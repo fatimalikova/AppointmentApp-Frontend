@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Qeydiyyat — Appointment System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      min-height:100vh;
+      display:flex;align-items:center;justify-content:center;
+      font-family:'Inter',sans-serif;
+      background:#060d0d;
+      overflow-x:hidden;padding:24px;
+    }
+
+    /* ══ Background — login ilə eyni ══ */
+    .bg{position:fixed;inset:0;z-index:0;overflow:hidden}
+    .bg-g{
+      position:absolute;inset:0;
+      background:
+        radial-gradient(ellipse 70% 50% at 25% 35%, rgba(201,145,47,.1) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 60% at 75% 65%, rgba(15,75,80,.25) 0%, transparent 55%),
+        linear-gradient(145deg,#060d0d 0%,#0a1f1f 40%,#0f2b2b 70%,#082627 100%);
+    }
+    .bg-grid{
+      position:absolute;inset:0;
+      background-image:
+        linear-gradient(rgba(201,145,47,.03) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(201,145,47,.03) 1px,transparent 1px);
+      background-size:52px 52px;
+    }
+    .orb{position:absolute;border-radius:50%;filter:blur(80px);animation:floatOrb ease-in-out infinite}
+    .orb-1{width:500px;height:500px;background:radial-gradient(circle,rgba(201,145,47,.12),transparent 70%);top:-120px;left:-100px;animation-duration:9s}
+    .orb-2{width:400px;height:400px;background:radial-gradient(circle,rgba(15,75,80,.2),transparent 70%);bottom:-80px;right:-80px;animation-duration:11s;animation-delay:-4s}
+    .orb-3{width:260px;height:260px;background:radial-gradient(circle,rgba(201,145,47,.08),transparent 70%);top:50%;left:40%;animation-duration:7s;animation-delay:-6s}
+    @keyframes floatOrb{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-36px) scale(1.05)}}
+    .floats{position:absolute;inset:0;pointer-events:none}
+    .fi{position:absolute;border-radius:12px;display:flex;align-items:center;justify-content:center;animation:floatUp linear infinite}
+    .fi.g{background:rgba(201,145,47,.1);border:1px solid rgba(201,145,47,.18);color:rgba(201,145,47,.6)}
+    .fi.t{background:rgba(15,75,80,.18);border:1px solid rgba(15,150,150,.12);color:rgba(80,180,180,.5)}
+    @keyframes floatUp{
+      0%{transform:translateY(110vh) rotate(0deg);opacity:0}
+      5%{opacity:.8}95%{opacity:.5}
+      100%{transform:translateY(-100px) rotate(15deg);opacity:0}
+    }
+
+    /* ══ Card ══ */
+    .reg-card{
+      position:relative;z-index:10;
+      width:100%;max-width:520px;
+      padding:44px 48px;
+      background:rgba(250,247,242,.065);
+      backdrop-filter:blur(28px);
+      -webkit-backdrop-filter:blur(28px);
+      border:1px solid rgba(201,145,47,.14);
+      border-radius:24px;
+      box-shadow:
+        0 40px 80px rgba(0,0,0,.5),
+        0 0 0 1px rgba(255,255,255,.03),
+        inset 0 1px 0 rgba(255,255,255,.05);
+    }
+
+    /* Brand */
+    .card-brand{
+      display:flex;align-items:center;gap:11px;
+      margin-bottom:30px;
+    }
+    .card-brand-icon{
+      width:40px;height:40px;
+      background:rgba(201,145,47,.14);
+      border:1px solid rgba(201,145,47,.24);
+      border-radius:10px;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .card-brand-icon i{color:#c9912f;font-size:1rem}
+    .card-brand-name{
+      color:#fff;font-family:'Playfair Display',serif;
+      font-size:1rem;font-weight:700;line-height:1;
+    }
+    .card-brand-name small{
+      display:block;font-family:'Inter',sans-serif;
+      font-size:.57rem;letter-spacing:.14em;
+      color:rgba(201,145,47,.7);font-weight:700;margin-top:2px;
+    }
+
+    /* Head */
+    .card-title{
+      font-family:'Playfair Display',serif;
+      font-size:1.65rem;color:#fff;margin-bottom:6px;
+    }
+    .card-sub{font-size:.8rem;color:rgba(255,255,255,.42);margin-bottom:26px}
+
+    /* Alert */
+    .alert-box{
+      display:flex;align-items:center;gap:10px;padding:10px 14px;
+      background:rgba(181,39,29,.14);border:1px solid rgba(181,39,29,.28);
+      color:#f87171;border-radius:10px;font-size:.78rem;margin-bottom:14px;
+    }
+    .alert-box.hidden{display:none}
+
+    /* Fields */
+    .field{margin-bottom:14px}
+    .field label{
+      display:block;font-size:.76rem;font-weight:600;
+      color:rgba(255,255,255,.6);margin-bottom:6px;
+    }
+    .field label i{color:#c9912f;margin-right:6px}
+    .field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .pw-wrap{position:relative}
+    .pw-wrap input{padding-right:42px!important}
+    .pw-toggle{
+      position:absolute;right:12px;top:50%;transform:translateY(-50%);
+      background:none;border:none;color:rgba(255,255,255,.3);
+      cursor:pointer;font-size:.85rem;transition:color .18s ease;
+    }
+    .pw-toggle:hover{color:rgba(255,255,255,.7)}
+    .field input{
+      width:100%;padding:10px 14px;
+      background:rgba(255,255,255,.06);
+      border:1.5px solid rgba(255,255,255,.1);
+      border-radius:10px;color:#fff;font-size:.85rem;
+      font-family:'Inter',sans-serif;outline:none;
+      transition:all .18s ease;
+    }
+    .field input::placeholder{color:rgba(255,255,255,.22)}
+    .field input:focus{
+      border-color:rgba(201,145,47,.5);
+      background:rgba(255,255,255,.08);
+      box-shadow:0 0 0 3px rgba(201,145,47,.1);
+    }
+    .field-hint{font-size:.7rem;color:rgba(255,255,255,.28);margin-top:4px;display:block}
+
+    /* Password match */
+    .pw-match{
+      display:flex;align-items:center;gap:6px;
+      font-size:.72rem;margin-top:-8px;margin-bottom:10px;
+    }
+    .pw-match.hidden{display:none}
+
+    /* Button */
+    .btn-submit{
+      width:100%;padding:13px;margin-top:6px;
+      background:linear-gradient(135deg,#c9912f,#a8741f);
+      color:#fff;border:none;border-radius:10px;
+      font-size:.9rem;font-weight:600;
+      font-family:'Inter',sans-serif;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;gap:8px;
+      transition:all .18s ease;
+      box-shadow:0 4px 20px rgba(201,145,47,.35);
+    }
+    .btn-submit:hover:not(:disabled){
+      background:linear-gradient(135deg,#dba84a,#c9912f);
+      box-shadow:0 6px 28px rgba(201,145,47,.5);
+      transform:translateY(-1px);
+    }
+    .btn-submit:active{transform:translateY(0)}
+    .btn-submit:disabled{opacity:.55;cursor:not-allowed;transform:none}
+
+    /* Info box */
+    .info-box{
+      display:flex;gap:10px;align-items:flex-start;
+      padding:12px 14px;
+      background:rgba(201,145,47,.07);
+      border:1px solid rgba(201,145,47,.14);
+      border-radius:10px;
+      font-size:.72rem;color:rgba(255,255,255,.42);
+      margin-top:14px;
+    }
+    .info-box i{color:#c9912f;flex-shrink:0;margin-top:1px}
+
+    /* Footer */
+    .card-footer{
+      text-align:center;margin-top:18px;
+      padding-top:18px;
+      border-top:1px solid rgba(255,255,255,.07);
+      font-size:.76rem;color:rgba(255,255,255,.35);
+    }
+    .card-footer a{color:#c9912f;font-weight:600;text-decoration:none}
+    .card-footer a:hover{text-decoration:underline}
+
+    /* Success */
+    .success-wrap{text-align:center;padding:24px 0}
+    .success-icon{
+      width:72px;height:72px;
+      background:rgba(45,106,79,.18);
+      border:2px solid rgba(45,106,79,.28);
+      border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      margin:0 auto 16px;
+    }
+    .success-icon i{color:#4ade80;font-size:1.8rem}
+    .success-title{
+      font-family:'Playfair Display',serif;
+      font-size:1.4rem;color:#fff;margin-bottom:8px;
+    }
+    .success-msg{font-size:.8rem;color:rgba(255,255,255,.42);margin-bottom:24px;line-height:1.6}
+    .btn-outline{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:11px 28px;
+      background:rgba(255,255,255,.06);
+      border:1.5px solid rgba(255,255,255,.14);
+      border-radius:10px;color:rgba(255,255,255,.7);
+      font-size:.875rem;font-weight:600;
+      font-family:'Inter',sans-serif;cursor:pointer;
+      text-decoration:none;transition:all .18s ease;
+    }
+    .btn-outline:hover{background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.24)}
+
+    .hidden{display:none!important}
+
+    @media(max-width:600px){
+      .reg-card{padding:36px 28px}
+      .field-row{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+
+<!-- Background -->
+<div class="bg">
+  <div class="bg-g"></div>
+  <div class="bg-grid"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="floats" id="floats"></div>
+</div>
+
+<!-- Card -->
+<div class="reg-card">
+
+  <!-- Brand -->
+  <div class="card-brand">
+    <div class="card-brand-icon"><i class="fa-solid fa-calendar-check"></i></div>
+    <div class="card-brand-name">Appointment<small>SYSTEM</small></div>
+  </div>
+
+  <!-- Success state -->
+  <div id="successState" class="hidden">
+    <div class="success-wrap">
+      <div class="success-icon"><i class="fa-solid fa-envelope-circle-check"></i></div>
+      <h2 class="success-title">Email-inizi yoxlayın</h2>
+      <p class="success-msg" id="successMsg"></p>
+      <a href="login.html" class="btn-outline">
+        <i class="fa-solid fa-right-to-bracket"></i> Girişə keç
+      </a>
+    </div>
+  </div>
+
+  <!-- Form state -->
+  <div id="formState">
+    <h2 class="card-title">Hesab yaradın</h2>
+    <p class="card-sub">Pulsuz qeydiyyatdan keçin, dərhal istifadə edin</p>
+
+    <div class="alert-box hidden" id="alertBox">
+      <i class="fa-solid fa-circle-exclamation"></i>
+      <span id="alertMsg"></span>
+    </div>
+
+    <form id="regForm">
+      <div class="field-row">
+        <div class="field">
+          <label><i class="fa-solid fa-user"></i>Ad Soyad</label>
+          <input type="text" id="fullName" placeholder="Aytən Həsənova" required autocomplete="name">
+        </div>
+        <div class="field">
+          <label><i class="fa-solid fa-at"></i>İstifadəçi adı</label>
+          <input type="text" id="userName" placeholder="ayten_h" required autocomplete="username">
+          <span class="field-hint">Latın hərfi, rəqəm, alt xətt</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label><i class="fa-solid fa-envelope"></i>Email</label>
+        <input type="email" id="email" placeholder="ayten@email.com" required autocomplete="email">
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label><i class="fa-solid fa-lock"></i>Şifrə</label>
+          <div class="pw-wrap">
+            <input type="password" id="password" placeholder="••••••••" required minlength="6">
+            <button type="button" class="pw-toggle" onclick="togglePw('password','eye1')">
+              <i class="fa-regular fa-eye" id="eye1"></i>
+            </button>
+          </div>
+          <span class="field-hint">Ən azı 6 simvol</span>
+        </div>
+        <div class="field">
+          <label><i class="fa-solid fa-lock"></i>Şifrəni təsdiqlə</label>
+          <div class="pw-wrap">
+            <input type="password" id="confirmPassword" placeholder="••••••••" required minlength="6">
+            <button type="button" class="pw-toggle" onclick="togglePw('confirmPassword','eye2')">
+              <i class="fa-regular fa-eye" id="eye2"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="pw-match hidden" id="pwMatch"></div>
+
+      <button type="submit" class="btn-submit" id="regBtn">
+        <i class="fa-solid fa-user-plus"></i> Qeydiyyatdan keç
+      </button>
+    </form>
+
+    <div class="info-box">
+      <i class="fa-solid fa-circle-info"></i>
+      <span>Qeydiyyatdan sonra email-inizə təsdiq linki göndəriləcək. Linki açdıqdan sonra daxil ola bilərsiniz.</span>
+    </div>
+
+    <div class="card-footer">
+      Artıq hesabınız var?
+      <a href="login.html">Daxil olun</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  const BASE = 'http://localhost:5291/api';
+
+  /* Floating icons — login ilə eyni */
+  const ICONS = ['fa-calendar-check','fa-clock','fa-star','fa-bell',
+    'fa-heart','fa-user-check','fa-calendar-plus','fa-comment',
+    'fa-calendar-days','fa-stethoscope','fa-scissors','fa-book-open'];
+  const cont = document.getElementById('floats');
+  for (let i=0; i<16; i++) {
+    const el = document.createElement('div');
+    el.className = `fi ${Math.random()>.5?'g':'t'}`;
+    const ic = document.createElement('i');
+    ic.className = `fa-solid ${ICONS[i%ICONS.length]}`;
+    el.appendChild(ic);
+    const sz = 38 + Math.random()*18;
+    el.style.cssText = `
+      left:${Math.random()*88}%;
+      width:${sz}px;height:${sz}px;font-size:${.75+Math.random()*.5}rem;
+      opacity:${.3+Math.random()*.4};
+      animation-duration:${13+Math.random()*18}s;
+      animation-delay:-${Math.random()*22}s;
+    `;
+    cont.appendChild(el);
+  }
+
+  function togglePw(inputId, iconId) {
+    const inp = document.getElementById(inputId);
+    const ic  = document.getElementById(iconId);
+    inp.type = inp.type==='password' ? 'text' : 'password';
+    ic.className = inp.type==='password' ? 'fa-regular fa-eye' : 'fa-regular fa-eye-slash';
+  }
+
+  document.getElementById('confirmPassword').addEventListener('input', () => {
+    const pw  = document.getElementById('password').value;
+    const cpw = document.getElementById('confirmPassword').value;
+    const el  = document.getElementById('pwMatch');
+    if (!cpw) { el.classList.add('hidden'); return; }
+    el.classList.remove('hidden');
+    if (pw===cpw) {
+      el.style.color = '#4ade80';
+      el.innerHTML = '<i class="fa-solid fa-circle-check"></i><span>Şifrələr uyğundur</span>';
+    } else {
+      el.style.color = '#f87171';
+      el.innerHTML = '<i class="fa-solid fa-circle-xmark"></i><span>Şifrələr uyğun deyil</span>';
+    }
+  });
+
+  document.getElementById('regForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const pw  = document.getElementById('password').value;
+    const cpw = document.getElementById('confirmPassword').value;
+    const alertBox = document.getElementById('alertBox');
+    alertBox.classList.add('hidden');
+
+    if (pw !== cpw) {
+      document.getElementById('alertMsg').textContent = 'Şifrələr uyğun deyil.';
+      alertBox.classList.remove('hidden');
+      return;
+    }
+
+    const btn = document.getElementById('regBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Göndərilir...';
+
+    const dto = {
+      fullName:        document.getElementById('fullName').value,
+      userName:        document.getElementById('userName').value,
+      email:           document.getElementById('email').value,
+      password:        pw,
+      confirmPassword: cpw,
+    };
+
+    try {
+      const res  = await fetch(BASE+'/account/register/client', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(dto),
+      });
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById('formState').classList.add('hidden');
+        document.getElementById('successState').classList.remove('hidden');
+        document.getElementById('successMsg').textContent =
+          `${dto.email} ünvanına təsdiq linki göndərildi. Linki açdıqdan sonra daxil ola bilərsiniz.`;
+      } else {
+        document.getElementById('alertMsg').textContent = data.errors?.[0] || 'Qeydiyyat uğursuz oldu';
+        alertBox.classList.remove('hidden');
+      }
+    } catch {
+      document.getElementById('alertMsg').textContent = 'Server ilə əlaqə qurulmadı.';
+      alertBox.classList.remove('hidden');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Qeydiyyatdan keç';
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Bağlı Günlər — Provider Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/provider.css">
+</head>
+<body>
+<div class="shell">
+  <div id="sidebar"></div>
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Bağlı Günlər</div>
+        <div class="topbar-sub" id="topbarSub"></div>
+      </div>
+      <button class="btn btn-primary" onclick="openModal('addModal')">
+        <i class="fa-solid fa-calendar-plus"></i> Gün əlavə et
+      </button>
+    </div>
+
+    <div class="content" style="max-width:640px">
+      <div class="page-header">
+        <div>
+          <h1>Bağlı Günlər</h1>
+          <p>Məzuniyyət, bayram və ya işləmədiyiniz günləri əlavə edin</p>
+        </div>
+      </div>
+
+      <div class="alert hidden" id="alertBox"></div>
+
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:var(--sp-3);padding:var(--sp-3) var(--sp-4);background:var(--danger-soft);border-radius:var(--r-sm);margin-bottom:var(--sp-5);font-size:var(--fs-sm)">
+          <i class="fa-solid fa-triangle-exclamation" style="color:var(--danger)"></i>
+          <span>Həmin tarixdə <strong>Confirmed</strong> rezervasiya varsa, o günü bağlaya bilməzsiniz.</span>
+        </div>
+
+        <div id="daysList"><div class="spinner-wrap"><div class="spinner"></div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add modal -->
+<div class="overlay hidden" id="addModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3><i class="fa-solid fa-calendar-xmark" style="color:var(--accent);margin-right:8px"></i>Bağlı Gün Əlavə Et</h3>
+      <button class="btn-icon" onclick="closeModal('addModal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="alert hidden" id="addAlert"></div>
+      <div class="field">
+        <label><i class="fa-regular fa-calendar" style="color:var(--accent);margin-right:6px"></i>Tarix</label>
+        <input type="date" id="addDate" required>
+      </div>
+      <div class="field">
+        <label><i class="fa-solid fa-comment" style="color:var(--accent);margin-right:6px"></i>Səbəb (istəyə görə)</label>
+        <input type="text" id="addReason" placeholder="Məs. Bayram, məzuniyyət...">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('addModal')">Ləğv et</button>
+      <button class="btn btn-primary" onclick="addDay()">
+        <i class="fa-solid fa-plus"></i> Əlavə et
+      </button>
+    </div>
+  </div>
+</div>
+<div class="overlay hidden" id="deleteModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3><i class="fa-solid fa-calendar-xmark" style="color:var(--danger);margin-right:8px"></i>Bağlı Günü Sil</h3>
+      <button class="btn-icon" onclick="closeModal('deleteModal')">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="alert alert-warning" style="display:flex">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span>Bu günü silmək istədiyinizə əminsiniz? Silindikdən sonra həmin tarix aktiv olacaq.</span>
+      </div>
+      <input type="hidden" id="deleteId">
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('deleteModal')">Ləğv et</button>
+      <button class="btn btn-danger" onclick="confirmDelete()">
+        <i class="fa-solid fa-trash"></i> Sil
+      </button>
+    </div>
+  </div>
+</div>
+<script src="../js/provider-api.js"></script>
+<script src="../js/layout.js"></script>
+<script>
+  async function loadDays() {
+    const dl = document.getElementById('daysList');
+    dl.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div></div>';
+    const days = await pApi.getUnavailableDays().catch(()=>[]);
+    if (!days.length) {
+      dl.innerHTML = `<div class="empty">
+        <i class="fa-solid fa-calendar-check"></i>
+        <h3>Bağlı gün yoxdur</h3>
+        <p>Hər gün aktiv görünürsünüz</p>
+      </div>`;
+      return;
+    }
+    dl.innerHTML = days.map(d => `
+      <div style="display:flex;align-items:center;gap:var(--sp-4);padding:var(--sp-3) 0;border-bottom:1px solid var(--border)">
+        <div style="width:44px;height:44px;border-radius:var(--r-sm);background:var(--danger-soft);color:var(--danger);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <i class="fa-solid fa-calendar-xmark"></i>
+        </div>
+        <div style="flex:1">
+          <b style="display:block;font-size:var(--fs-sm)">${formatDate(d.date, {weekday:'long',day:'numeric',month:'long',year:'numeric'})}</b>
+          ${d.reason ? `<span style="font-size:var(--fs-xs);color:var(--ink-soft)">${d.reason}</span>` : ''}
+        </div>
+        <button class="btn btn-danger btn-xs" onclick="removeDay('${d.id}')">
+          <i class="fa-solid fa-trash"></i> Sil
+        </button>
+      </div>`).join('');
+  }
+
+  // Set min date
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('addDate').min = new Date().toISOString().split('T')[0];
+  });
+
+  async function addDay() {
+  const dateVal = document.getElementById('addDate').value;
+  const reason  = document.getElementById('addReason').value;
+  if (!dateVal) return;
+  try {
+    await pApi.addUnavailableDay({
+      date:   new Date(dateVal).toISOString(),  
+      reason: reason || undefined,
+    });
+    closeModal('addModal');
+    showAlert('#alertBox', 'Bağlı gün əlavə edildi!', 'success');
+    loadDays();
+  } catch(err) { showAlert('#addAlert', err.message); }
+}
+
+  function removeDay(id) {
+  document.getElementById('deleteId').value = id;
+  openModal('deleteModal');
+}
+
+async function confirmDelete() {
+  const id = document.getElementById('deleteId').value;
+  try {
+    await pApi.removeUnavailableDay(id);
+    closeModal('deleteModal');
+    showAlert('#alertBox', 'Bağlı gün silindi.', 'success');
+    loadDays();
+  } catch(err) {
+    showAlert('#alertBox', err.message);
+  }
+}
+
+  loadDays();
+</script>
+
+</body>
+</html>

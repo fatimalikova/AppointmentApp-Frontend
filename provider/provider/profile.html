@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Profil — Provider Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/provider.css">
+  <style>
+    .profile-section-label {
+      font-size:var(--fs-xs);font-weight:700;
+      text-transform:uppercase;letter-spacing:.07em;
+      color:var(--ink-soft);margin-bottom:var(--sp-4);
+      display:flex;align-items:center;gap:7px;
+    }
+    .profile-section-label i { color:var(--accent); }
+    .social-input-wrap { position:relative; }
+    .social-input-prefix {
+      position:absolute;left:12px;top:50%;transform:translateY(-50%);
+      font-size:var(--fs-sm);color:var(--ink-soft);
+      pointer-events:none;white-space:nowrap;
+    }
+    .social-input-wrap input { padding-left:130px; }
+    .social-input-wrap.short input { padding-left:112px; }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <div id="sidebar"></div>
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Biznes Profili</div>
+        <div class="topbar-sub" id="topbarSub"></div>
+      </div>
+    </div>
+
+    <div class="content" style="max-width:780px">
+      <div class="page-header">
+        <div>
+          <h1>Biznes Profili</h1>
+          <p>Biznes məlumatlarınızı idarə edin</p>
+        </div>
+      </div>
+
+      <div class="alert hidden" id="alertBox"></div>
+
+      <!-- Status banner -->
+      <div id="statusBanner" class="hidden"
+        style="display:flex;align-items:center;gap:var(--sp-3);padding:var(--sp-4);
+               border-radius:var(--r-md);margin-bottom:var(--sp-5);border:1px solid"></div>
+
+      <form id="profileForm">
+
+        <!-- ══ KART 1: Avatar + Əsas ══ -->
+        <div class="card" style="margin-bottom:var(--sp-4)">
+
+          <!-- Avatar -->
+          <div style="display:flex;align-items:center;gap:var(--sp-5);
+                      padding:var(--sp-5);background:var(--surface-soft);
+                      border-radius:var(--r-md);margin-bottom:var(--sp-6)">
+            <div style="position:relative;width:88px;height:88px;flex-shrink:0">
+              <div id="avatarEl"
+                style="width:88px;height:88px;border-radius:50%;
+                       background:var(--accent-soft);color:var(--accent-dark);
+                       display:flex;align-items:center;justify-content:center;
+                       font-size:var(--fs-2xl);font-weight:700;
+                       border:3px solid var(--accent-light);overflow:hidden">?</div>
+              <label for="photoFile"
+                style="position:absolute;bottom:0;right:0;
+                       width:28px;height:28px;background:var(--accent);
+                       border-radius:50%;display:flex;align-items:center;
+                       justify-content:center;cursor:pointer;border:2px solid #fff"
+                title="Şəkil seç">
+                <i class="fa-solid fa-camera" style="color:#fff;font-size:.65rem"></i>
+              </label>
+            </div>
+            <div style="flex:1;min-width:0">
+              <b id="avatarName" style="font-size:var(--fs-lg);display:block;margin-bottom:3px">—</b>
+              <span id="avatarCat" style="font-size:var(--fs-sm);color:var(--ink-soft)"></span>
+              <div id="uploadStatus" style="font-size:var(--fs-xs);color:var(--ink-soft);margin-top:4px"></div>
+              <button type="button" id="removePhotoBtn" class="btn btn-danger btn-xs hidden"
+                onclick="removePhoto()" style="margin-top:var(--sp-2)">
+                <i class="fa-solid fa-trash"></i> Şəkli sil
+              </button>
+            </div>
+          </div>
+
+          <input type="file" id="photoFile" accept="image/*" style="display:none"
+            onchange="handlePhotoSelect(this)">
+
+          <!-- Biznes adı + Kateqoriya -->
+          <div class="profile-section-label">
+            <i class="fa-solid fa-building"></i> Əsas məlumatlar
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label><i class="fa-solid fa-building" style="color:var(--accent);margin-right:6px"></i>Biznes adı</label>
+              <input type="text" id="businessName" required placeholder="Məs. Bella Hair Salon">
+            </div>
+            <div class="field">
+              <label><i class="fa-solid fa-tag" style="color:var(--accent);margin-right:6px"></i>Kateqoriya</label>
+              <select id="category" required onchange="handleCategoryChange()">
+                <option value="" disabled selected>Seçin...</option>
+                <option>Stomatoloq</option>
+                <option>Gözəllik salonu</option>
+                <option>Bərbərxana</option>
+                <option>Masaj</option>
+                <option>Repetitor</option>
+                <option>Psixoloq</option>
+                <option>Hüquqşünas</option>
+                <option value="other">Digər...</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field hidden" id="customCategoryField">
+            <label><i class="fa-solid fa-pen" style="color:var(--accent);margin-right:6px"></i>Kateqoriyanızı daxil edin</label>
+            <input type="text" id="customCategory" placeholder="Məs. Fizioterapevt, Dietoloq...">
+          </div>
+
+          <div class="field">
+            <label><i class="fa-solid fa-align-left" style="color:var(--accent);margin-right:6px"></i>Təsvir</label>
+            <textarea id="description" rows="3"
+              placeholder="Biznesiniz haqqında qısa məlumat — xidmətlər, təcrübə, üstünlüklər..."></textarea>
+          </div>
+
+          <div class="field">
+            <label><i class="fa-solid fa-location-dot" style="color:var(--accent);margin-right:6px"></i>Ünvan</label>
+            <input type="text" id="address" placeholder="Bakı, Nərimanov rayonu, Əliağa Vahid 12">
+          </div>
+        </div>
+
+        <!-- ══ KART 2: Əlaqə ══ -->
+        <div class="card" style="margin-bottom:var(--sp-4)">
+          <div class="profile-section-label">
+            <i class="fa-solid fa-address-card"></i> Əlaqə məlumatları
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label><i class="fa-solid fa-phone" style="color:var(--accent);margin-right:6px"></i>Telefon nömrəsi</label>
+              <input type="tel" id="phoneNumber" placeholder="+994 50 123 45 67">
+              <span class="field-hint">Müştərilər bu nömrə ilə əlaqə saxlaya bilər</span>
+            </div>
+            <div class="field">
+              <label><i class="fa-solid fa-envelope" style="color:var(--accent);margin-right:6px"></i>Əlaqə email</label>
+              <input type="email" id="contactEmail" placeholder="biznes@email.com">
+              <span class="field-hint">Hesab email-dən fərqli ola bilər</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══ KART 3: Sosial media ══ -->
+        <div class="card" style="margin-bottom:var(--sp-5)">
+          <div class="profile-section-label">
+            <i class="fa-solid fa-share-nodes"></i> Sosial media <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink-soft);font-size:var(--fs-xs)">(istəyə görə)</span>
+          </div>
+
+          <div class="field">
+            <label>
+              <i class="fa-brands fa-instagram" style="color:#E1306C;margin-right:6px"></i>Instagram
+            </label>
+            <div class="social-input-wrap">
+              <span class="social-input-prefix">instagram.com/</span>
+              <input type="text" id="instagramUrl" placeholder="hesabiniz">
+            </div>
+          </div>
+
+          <div class="field">
+            <label>
+              <i class="fa-brands fa-facebook" style="color:#1877F2;margin-right:6px"></i>Facebook
+            </label>
+            <div class="social-input-wrap short">
+              <span class="social-input-prefix">facebook.com/</span>
+              <input type="text" id="facebookUrl" placeholder="hesabiniz">
+            </div>
+          </div>
+
+          <!-- Doldurulmuş sosialların preview -->
+          <div id="socialPreview" class="hidden"
+            style="display:flex;gap:var(--sp-3);margin-top:var(--sp-2);flex-wrap:wrap">
+          </div>
+        </div>
+
+        <!-- Saxla -->
+        <div style="display:flex;gap:var(--sp-3)">
+          <button type="submit" class="btn btn-primary" id="saveBtn">
+            <i class="fa-solid fa-floppy-disk"></i> Yadda saxla
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="../js/provider-api.js"></script>
+<script src="../js/layout.js"></script>
+<script>
+  let isNew = false;
+  let uploadedImageUrl = '';
+
+  /* ── Kateqoriya ── */
+  function handleCategoryChange() {
+    const val = document.getElementById('category').value;
+    const cf  = document.getElementById('customCategoryField');
+    if (val === 'other') {
+      cf.classList.remove('hidden');
+      document.getElementById('customCategory').focus();
+    } else {
+      cf.classList.add('hidden');
+      document.getElementById('customCategory').value = '';
+    }
+  }
+
+  function getCategoryValue() {
+    const v = document.getElementById('category').value;
+    return v === 'other'
+      ? document.getElementById('customCategory').value.trim()
+      : v;
+  }
+
+  /* ── Sosial URL helper-ləri ── */
+  function getSocialValue(id, prefix) {
+    const val = document.getElementById(id).value.trim();
+    if (!val) return undefined;
+    if (val.startsWith('http')) return val;
+    return prefix + val;
+  }
+
+  function setSocialValue(id, prefix, fullUrl) {
+    if (!fullUrl) { document.getElementById(id).value = ''; return; }
+    // "instagram.com/hesab" və ya "https://instagram.com/hesab" → "hesab"
+    document.getElementById(id).value = fullUrl
+      .replace(/^https?:\/\/(www\.)?/, '')
+      .replace(prefix.replace(/^https?:\/\/(www\.)?/, ''), '');
+  }
+
+  function updateSocialPreview() {
+    const ig = document.getElementById('instagramUrl').value.trim();
+    const fb = document.getElementById('facebookUrl').value.trim();
+    const prev = document.getElementById('socialPreview');
+    const links = [];
+    if (ig) links.push(`<a href="https://instagram.com/${ig}" target="_blank"
+      style="display:inline-flex;align-items:center;gap:5px;padding:4px 12px;
+             background:#fdecea;color:#E1306C;border-radius:var(--r-full);
+             font-size:var(--fs-xs);font-weight:600;text-decoration:none">
+      <i class="fa-brands fa-instagram"></i> @${ig}
+    </a>`);
+    if (fb) links.push(`<a href="https://facebook.com/${fb}" target="_blank"
+      style="display:inline-flex;align-items:center;gap:5px;padding:4px 12px;
+             background:#e3f0fa;color:#1877F2;border-radius:var(--r-full);
+             font-size:var(--fs-xs);font-weight:600;text-decoration:none">
+      <i class="fa-brands fa-facebook"></i> ${fb}
+    </a>`);
+    if (links.length) {
+      prev.innerHTML = links.join('');
+      prev.style.display = 'flex';
+      prev.classList.remove('hidden');
+    } else {
+      prev.classList.add('hidden');
+    }
+  }
+
+  document.getElementById('instagramUrl').addEventListener('input', updateSocialPreview);
+  document.getElementById('facebookUrl').addEventListener('input', updateSocialPreview);
+
+  /* ── Şəkil seç ── */
+  async function handlePhotoSelect(input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      showAlert('#alertBox', 'Şəkil 5MB-dan böyük ola bilməz.');
+      return;
+    }
+    const statusEl = document.getElementById('uploadStatus');
+    statusEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Yüklənir...';
+
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('avatarEl').innerHTML =
+        `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+    };
+    reader.readAsDataURL(file);
+
+    try {
+      const fd = new FormData();
+      fd.append('image', file);
+      const res  = await fetch('https://api.imgbb.com/1/upload?key=cfb112e9e8b779f0c69925b074355c2c',
+        { method:'POST', body:fd });
+      const data = await res.json();
+      if (data.success) {
+        uploadedImageUrl = data.data.url;
+        statusEl.innerHTML = '<i class="fa-solid fa-circle-check" style="color:var(--success)"></i> Şəkil yükləndi';
+        document.getElementById('removePhotoBtn').classList.remove('hidden');
+      } else throw new Error();
+    } catch {
+      uploadedImageUrl = '';
+      statusEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="color:var(--warning)"></i> Yükləmə uğursuz';
+    }
+  }
+
+  function removePhoto() {
+    uploadedImageUrl = '';
+    const name = document.getElementById('businessName').value;
+    document.getElementById('avatarEl').textContent = name?.[0] || '?';
+    document.getElementById('removePhotoBtn').classList.add('hidden');
+    document.getElementById('uploadStatus').innerHTML =
+      '<i class="fa-solid fa-circle-info" style="color:var(--ink-soft)"></i> Şəkil silinəcək — formu saxlayın';
+  }
+
+  /* ── Profil yüklə ── */
+  async function loadProfile() {
+    try {
+      const p = await pApi.getMyProfile();
+
+      document.getElementById('businessName').value = p.businessName || '';
+      document.getElementById('description').value  = p.description  || '';
+      document.getElementById('address').value      = p.address      || '';
+      document.getElementById('phoneNumber').value  = p.phoneNumber  || '';
+      document.getElementById('contactEmail').value = p.contactEmail || '';
+
+      /* Sosial */
+      setSocialValue('instagramUrl', 'instagram.com/', p.instagramUrl);
+      setSocialValue('facebookUrl',  'facebook.com/',  p.facebookUrl);
+      updateSocialPreview();
+
+      /* Kateqoriya */
+      const cat    = p.category || '';
+      const select = document.getElementById('category');
+      const known  = Array.from(select.options).map(o => o.value).filter(v => v && v !== 'other');
+      if (cat && !known.includes(cat)) {
+        select.value = 'other';
+        document.getElementById('customCategoryField').classList.remove('hidden');
+        document.getElementById('customCategory').value = cat;
+      } else {
+        select.value = cat;
+      }
+
+      /* Avatar */
+      uploadedImageUrl = p.imageUrl || '';
+      const avatarEl   = document.getElementById('avatarEl');
+      if (p.imageUrl) {
+        avatarEl.innerHTML = `<img src="${p.imageUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+        document.getElementById('removePhotoBtn').classList.remove('hidden');
+      } else {
+        avatarEl.textContent = p.businessName?.[0] || '?';
+        document.getElementById('removePhotoBtn').classList.add('hidden');
+      }
+      document.getElementById('avatarName').textContent = p.businessName || '—';
+      document.getElementById('avatarCat').textContent  = p.category     || '';
+      document.getElementById('uploadStatus').innerHTML = '';
+
+      /* Status banner */
+      const cfg = {
+        Pending:  { bg:'var(--warning-soft)', border:'var(--warning)', icon:'fa-clock',        color:'var(--warning)', text:'Profiliniz admin tərəfindən nəzərdən keçirilir.' },
+        Approved: { bg:'var(--success-soft)', border:'var(--success)', icon:'fa-circle-check', color:'var(--success)', text:'Profiliniz təsdiqlənib. Müştərilər sizi görə bilər.' },
+        Rejected: { bg:'var(--danger-soft)',  border:'var(--danger)',  icon:'fa-circle-xmark', color:'var(--danger)',  text:'Profiliniz rədd edildi. Məlumatları düzəldib yenidən göndərin.' },
+      };
+      const banner = document.getElementById('statusBanner');
+      const c = cfg[p.status];
+      if (c) {
+        banner.style.background  = c.bg;
+        banner.style.borderColor = c.border;
+        banner.innerHTML = `<i class="fa-solid ${c.icon}" style="color:${c.color};font-size:1.1rem"></i><span style="font-size:var(--fs-sm)">${c.text}</span>`;
+        banner.classList.remove('hidden');
+        banner.style.display = 'flex';
+      } else {
+        banner.classList.add('hidden');
+      }
+      isNew = false;
+    } catch {
+      isNew = true;
+      document.getElementById('statusBanner').classList.add('hidden');
+    }
+  }
+
+  /* ── Saxla ── */
+  document.getElementById('profileForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = document.getElementById('saveBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saxlanılır...';
+
+    const dto = {
+      businessName: document.getElementById('businessName').value,
+      category:     getCategoryValue(),
+      description:  document.getElementById('description').value,
+      address:      document.getElementById('address').value,
+      latitude:     40.4093,
+      longitude:    49.8671,
+      imageUrl:     uploadedImageUrl || undefined,
+      phoneNumber:  document.getElementById('phoneNumber').value.trim()  || undefined,
+      contactEmail: document.getElementById('contactEmail').value.trim() || undefined,
+      instagramUrl: getSocialValue('instagramUrl', 'https://instagram.com/'),
+      facebookUrl:  getSocialValue('facebookUrl',  'https://facebook.com/'),
+    };
+
+    try {
+      if (isNew) await pApi.createProfile(dto);
+      else       await pApi.updateProfile(dto);
+      showAlert('#alertBox', 'Profil uğurla yadda saxlandı!', 'success');
+      loadProfile();
+    } catch(err) {
+      showAlert('#alertBox', err.message);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Yadda saxla';
+    }
+  });
+
+  loadProfile();
+</script>
+</body>
+</html>

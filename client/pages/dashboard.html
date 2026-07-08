@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dashboard — Appointment System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/client.css">
+  <style>
+    .dash-hero{
+      background:linear-gradient(135deg,var(--primary-dark),var(--primary));
+      border-radius:var(--r-xl);padding:var(--sp-8);
+      display:flex;align-items:center;justify-content:space-between;
+      gap:var(--sp-6);margin-bottom:var(--sp-6);
+    }
+    .dash-hero h1{color:#fff;font-size:var(--fs-2xl);margin-bottom:var(--sp-2)}
+    .dash-hero p{color:rgba(255,255,255,.6);margin-bottom:var(--sp-5)}
+    .stat-card-dash{
+      background:var(--surface);border:1px solid var(--border);
+      border-radius:var(--r-md);padding:var(--sp-5);
+      display:flex;align-items:center;gap:var(--sp-4);
+    }
+    .stat-icon-dash{
+      width:52px;height:52px;border-radius:var(--r-md);
+      display:flex;align-items:center;justify-content:center;
+      font-size:1.3rem;flex-shrink:0;
+    }
+  </style>
+</head>
+<body>
+<div id="navbar"></div>
+
+<section class="section-sm">
+  <div class="container">
+
+    <div class="dash-hero">
+      <div>
+        <h1 id="heroTitle">Salam!</h1>
+        <p id="heroSub">Görüşlərinizi asanlıqla idarə edin</p>
+        <a href="booking.html" class="btn btn-primary">
+          <i class="fa-solid fa-calendar-plus"></i> Yeni görüş yarat
+        </a>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid-4" style="margin-bottom:var(--sp-6)">
+      <div class="stat-card-dash">
+        <div class="stat-icon-dash" style="background:var(--accent-xsoft);color:var(--accent-dark)">
+          <i class="fa-solid fa-calendar-day"></i>
+        </div>
+        <div>
+          <div style="font-family:var(--font-head);font-size:var(--fs-xl);font-weight:700;line-height:1" id="statUpcoming">—</div>
+          <div style="font-size:var(--fs-xs);color:var(--ink-soft);margin-top:3px">Gələcək görüşlər</div>
+        </div>
+      </div>
+      <div class="stat-card-dash">
+        <div class="stat-icon-dash" style="background:var(--success-soft);color:var(--success)">
+          <i class="fa-solid fa-circle-check"></i>
+        </div>
+        <div>
+          <div style="font-family:var(--font-head);font-size:var(--fs-xl);font-weight:700;line-height:1" id="statDone">—</div>
+          <div style="font-size:var(--fs-xs);color:var(--ink-soft);margin-top:3px">Tamamlanmış</div>
+        </div>
+      </div>
+      <div class="stat-card-dash">
+        <div class="stat-icon-dash" style="background:var(--info-soft);color:var(--info)">
+          <i class="fa-solid fa-list"></i>
+        </div>
+        <div>
+          <div style="font-family:var(--font-head);font-size:var(--fs-xl);font-weight:700;line-height:1" id="statAll">—</div>
+          <div style="font-size:var(--fs-xs);color:var(--ink-soft);margin-top:3px">Ümumi görüşlər</div>
+        </div>
+      </div>
+      <div class="stat-card-dash">
+        <div class="stat-icon-dash" style="background:var(--accent-xsoft);color:var(--accent-dark)">
+          <i class="fa-solid fa-user"></i>
+        </div>
+        <div>
+          <div style="font-size:var(--fs-sm);font-weight:700;line-height:1;margin-top:2px" id="statRole">—</div>
+          <div style="font-size:var(--fs-xs);color:var(--ink-soft);margin-top:3px">Hesab tipi</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Two cols -->
+    <div class="grid-2">
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp-4)">
+          <h2 style="font-size:var(--fs-md)">Yaxın görüşlər</h2>
+          <a href="appointments.html" style="font-size:var(--fs-sm);color:var(--accent-dark);font-weight:600">Hamısına bax →</a>
+        </div>
+        <div id="upcomingList"><div class="spinner-wrap"><div class="spinner"></div></div></div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp-4)">
+          <h2 style="font-size:var(--fs-md)">Populyar xidmətlər</h2>
+          <a href="booking.html" style="font-size:var(--fs-sm);color:var(--accent-dark);font-weight:600">Hamısına bax →</a>
+        </div>
+        <div class="grid-2" id="popularServices">
+          <div class="spinner-wrap" style="grid-column:1/-1"><div class="spinner"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div id="footer"></div>
+
+<script src="../js/client-api.js"></script>
+<script src="../js/layout.js"></script>
+<script>
+  requireAuth();
+
+  (async () => {
+    const profile = await cApi.profile().catch(()=>null);
+    if (profile) {
+      const first = profile.fullName?.split(' ')[0] || '';
+      document.getElementById('heroTitle').textContent = `Salam, ${first}!`;
+      document.getElementById('statRole').textContent  = profile.roles?.[0] || 'Client';
+    }
+
+    const [upcoming, past, all, catalog] = await Promise.all([
+      cApi.getMy('upcoming').catch(()=>[]),
+      cApi.getMy('past').catch(()=>[]),
+      cApi.getMy().catch(()=>[]),
+      cApi.getCatalog().catch(()=>[]),
+    ]);
+
+    document.getElementById('statUpcoming').textContent = upcoming.length;
+    document.getElementById('statDone').textContent     = (Array.isArray(past)?past:[]).filter(a=>a.status==='Completed').length;
+    document.getElementById('statAll').textContent      = all.length;
+
+    if (upcoming[0]) {
+      document.getElementById('heroSub').textContent =
+        `Növbəti görüşünüz: ${formatDate(upcoming[0].startDateTime)} ${formatTime(upcoming[0].startDateTime)}`;
+    }
+
+    // Upcoming list
+    const ul = document.getElementById('upcomingList');
+    const upArr = Array.isArray(upcoming) ? upcoming : [];
+    if (!upArr.length) {
+      ul.innerHTML = `<div class="empty" style="padding:var(--sp-6) 0">
+        <i class="fa-regular fa-calendar"></i>
+        <h3>Görüş yoxdur</h3>
+        <p>İlk rezervasiyanızı edin</p>
+        <a href="booking.html" class="btn btn-primary btn-sm">Rezervasiya et</a>
+      </div>`;
+    } else {
+      ul.innerHTML = upArr.slice(0,4).map(a => `
+        <a href="appointment-detail.html?id=${a.id}" class="appt-card" style="display:flex;margin-bottom:var(--sp-3)">
+          <div class="appt-date-box">
+            <b>${new Date(a.startDateTime).getDate()}</b>
+            <small>${formatDate(a.startDateTime,{month:'short'})}</small>
+          </div>
+          <div class="appt-icon-box" style="margin:0 var(--sp-3)">
+            <i class="fa-solid fa-calendar-check"></i>
+          </div>
+          <div class="appt-info">
+            <b>${a.serviceName}</b>
+            <span>${a.providerBusinessName} · ${formatTime(a.startDateTime)}</span>
+          </div>
+          ${statusBadge(a.status)}
+        </a>`).join('');
+    }
+
+    // Popular services
+    const ps = document.getElementById('popularServices');
+    const catArr = Array.isArray(catalog) ? catalog : [];
+    if (!catArr.length) { ps.innerHTML = ''; return; }
+    ps.innerHTML = catArr.slice(0,4).map(c => `
+      <div class="card-sm" style="text-align:center">
+        <i class="fa-solid fa-briefcase-medical" style="font-size:1.5rem;color:var(--accent-dark);margin-bottom:var(--sp-2);display:block"></i>
+        <strong style="display:block;font-size:var(--fs-sm);margin-bottom:var(--sp-3)">${c.name}</strong>
+        <a href="booking.html" class="btn btn-outline btn-sm btn-block">Seç</a>
+      </div>`).join('');
+  })();
+</script>
+</body>
+</html>

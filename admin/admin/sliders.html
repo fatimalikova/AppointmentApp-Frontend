@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Sliderlər — Admin Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/admin.css">
+  <style>
+    .slider-row{
+      display:grid;
+      grid-template-columns:56px 80px 1fr auto auto auto;
+      align-items:center;gap:var(--sp-4);
+      padding:var(--sp-3) var(--sp-4);
+      border-bottom:1px solid var(--border);
+      background:var(--surface);
+      transition:background .18s ease;
+    }
+    .slider-row:last-child{border-bottom:none}
+    .slider-row:hover{background:var(--accent-xsoft)}
+    .slider-thumb{
+      width:80px;height:52px;border-radius:var(--r-sm);
+      overflow:hidden;background:var(--surface-soft);
+      display:flex;align-items:center;justify-content:center;
+      flex-shrink:0;
+    }
+    .slider-thumb img{width:100%;height:100%;object-fit:cover}
+    .slider-thumb i{color:var(--border-strong);font-size:1.2rem}
+    .slider-info{min-width:0}
+    .slider-info b{display:block;font-size:var(--fs-sm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .slider-info span{font-size:var(--fs-xs);color:var(--ink-soft)}
+    .order-btns{display:flex;flex-direction:column;gap:2px}
+    .order-btn{
+      width:24px;height:24px;border:1px solid var(--border);
+      border-radius:var(--r-sm);background:var(--surface);
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer;color:var(--ink-soft);font-size:.65rem;
+      transition:all .18s ease;
+    }
+    .order-btn:hover{background:var(--accent-soft);color:var(--accent-dark);border-color:var(--accent)}
+    .order-btn:disabled{opacity:.3;cursor:not-allowed}
+    .slider-list-head{
+      display:grid;
+      grid-template-columns:56px 80px 1fr auto auto auto;
+      gap:var(--sp-4);padding:10px var(--sp-4);
+      background:var(--surface-soft);
+      border-bottom:1px solid var(--border);
+      border-radius:var(--r-lg) var(--r-lg) 0 0;
+    }
+    .slider-list-head span{font-size:var(--fs-xs);font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <div id="sidebar"></div>
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Sliderlər</div>
+        <div class="topbar-sub" id="topbarSub"></div>
+      </div>
+      <button class="btn btn-primary" onclick="openCreate()">
+        <i class="fa-solid fa-plus"></i> Yeni Slider
+      </button>
+    </div>
+
+    <div class="content">
+      <div class="page-header">
+        <div>
+          <h1>Slider İdarəetməsi</h1>
+          <p>Landing page-dəki sliderların sırasını və məzmununu idarə edin</p>
+        </div>
+      </div>
+
+      <div class="alert hidden" id="alertBox"></div>
+
+      <div style="border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden">
+        <div class="slider-list-head">
+          <span>Sıra</span>
+          <span>Şəkil</span>
+          <span>Məlumat</span>
+          <span>Düymə</span>
+          <span>Status</span>
+          <span>Əməliyyat</span>
+        </div>
+        <div id="sliderList">
+          <div class="spinner-wrap"><div class="spinner"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Create/Edit Modal -->
+<div class="overlay hidden" id="sliderModal">
+  <div class="modal modal-lg">
+    <div class="modal-head">
+      <h3 id="modalTitle">
+        <i class="fa-solid fa-images" style="color:var(--accent);margin-right:8px"></i>Yeni Slider
+      </h3>
+      <button class="btn-icon" onclick="closeModal('sliderModal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="alert hidden" id="modalAlert"></div>
+      <input type="hidden" id="editId">
+      <input type="hidden" id="sImageUrl">
+
+      <div class="field">
+        <label><i class="fa-solid fa-image" style="color:var(--accent);margin-right:6px"></i>Şəkil</label>
+        <div style="display:flex;align-items:center;gap:var(--sp-3)">
+          <label for="sImageFile" class="btn btn-outline btn-sm" style="cursor:pointer;margin:0">
+            <i class="fa-solid fa-upload"></i> Şəkil seç
+          </label>
+          <span id="sImageFileName" style="font-size:var(--fs-sm);color:var(--ink-soft)">Fayl seçilməyib</span>
+        </div>
+        <input type="file" id="sImageFile" accept="image/*" style="display:none" onchange="handleSliderImg(this)">
+        <div id="sUploadStatus" style="font-size:var(--fs-xs);margin-top:var(--sp-2)"></div>
+        <span class="field-hint">Tövsiyə: 1920x600px, maks 5MB</span>
+      </div>
+
+      <div id="imgPreviewWrap" class="hidden" style="margin-bottom:var(--sp-4)">
+        <img id="imgPreview" style="width:100%;height:180px;object-fit:cover;border-radius:var(--r-md);border:1px solid var(--border)">
+      </div>
+
+      <div class="field">
+        <label><i class="fa-solid fa-heading" style="color:var(--accent);margin-right:6px"></i>Başlıq</label>
+        <input type="text" id="sTitle" placeholder="Məs. Görüşlərinizi asanlıqla planlaşdırın">
+      </div>
+
+      <div class="field">
+        <label><i class="fa-solid fa-align-left" style="color:var(--accent);margin-right:6px"></i>Təsvir (istəyə görə)</label>
+        <textarea id="sDesc" placeholder="Qısa açıqlama..." rows="2"></textarea>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label><i class="fa-solid fa-computer-mouse" style="color:var(--accent);margin-right:6px"></i>Düymə mətni</label>
+          <input type="text" id="sBtnText" placeholder="Məs. Rezervasiya et">
+        </div>
+        <div class="field">
+          <label><i class="fa-solid fa-link" style="color:var(--accent);margin-right:6px"></i>Düymə linki</label>
+          <input type="text" id="sBtnLink" placeholder="Məs. /client/booking.html">
+        </div>
+      </div>
+
+      <div class="field" id="statusFieldWrap" style="display:none">
+        <label>Status</label>
+        <select id="sActive">
+          <option value="true">Aktiv</option>
+          <option value="false">Deaktiv</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('sliderModal')">Ləğv et</button>
+      <button class="btn btn-primary" id="saveBtn" onclick="saveSlider()">
+        <i class="fa-solid fa-floppy-disk"></i> Saxla
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete confirm -->
+<div class="overlay hidden" id="deleteModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Slideri Sil</h3>
+      <button class="btn-icon" onclick="closeModal('deleteModal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="alert alert-warning" style="display:flex">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span>Bu slideri silmək istədiyinizə əminsiniz? Landing page-dən silinəcək.</span>
+      </div>
+      <input type="hidden" id="deleteId">
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('deleteModal')">Ləğv et</button>
+      <button class="btn btn-danger" onclick="confirmDelete()">
+        <i class="fa-solid fa-trash"></i> Sil
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="../js/admin-api.js"></script>
+<script src="../js/layout.js"></script>
+<script>
+  let sliders = [];
+
+  async function load() {
+    const list = document.getElementById('sliderList');
+    list.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div></div>';
+    sliders = await aApi.getSliders().catch(() => []);
+    sliders.sort((a, b) => a.order - b.order);
+    render();
+  }
+
+  function render() {
+    const list = document.getElementById('sliderList');
+    if (!sliders.length) {
+      list.innerHTML = `
+        <div class="empty">
+          <i class="fa-solid fa-images"></i>
+          <h3>Hələ slider yoxdur</h3>
+          <p>Landing page-ə slider əlavə edin</p>
+          <button class="btn btn-primary btn-sm" onclick="openCreate()">
+            <i class="fa-solid fa-plus"></i> İlk slideri yarat
+          </button>
+        </div>`;
+      return;
+    }
+
+    list.innerHTML = sliders.map((s, i) => `
+      <div class="slider-row">
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:var(--fs-sm);font-weight:700;color:var(--ink-soft);min-width:18px;text-align:center">${i + 1}</span>
+          <div class="order-btns">
+            <button class="order-btn" onclick="moveUp(${i})" ${i===0?'disabled':''} title="Yuxarı">
+              <i class="fa-solid fa-chevron-up"></i>
+            </button>
+            <button class="order-btn" onclick="moveDown(${i})" ${i===sliders.length-1?'disabled':''} title="Aşağı">
+              <i class="fa-solid fa-chevron-down"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="slider-thumb">
+          ${s.imageUrl
+            ? `<img src="${s.imageUrl}" alt="${s.title}" onerror="this.style.display='none'">`
+            : '<i class="fa-solid fa-image"></i>'}
+        </div>
+
+        <div class="slider-info">
+          <b>${s.title}</b>
+          <span>${s.description || '—'}</span>
+        </div>
+
+        <div style="flex-shrink:0">
+          ${s.buttonText
+            ? `<span class="badge badge-accent"><i class="fa-solid fa-computer-mouse"></i> ${s.buttonText}</span>`
+            : '<span style="font-size:var(--fs-xs);color:var(--ink-soft)">Yox</span>'}
+        </div>
+
+        <div style="flex-shrink:0">
+          ${s.isActive
+            ? '<span class="badge badge-success"><i class="fa-solid fa-circle-check"></i> Aktiv</span>'
+            : '<span class="badge badge-gray"><i class="fa-solid fa-circle-pause"></i> Deaktiv</span>'}
+        </div>
+
+        <div class="td-actions">
+          <button class="btn-icon" title="Redaktə et"
+            onclick="openEdit(${JSON.stringify(s).replace(/"/g,'&quot;')})">
+            <i class="fa-solid fa-pen"></i>
+          </button>
+          <button class="btn-icon" title="Sil"
+            style="color:var(--danger);border-color:var(--danger-soft)"
+            onclick="openDelete('${s.id}')">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </div>
+      </div>`).join('');
+  }
+
+  async function reorderAll() {
+    try {
+      await Promise.all(
+        sliders.map((s, i) =>
+          aApi.updateSlider(s.id, {
+            imageUrl:    s.imageUrl,
+            title:       s.title,
+            description: s.description || undefined,
+            buttonText:  s.buttonText  || undefined,
+            buttonLink:  s.buttonLink  || undefined,
+            order:       i,
+            isActive:    s.isActive,
+          })
+        )
+      );
+      render();
+    } catch(e) {
+      showAlert('#alertBox', 'Sıra yenilənərkən xəta: ' + e.message);
+      await load();
+    }
+  }
+
+  async function moveUp(i) {
+    if (i === 0) return;
+    [sliders[i], sliders[i - 1]] = [sliders[i - 1], sliders[i]];
+    sliders.forEach((s, idx) => s.order = idx);
+    await reorderAll();
+  }
+
+  async function moveDown(i) {
+    if (i === sliders.length - 1) return;
+    [sliders[i], sliders[i + 1]] = [sliders[i + 1], sliders[i]];
+    sliders.forEach((s, idx) => s.order = idx);
+    await reorderAll();
+  }
+
+  async function handleSliderImg(input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      showAlert('#modalAlert', 'Şəkil 5MB-dan böyük ola bilməz.');
+      return;
+    }
+    document.getElementById('sImageFileName').textContent = file.name;
+    const statusEl = document.getElementById('sUploadStatus');
+    statusEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Yüklənir...';
+
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('imgPreview').src = e.target.result;
+      document.getElementById('imgPreviewWrap').classList.remove('hidden');
+    };
+    reader.readAsDataURL(file);
+
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      const res  = await fetch('https://api.imgbb.com/1/upload?key=cfb112e9e8b779f0c69925b074355c2c', {
+        method: 'POST', body: formData,
+      });
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById('sImageUrl').value = data.data.url;
+        statusEl.innerHTML = '<i class="fa-solid fa-circle-check" style="color:var(--success)"></i> Şəkil uğurla yükləndi';
+      } else throw new Error();
+    } catch {
+      document.getElementById('sImageUrl').value = '';
+      statusEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="color:var(--warning)"></i> Yükləmə uğursuz';
+    }
+  }
+
+  function resetForm() {
+    document.getElementById('editId').value               = '';
+    document.getElementById('sImageUrl').value            = '';
+    document.getElementById('sImageFile').value           = '';
+    document.getElementById('sImageFileName').textContent = 'Fayl seçilməyib';
+    document.getElementById('sUploadStatus').innerHTML    = '';
+    document.getElementById('sTitle').value               = '';
+    document.getElementById('sDesc').value                = '';
+    document.getElementById('sBtnText').value             = '';
+    document.getElementById('sBtnLink').value             = '';
+    document.getElementById('imgPreviewWrap').classList.add('hidden');
+    document.getElementById('modalAlert').classList.add('hidden');
+  }
+
+  function openCreate() {
+    resetForm();
+    document.getElementById('modalTitle').innerHTML =
+      '<i class="fa-solid fa-images" style="color:var(--accent);margin-right:8px"></i>Yeni Slider';
+    document.getElementById('statusFieldWrap').style.display = 'none';
+    openModal('sliderModal');
+  }
+
+  function openEdit(s) {
+    resetForm();
+    document.getElementById('modalTitle').innerHTML =
+      '<i class="fa-solid fa-pen" style="color:var(--accent);margin-right:8px"></i>Slideri Redaktə Et';
+    document.getElementById('editId').value    = s.id;
+    document.getElementById('sImageUrl').value = s.imageUrl;
+    document.getElementById('sTitle').value    = s.title;
+    document.getElementById('sDesc').value     = s.description || '';
+    document.getElementById('sBtnText').value  = s.buttonText  || '';
+    document.getElementById('sBtnLink').value  = s.buttonLink  || '';
+    document.getElementById('sActive').value   = s.isActive ? 'true' : 'false';
+    document.getElementById('statusFieldWrap').style.display = 'block';
+    if (s.imageUrl) {
+      document.getElementById('sImageFileName').textContent = 'Mövcud şəkil';
+      document.getElementById('imgPreview').src = s.imageUrl;
+      document.getElementById('imgPreviewWrap').classList.remove('hidden');
+      document.getElementById('sUploadStatus').innerHTML =
+        '<i class="fa-solid fa-circle-check" style="color:var(--success)"></i> Mövcud şəkil saxlanılıb';
+    }
+    openModal('sliderModal');
+  }
+
+  async function saveSlider() {
+    const btn = document.getElementById('saveBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saxlanılır...';
+    document.getElementById('modalAlert').classList.add('hidden');
+
+    const id  = document.getElementById('editId').value;
+    const dto = {
+      imageUrl:    document.getElementById('sImageUrl').value,
+      title:       document.getElementById('sTitle').value,
+      description: document.getElementById('sDesc').value    || undefined,
+      buttonText:  document.getElementById('sBtnText').value || undefined,
+      buttonLink:  document.getElementById('sBtnLink').value || undefined,
+      order:       id
+        ? (sliders.find(s => s.id === id)?.order ?? sliders.length)
+        : sliders.length,
+      isActive: id
+        ? document.getElementById('sActive').value !== 'false'
+        : true,
+    };
+
+    if (!dto.imageUrl || !dto.title) {
+      showAlert('#modalAlert', 'Şəkil və başlıq tələb olunur');
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Saxla';
+      return;
+    }
+
+    try {
+      if (id) await aApi.updateSlider(id, dto);
+      else    await aApi.createSlider(dto);
+      closeModal('sliderModal');
+      showAlert('#alertBox', id ? 'Slider yeniləndi!' : 'Slider əlavə edildi!', 'success');
+      await load();
+    } catch(e) {
+      showAlert('#modalAlert', e.message);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Saxla';
+    }
+  }
+
+  function openDelete(id) {
+    document.getElementById('deleteId').value = id;
+    openModal('deleteModal');
+  }
+
+  async function confirmDelete() {
+    const id = document.getElementById('deleteId').value;
+    try {
+      await aApi.deleteSlider(id);
+      closeModal('deleteModal');
+      showAlert('#alertBox', 'Slider silindi.', 'success');
+      await load();
+    } catch(e) { showAlert('#alertBox', e.message); }
+  }
+
+  load();
+</script>
+</body>
+</html>

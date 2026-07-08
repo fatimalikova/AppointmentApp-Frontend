@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Bildirişlər — Appointment System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/client.css">
+  <style>
+    .notif-row{
+      display:flex;align-items:flex-start;gap:var(--sp-4);
+      padding:var(--sp-4);border-bottom:1px solid var(--border);
+      transition:background .18s ease;cursor:pointer;
+    }
+    .notif-row:last-child{border-bottom:none}
+    .notif-row:hover{background:var(--accent-xsoft)}
+    .notif-row.unread{background:var(--surface-warm)}
+    .notif-icon{
+      width:44px;height:44px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      font-size:1rem;flex-shrink:0;
+    }
+    .notif-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:6px}
+  </style>
+</head>
+<body>
+<div id="navbar"></div>
+
+<section class="section-sm">
+  <div class="container" style="max-width:720px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp-6)">
+      <div>
+        <h1 style="font-size:var(--fs-2xl);margin-bottom:4px">Bildirişlər</h1>
+        <p style="color:var(--ink-soft)">Bütün yeniliklər bir yerdə</p>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="markAll()">
+        <i class="fa-solid fa-check-double"></i> Hamısını oxunmuş et
+      </button>
+    </div>
+
+    <div class="alert alert-success hidden" id="alertBox"></div>
+
+    <div class="card" style="padding:0;overflow:hidden">
+      <div id="notifList"><div class="spinner-wrap"><div class="spinner"></div></div></div>
+    </div>
+  </div>
+</section>
+
+<div id="footer"></div>
+
+<script src="../js/client-api.js"></script>
+<script src="../js/layout.js"></script>
+<script>
+  requireAuth();
+
+  const ICON_MAP = {
+    appointment: { icon:'fa-calendar-check', bg:'var(--accent-xsoft)',  color:'var(--accent-dark)' },
+    cancel:      { icon:'fa-circle-xmark',   bg:'var(--danger-soft)',   color:'var(--danger)' },
+    reminder:    { icon:'fa-bell',            bg:'var(--warning-soft)', color:'var(--warning)' },
+    follow:      { icon:'fa-heart',           bg:'var(--danger-soft)',  color:'var(--danger)' },
+    comment:     { icon:'fa-comment',         bg:'var(--info-soft)',    color:'var(--info)' },
+    system:      { icon:'fa-circle-info',     bg:'var(--surface-soft)', color:'var(--ink-soft)' },
+  };
+
+  function getIcon(title='') {
+    const t = title.toLowerCase();
+    if (t.includes('cancel')||t.includes('ləğv')) return ICON_MAP.cancel;
+    if (t.includes('follow')||t.includes('izlə')) return ICON_MAP.follow;
+    if (t.includes('comment')||t.includes('şərh')) return ICON_MAP.comment;
+    if (t.includes('remind')||t.includes('xatır')) return ICON_MAP.reminder;
+    if (t.includes('book')||t.includes('rezerv')||t.includes('appoint')) return ICON_MAP.appointment;
+    return ICON_MAP.system;
+  }
+
+  async function loadNotifs() {
+    const list   = document.getElementById('notifList');
+    const notifs = await cApi.getNotifications().catch(()=>[]);
+    const arr    = Array.isArray(notifs) ? notifs : [];
+
+    if (!arr.length) {
+      list.innerHTML = `<div class="empty">
+        <i class="fa-regular fa-bell-slash"></i>
+        <h3>Bildiriş yoxdur</h3>
+        <p>Yeni rezervasiya, like, şərh gəldikcə burada görünəcək</p>
+      </div>`;
+      return;
+    }
+
+    list.innerHTML = arr.map(n => {
+      const ic = getIcon(n.title);
+      return `
+        <div class="notif-row ${n.isRead?'':'unread'}">
+          <div class="notif-icon" style="background:${ic.bg}">
+            <i class="fa-solid ${ic.icon}" style="color:${ic.color}"></i>
+          </div>
+          <div style="flex:1;min-width:0">
+            <strong style="display:block;font-size:var(--fs-sm);margin-bottom:2px">${n.title}</strong>
+            <p style="font-size:var(--fs-sm);color:var(--ink-soft)">${n.message}</p>
+          </div>
+          ${!n.isRead ? '<div class="notif-dot"></div>' : ''}
+          <span style="font-size:var(--fs-xs);color:var(--ink-soft);flex-shrink:0;margin-top:2px">
+            ${formatDate(n.createdAt,{day:'numeric',month:'short'})}
+          </span>
+        </div>`;
+    }).join('');
+  }
+
+  async function markAll() {
+    try {
+      await cApi.markAllRead();
+      showAlert('#alertBox', 'Bütün bildirişlər oxunmuş kimi işarələndi.', 'success');
+      loadNotifs();
+    } catch(err) { console.error(err); }
+  }
+
+  loadNotifs();
+</script>
+</body>
+</html>

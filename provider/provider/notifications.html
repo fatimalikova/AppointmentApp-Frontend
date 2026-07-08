@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Bildirişlər — Provider Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/provider.css">
+</head>
+<body>
+<div class="shell">
+  <div id="sidebar"></div>
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Bildirişlər</div>
+        <div class="topbar-sub" id="topbarSub"></div>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="markAll()">
+        <i class="fa-solid fa-check-double"></i> Hamısını oxunmuş et
+      </button>
+    </div>
+
+    <div class="content" style="max-width:720px">
+      <div class="alert hidden" id="alertBox"></div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div id="notifList"><div class="spinner-wrap"><div class="spinner"></div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../js/provider-api.js"></script>
+<script src="../js/layout.js"></script>
+<script>
+  const NOTIF_ICONS = {
+    appointment: { icon:'fa-calendar-check', cls:'gold' },
+    reminder:    { icon:'fa-bell',           cls:'gold' },
+    cancel:      { icon:'fa-circle-xmark',   cls:'red' },
+    follow:      { icon:'fa-heart',          cls:'red' },
+    comment:     { icon:'fa-comment',        cls:'green' },
+    system:      { icon:'fa-circle-info',    cls:'gold' },
+  };
+
+  function getIcon(title='') {
+    const t = title.toLowerCase();
+    if (t.includes('cancel')||t.includes('ləğv')) return NOTIF_ICONS.cancel;
+    if (t.includes('follow')||t.includes('izlə')) return NOTIF_ICONS.follow;
+    if (t.includes('comment')||t.includes('şərh')) return NOTIF_ICONS.comment;
+    if (t.includes('reminder')||t.includes('xatır')) return NOTIF_ICONS.reminder;
+    if (t.includes('booking')||t.includes('rezerv')||t.includes('appointment')) return NOTIF_ICONS.appointment;
+    return NOTIF_ICONS.system;
+  }
+
+  async function loadNotifs() {
+    const nl = document.getElementById('notifList');
+    const notifs = await pApi.getNotifications().catch(()=>[]);
+
+    if (!notifs.length) {
+      nl.innerHTML = `<div class="empty">
+        <i class="fa-solid fa-bell-slash"></i>
+        <h3>Bildiriş yoxdur</h3>
+        <p>Yeni rezervasiya, like, comment gəldikcə burada görünəcək</p>
+      </div>`;
+      return;
+    }
+
+    nl.innerHTML = notifs.map(n => {
+      const ic = getIcon(n.title);
+      return `
+        <div class="notif-row ${n.isRead?'':'unread'}" id="notif-${n.id}">
+          <div class="notif-icon ${ic.cls}"><i class="fa-solid ${ic.icon}"></i></div>
+          <div class="notif-body">
+            <b>${n.title}</b>
+            <p>${n.message}</p>
+          </div>
+          ${!n.isRead ? `<div class="unread-dot"></div>` : ''}
+          <div class="notif-time">${formatDate(n.createdAt,{day:'numeric',month:'short'})}</div>
+        </div>`;
+    }).join('');
+  }
+
+  async function markAll() {
+    try {
+      await pApi.markAllRead();
+      showAlert('#alertBox', 'Bütün bildirişlər oxunmuş kimi işarələndi.', 'success');
+      loadNotifs();
+      const badge = document.getElementById('notifBadge');
+      if (badge) badge.classList.add('hidden');
+    } catch(err) { showAlert('#alertBox', err.message); }
+  }
+
+  loadNotifs();
+</script>
+</body>
+</html>

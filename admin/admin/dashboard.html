@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dashboard — Admin Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body>
+<div class="shell">
+  <div id="sidebar"></div>
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Dashboard</div>
+        <div class="topbar-sub" id="topbarSub"></div>
+      </div>
+    </div>
+    <div class="content">
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-icon gold"><i class="fa-solid fa-building"></i></div>
+          <div>
+            <div class="stat-val" id="statProviders">—</div>
+            <div class="stat-lbl">Cəmi Providerlər</div>
+            <div class="stat-sub" id="statPending">— gözləyir</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green"><i class="fa-solid fa-circle-check"></i></div>
+          <div>
+            <div class="stat-val" id="statApproved">—</div>
+            <div class="stat-lbl">Təsdiqlənmiş Provider</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue"><i class="fa-solid fa-briefcase-medical"></i></div>
+          <div>
+            <div class="stat-val" id="statServices">—</div>
+            <div class="stat-lbl">Aktiv Xidmətlər</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon gold"><i class="fa-solid fa-calendar-check"></i></div>
+          <div>
+            <div class="stat-val" id="statAppts">—</div>
+            <div class="stat-lbl">Bugünkü Rezervasiyalar</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <!-- Pending providers -->
+        <div class="card">
+          <div class="panel-head">
+            <h2><i class="fa-solid fa-clock" style="color:var(--warning);margin-right:8px"></i>Gözləyən Providerlər</h2>
+            <a href="providers.html" style="font-size:var(--fs-sm);color:var(--accent-dark);font-weight:600">Hamısına bax →</a>
+          </div>
+          <div id="pendingList"><div class="spinner-wrap"><div class="spinner"></div></div></div>
+        </div>
+
+        <!-- Son rezervasiyalar -->
+        <div class="card">
+          <div class="panel-head">
+            <h2><i class="fa-solid fa-calendar-check" style="color:var(--accent);margin-right:8px"></i>Son Rezervasiyalar</h2>
+            <a href="appointments.html" style="font-size:var(--fs-sm);color:var(--accent-dark);font-weight:600">Hamısına bax →</a>
+          </div>
+          <div id="recentAppts"><div class="spinner-wrap"><div class="spinner"></div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../js/admin-api.js"></script>
+<script src="../js/layout.js"></script>
+<script>
+(async () => {
+  const today = new Date().toISOString().split('T')[0];
+
+  const [providers, services, appts] = await Promise.all([
+    aApi.getProviders({ pageSize:999 }).catch(()=>[]),
+    aApi.getServices({ isActive:true }).catch(()=>[]),
+    aApi.getAppointments({ from:today, to:today, pageSize:5 }).catch(()=>[]),
+  ]);
+
+  const provList = Array.isArray(providers) ? providers : (providers?.items||[]);
+  const svcList  = Array.isArray(services)  ? services  : [];
+  const apptList = Array.isArray(appts)     ? appts     : [];
+
+  const pending  = provList.filter(p => p.status==='Pending');
+  const approved = provList.filter(p => p.status==='Approved');
+
+  document.getElementById('statProviders').textContent = provList.length;
+  document.getElementById('statPending').textContent   = pending.length + ' gözləyir';
+  document.getElementById('statApproved').textContent  = approved.length;
+  document.getElementById('statServices').textContent  = svcList.length;
+  document.getElementById('statAppts').textContent     = apptList.length;
+
+  /* Pending list */
+  const pl = document.getElementById('pendingList');
+  if (!pending.length) {
+    pl.innerHTML = `<div class="empty"><i class="fa-solid fa-circle-check"></i><p>Gözləyən provider yoxdur</p></div>`;
+  } else {
+    pl.innerHTML = pending.slice(0,5).map(p => `
+      <div style="display:flex;align-items:center;gap:var(--sp-3);padding:var(--sp-3) 0;border-bottom:1px solid var(--border)">
+        <div class="prov-avatar">${p.businessName[0]}</div>
+        <div style="flex:1;min-width:0">
+          <strong style="display:block;font-size:var(--fs-sm)">${p.businessName}</strong>
+          <span style="font-size:var(--fs-xs);color:var(--ink-soft)">${p.category}</span>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-success btn-xs" onclick="quickApprove('${p.id}',this)">
+            <i class="fa-solid fa-check"></i> Təsdiqlə
+          </button>
+          <button class="btn btn-danger btn-xs" onclick="quickReject('${p.id}',this)">
+            <i class="fa-solid fa-xmark"></i> Rədd et
+          </button>
+        </div>
+      </div>`).join('');
+  }
+
+  /* Recent appointments */
+  const ra = document.getElementById('recentAppts');
+  if (!apptList.length) {
+    ra.innerHTML = `<div class="empty"><i class="fa-regular fa-calendar"></i><p>Bugün rezervasiya yoxdur</p></div>`;
+  } else {
+    ra.innerHTML = apptList.map(a => `
+      <div style="display:flex;align-items:center;gap:var(--sp-3);padding:var(--sp-3) 0;border-bottom:1px solid var(--border)">
+        <div style="flex:1;min-width:0">
+          <strong style="display:block;font-size:var(--fs-sm)">${a.serviceName}</strong>
+          <span style="font-size:var(--fs-xs);color:var(--ink-soft)">${a.clientFullName} → ${a.providerBusinessName}</span>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-size:var(--fs-xs);font-weight:600;margin-bottom:4px">${formatTime(a.startDateTime)}</div>
+          ${badge(a.status)}
+        </div>
+      </div>`).join('');
+  }
+})();
+
+async function quickApprove(id, btn) {
+  btn.disabled = true;
+  try {
+    await aApi.approveProvider(id);
+    btn.closest('div[style]').remove();
+  } catch(e) { alert(e.message); btn.disabled = false; }
+}
+
+async function quickReject(id, btn) {
+  if (!confirm('Bu provideri rədd etmək istədiyinizə əminsiniz?')) return;
+  btn.disabled = true;
+  try {
+    await aApi.rejectProvider(id);
+    btn.closest('div[style]').remove();
+  } catch(e) { alert(e.message); btn.disabled = false; }
+}
+</script>
+</body>
+</html>

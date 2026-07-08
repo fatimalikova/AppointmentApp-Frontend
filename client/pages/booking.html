@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Rezervasiya — Appointment System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/client.css">
+  <style>
+    .wizard-steps{display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:var(--sp-5) var(--sp-6);margin-bottom:var(--sp-6)}
+    .wizard-step{display:flex;align-items:center;gap:var(--sp-3)}
+    .wizard-step-circle{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:var(--fs-sm);font-weight:700;flex-shrink:0;background:var(--surface-soft);color:var(--ink-soft);border:2px solid var(--border);transition:all .22s ease}
+    .wizard-step.active .wizard-step-circle{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 4px 14px rgba(201,145,47,.35)}
+    .wizard-step.done   .wizard-step-circle{background:var(--primary);color:#fff;border-color:var(--primary)}
+    .wizard-step-label span{font-size:var(--fs-xs);color:var(--ink-soft)}
+    .wizard-step-label b{display:block;font-size:var(--fs-sm)}
+    .wizard-step.active .wizard-step-label b{color:var(--accent-dark)}
+    .wizard-step.done   .wizard-step-label b{color:var(--primary)}
+    .wizard-connector{flex:1;height:2px;background:var(--border);margin:0 var(--sp-4);transition:background .22s ease}
+    .wizard-connector.done{background:var(--primary)}
+
+    .booking-layout{display:grid;grid-template-columns:1fr 320px;gap:var(--sp-6);align-items:start}
+    .booking-summary{position:sticky;top:calc(var(--nav-h) + 20px);background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:var(--sp-5)}
+    .summary-row{display:flex;justify-content:space-between;align-items:flex-start;padding:var(--sp-3) 0;border-bottom:1px solid var(--border);font-size:var(--fs-sm)}
+    .summary-row:last-of-type{border-bottom:none}
+    .summary-row-label{color:var(--ink-soft);font-size:var(--fs-xs);flex-shrink:0;margin-right:var(--sp-3)}
+    .summary-total{display:flex;justify-content:space-between;margin-top:var(--sp-4);padding-top:var(--sp-4);border-top:2px solid var(--border-strong)}
+
+    .step-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:var(--sp-5);margin-bottom:var(--sp-4)}
+    .step-section-head{display:flex;align-items:center;gap:var(--sp-3);margin-bottom:var(--sp-5)}
+    .step-section-icon{width:40px;height:40px;border-radius:var(--r-sm);background:var(--accent-soft);color:var(--accent-dark);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+    .step-section-head h2{font-size:var(--fs-md);margin:0}
+    .step-section-head p{font-size:var(--fs-xs);color:var(--ink-soft);margin:2px 0 0}
+
+    /* Provider cards */
+    .prov-grid-book{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--sp-3)}
+    .prov-book-card{
+      border:2px solid var(--border);border-radius:var(--r-md);
+      padding:var(--sp-4);cursor:pointer;background:var(--surface);
+      transition:all .18s ease;display:flex;align-items:center;gap:var(--sp-3);
+    }
+    .prov-book-card:hover{border-color:var(--accent-light);background:var(--accent-xsoft)}
+    .prov-book-card.selected{border-color:var(--accent);background:var(--accent-xsoft)}
+    .prov-book-avatar{width:44px;height:44px;border-radius:50%;background:var(--accent-soft);color:var(--accent-dark);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:var(--fs-md);font-family:var(--font-head);flex-shrink:0;overflow:hidden}
+    .prov-book-avatar img{width:100%;height:100%;object-fit:cover}
+
+    /* Search */
+    .prov-search{
+      display:flex;gap:var(--sp-3);margin-bottom:var(--sp-4);
+    }
+    .prov-search input{
+      flex:1;padding:9px var(--sp-4);border:1.5px solid var(--border);
+      border-radius:var(--r-sm);font-size:var(--fs-sm);outline:none;
+      font-family:var(--font-body);transition:border-color .18s ease;
+    }
+    .prov-search input:focus{border-color:var(--primary)}
+    .cat-filter-row{display:flex;gap:var(--sp-2);flex-wrap:wrap;margin-bottom:var(--sp-4)}
+    .cat-chip{
+      padding:5px 14px;border-radius:var(--r-full);font-size:var(--fs-xs);
+      font-weight:600;border:1.5px solid var(--border);background:var(--surface);
+      color:var(--ink-soft);cursor:pointer;transition:all .18s ease;
+    }
+    .cat-chip:hover{border-color:var(--accent);color:var(--accent-dark)}
+    .cat-chip.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+    /* Service cards */
+    .prov-svc-card{display:flex;align-items:center;justify-content:space-between;padding:var(--sp-3) var(--sp-4);border:2px solid var(--border);border-radius:var(--r-sm);background:var(--surface);cursor:pointer;transition:all .18s ease}
+    .prov-svc-card:hover{border-color:var(--accent-light)}
+    .prov-svc-card.selected{border-color:var(--accent);background:var(--accent-xsoft)}
+
+    /* Calendar */
+    .cal-mini{border:1px solid var(--border);border-radius:var(--r-md);overflow:hidden;max-width:340px}
+    .cal-mini-head{display:flex;align-items:center;justify-content:space-between;padding:var(--sp-3) var(--sp-4);background:var(--surface-soft);border-bottom:1px solid var(--border);font-weight:600;font-size:var(--fs-sm)}
+    .cal-mini-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;padding:var(--sp-3)}
+    .cal-mini-day-head{font-size:var(--fs-xs);color:var(--ink-soft);text-align:center;padding:var(--sp-2) 0;font-weight:600}
+    .cal-day-btn{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:var(--fs-sm);cursor:pointer;background:none;border:none;transition:background .15s ease;font-family:var(--font-body)}
+    .cal-day-btn:hover:not(:disabled){background:var(--surface-soft)}
+    .cal-day-btn:disabled{color:var(--border-strong);cursor:not-allowed}
+    .cal-day-btn.today{border:2px solid var(--accent)}
+    .cal-day-btn.selected{background:var(--accent);color:#fff;font-weight:700}
+
+    /* Slots */
+    .slot-group-label{font-size:var(--fs-xs);font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);margin:var(--sp-4) 0 var(--sp-2)}
+    .slots-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-2)}
+    .slot-btn{padding:8px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--surface);font-size:var(--fs-sm);font-weight:600;cursor:pointer;transition:all .18s ease;text-align:center;font-family:var(--font-body)}
+    .slot-btn:hover{border-color:var(--accent-light);background:var(--accent-xsoft)}
+    .slot-btn.selected{background:var(--accent);color:#fff;border-color:var(--accent)}
+    .slot-btn:disabled{opacity:.4;cursor:not-allowed;background:var(--surface-soft)}
+
+    .success-wrap{text-align:center;padding:var(--sp-10) 0}
+    .success-icon{width:88px;height:88px;background:var(--success-soft);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto var(--sp-5);box-shadow:0 0 0 12px rgba(45,106,79,.08)}
+
+    @media(max-width:900px){.booking-layout{grid-template-columns:1fr}.booking-summary{position:static}}
+    @media(max-width:600px){.prov-grid-book{grid-template-columns:1fr}.slots-grid{grid-template-columns:repeat(3,1fr)}}
+  </style>
+</head>
+<body>
+<div id="navbar"></div>
+
+<section class="section-sm">
+  <div class="container">
+
+    <div style="display:flex;align-items:center;gap:var(--sp-2);font-size:var(--fs-sm);color:var(--ink-soft);margin-bottom:var(--sp-4)">
+      <a href="home.html" style="color:var(--ink-soft)">Ana səhifə</a>
+      <i class="fa-solid fa-chevron-right" style="font-size:.6rem"></i>
+      <span>Rezervasiya</span>
+    </div>
+
+    <h1 style="font-size:var(--fs-2xl);margin-bottom:var(--sp-2)">Rezervasiya et</h1>
+    <p style="color:var(--ink-soft);margin-bottom:var(--sp-6)">Mütəxəssis, xidmət və vaxt seçərək görüş təyin edin</p>
+
+    <!-- Wizard -->
+    <div class="wizard-steps">
+      <div class="wizard-step active" id="wi1">
+        <div class="wizard-step-circle" id="wc1">1</div>
+        <div class="wizard-step-label"><span>Addım 1</span><b>Mütəxəssis</b></div>
+      </div>
+      <div class="wizard-connector" id="wconn1"></div>
+      <div class="wizard-step" id="wi2">
+        <div class="wizard-step-circle" id="wc2">2</div>
+        <div class="wizard-step-label"><span>Addım 2</span><b>Xidmət & Vaxt</b></div>
+      </div>
+      <div class="wizard-connector" id="wconn2"></div>
+      <div class="wizard-step" id="wi3">
+        <div class="wizard-step-circle" id="wc3">3</div>
+        <div class="wizard-step-label"><span>Addım 3</span><b>Təsdiq</b></div>
+      </div>
+    </div>
+
+    <div class="booking-layout">
+
+      <!-- LEFT -->
+      <div>
+
+        <!-- ══ STEP 1: Provider ══ -->
+        <div id="step1">
+          <div class="step-section">
+            <div class="step-section-head">
+              <div class="step-section-icon"><i class="fa-solid fa-user-doctor"></i></div>
+              <div><h2>Mütəxəssis seçin</h2><p>Rezervasiya etmək istədiyiniz mütəxəssisi tapın</p></div>
+            </div>
+
+            <!-- Search + Category filter -->
+            <div class="prov-search">
+              <input type="text" id="provSearch" placeholder="Ad, kateqoriya axtar..."
+                oninput="filterProviders()">
+            </div>
+            <div class="cat-filter-row" id="catChips">
+              <button class="cat-chip active" data-cat="" onclick="setCat(this,'')">Hamısı</button>
+            </div>
+
+            <div class="prov-grid-book" id="provGrid">
+              <div class="spinner-wrap" style="grid-column:1/-1"><div class="spinner"></div></div>
+            </div>
+          </div>
+
+          <div style="display:flex;justify-content:flex-end">
+            <button class="btn btn-primary" id="step1Next" disabled onclick="loadStep2()">
+              Davam et <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- ══ STEP 2: Service + Date + Time ══ -->
+        <div id="step2" class="hidden">
+
+          <!-- 2a: Services -->
+          <div class="step-section">
+            <div class="step-section-head">
+              <div class="step-section-icon"><i class="fa-solid fa-briefcase-medical"></i></div>
+              <div><h2>Xidmət seçin</h2><p id="step2ProvName" style="color:var(--accent-dark);font-weight:600"></p></div>
+            </div>
+            <div id="provSvcList" style="display:flex;flex-direction:column;gap:var(--sp-2)">
+              <div class="spinner-wrap"><div class="spinner"></div></div>
+            </div>
+          </div>
+
+          <!-- 2b: Calendar -->
+          <div class="step-section hidden" id="calSection">
+            <div class="step-section-head">
+              <div class="step-section-icon"><i class="fa-solid fa-calendar"></i></div>
+              <div><h2>Tarix seçin</h2><p>Görüş üçün uyğun tarixi seçin</p></div>
+            </div>
+            <div class="cal-mini" id="calMini"></div>
+          </div>
+
+          <!-- 2c: Slots -->
+          <div class="step-section hidden" id="slotSection">
+            <div class="step-section-head">
+              <div class="step-section-icon"><i class="fa-solid fa-clock"></i></div>
+              <div><h2>Saat seçin</h2><p>Mövcud boş vaxtlardan birini seçin</p></div>
+            </div>
+            <div id="slotsList"></div>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;margin-top:var(--sp-4)">
+            <button class="btn btn-ghost" onclick="backToStep1()">
+              <i class="fa-solid fa-arrow-left"></i> Geri
+            </button>
+            <button class="btn btn-primary" id="step2Next" disabled onclick="goStep3()">
+              Davam et <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- ══ STEP 3: Confirm ══ -->
+        <div id="step3" class="hidden">
+          <div class="step-section">
+            <div class="step-section-head">
+              <div class="step-section-icon"><i class="fa-solid fa-circle-check"></i></div>
+              <div><h2>Rezervasiyanı təsdiqləyin</h2><p>Məlumatları yoxlayın, sonra təsdiqlə</p></div>
+            </div>
+            <div class="alert alert-error hidden" id="bookingAlert"></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4);margin-bottom:var(--sp-5)" id="confirmDetails"></div>
+            <div class="field">
+              <label><i class="fa-solid fa-comment"></i>Qeyd (istəyə görə)</label>
+              <textarea id="bookingNotes" placeholder="Mütəxəssisə çatdırmaq istədiyiniz məlumat..."></textarea>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between">
+            <button class="btn btn-ghost" onclick="backToStep2()">
+              <i class="fa-solid fa-arrow-left"></i> Geri
+            </button>
+            <button class="btn btn-primary btn-lg" id="confirmBtn" onclick="doBook()">
+              <i class="fa-solid fa-calendar-check"></i> Rezervasiyanı təsdiqlə
+            </button>
+          </div>
+        </div>
+
+        <!-- ══ SUCCESS ══ -->
+        <div id="stepSuccess" class="hidden">
+          <div class="step-section">
+            <div class="success-wrap">
+              <div class="success-icon">
+                <i class="fa-solid fa-calendar-check" style="color:var(--success);font-size:2.2rem"></i>
+              </div>
+              <h2 style="font-size:var(--fs-xl);margin-bottom:var(--sp-3)">Rezervasiya təsdiqləndi!</h2>
+              <p style="color:var(--ink-soft);margin-bottom:var(--sp-6);max-width:400px;margin-left:auto;margin-right:auto" id="successDetail"></p>
+              <div style="display:flex;gap:var(--sp-3);justify-content:center">
+                <a href="appointments.html" class="btn btn-primary">
+                  <i class="fa-solid fa-calendar-check"></i> Görüşlərimə bax
+                </a>
+                <a href="home.html" class="btn btn-outline">
+                  <i class="fa-solid fa-house"></i> Ana səhifə
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /LEFT -->
+
+      <!-- RIGHT: Summary -->
+      <div class="booking-summary">
+        <h3 style="font-size:var(--fs-md);margin-bottom:var(--sp-4);display:flex;align-items:center;gap:8px">
+          <i class="fa-solid fa-receipt" style="color:var(--accent)"></i> Xülasə
+        </h3>
+        <div class="summary-row"><span class="summary-row-label">Mütəxəssis</span><span id="sumProv" style="font-size:var(--fs-sm);color:var(--ink-soft);font-style:italic;text-align:right">Seçilməyib</span></div>
+        <div class="summary-row"><span class="summary-row-label">Xidmət</span><span id="sumSvc" style="font-size:var(--fs-sm);color:var(--ink-soft);font-style:italic;text-align:right">Seçilməyib</span></div>
+        <div class="summary-row"><span class="summary-row-label">Tarix</span><span id="sumDate" style="font-size:var(--fs-sm);color:var(--ink-soft);font-style:italic;text-align:right">Seçilməyib</span></div>
+        <div class="summary-row"><span class="summary-row-label">Saat</span><span id="sumSlot" style="font-size:var(--fs-sm);color:var(--ink-soft);font-style:italic;text-align:right">Seçilməyib</span></div>
+        <div class="summary-row"><span class="summary-row-label">Müddət</span><span id="sumDur" style="font-size:var(--fs-sm);color:var(--ink-soft);font-style:italic;text-align:right">—</span></div>
+        <div class="summary-total">
+          <span style="font-weight:600">Ümumi</span>
+          <b id="sumPrice" style="font-family:var(--font-head);font-size:var(--fs-lg);color:var(--accent-dark)">—</b>
+        </div>
+        <div style="margin-top:var(--sp-4);padding:var(--sp-4);background:var(--accent-xsoft);border:1px solid var(--accent-soft);border-radius:var(--r-md)">
+          <div style="display:flex;gap:var(--sp-3);align-items:flex-start">
+            <i class="fa-solid fa-lock" style="color:var(--accent-dark);margin-top:2px;flex-shrink:0"></i>
+            <div>
+              <strong style="font-size:var(--fs-sm);display:block;margin-bottom:2px">Təhlükəsiz rezervasiya</strong>
+              <span style="font-size:var(--fs-xs);color:var(--ink-soft)">Məlumatlarınız qorunur</span>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:var(--sp-4)">
+          <div style="display:flex;gap:4px">
+            <div id="prog1" style="flex:1;height:4px;border-radius:4px;background:var(--accent);transition:background .22s ease"></div>
+            <div id="prog2" style="flex:1;height:4px;border-radius:4px;background:var(--border);transition:background .22s ease"></div>
+            <div id="prog3" style="flex:1;height:4px;border-radius:4px;background:var(--border);transition:background .22s ease"></div>
+          </div>
+          <p style="font-size:var(--fs-xs);color:var(--ink-soft);margin-top:6px" id="progLabel">Addım 1 / 3</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div id="footer"></div>
+
+<script src="../js/client-api.js"></script>
+<script src="../js/layout.js"></script>
+<script>
+  requireAuth();
+
+  const urlP        = new URLSearchParams(location.search);
+  const urlProvider = urlP.get('providerId');
+  const urlSvcId    = urlP.get('serviceId');
+
+  /* ── State ── */
+  const sel = {
+    provId:   null, provName: null,
+    svcId:    null, svcName:  null, svcPrice: null, svcDur: null,
+    date:     null, slot:     null,
+  };
+
+  let allProviders = [];
+  let currentCat   = '';
+
+  let calYear  = new Date().getFullYear();
+  let calMonth = new Date().getMonth();
+  const MONTHS = ['Yanvar','Fevral','Mart','Aprel','May','İyun','İyul','Avqust','Sentyabr','Oktyabr','Noyabr','Dekabr'];
+  const DAYS   = ['B.e','Ç.a','Ç','C.a','C','Ş','B'];
+
+  /* ══ STEP 1: Provider seç ══ */
+  (async () => {
+    const data = await cApi.getProviders({ pageSize:200 }).catch(() => []);
+    allProviders = Array.isArray(data) ? data : (data?.items||[]);
+
+    /* Kateqoriya chip-ləri */
+    const cats = [...new Set(allProviders.map(p => p.category).filter(Boolean))];
+    const chipsEl = document.getElementById('catChips');
+    cats.forEach(cat => {
+      const btn = document.createElement('button');
+      btn.className = 'cat-chip';
+      btn.dataset.cat = cat;
+      btn.textContent = cat;
+      btn.onclick = () => setCat(btn, cat);
+      chipsEl.appendChild(btn);
+    });
+
+    renderProviders(allProviders);
+
+    /* URL-dən provider pre-select */
+    if (urlProvider) {
+      const found = allProviders.find(p => p.id === urlProvider);
+      if (found) {
+        selectProvider(found.id, found.businessName, found.category, found.imageUrl||null);
+        await loadStep2();
+      }
+    }
+  })();
+
+  function setCat(btn, cat) {
+    document.querySelectorAll('.cat-chip').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentCat = cat;
+    filterProviders();
+  }
+
+  function filterProviders() {
+    const q = document.getElementById('provSearch').value.toLowerCase();
+    let list = allProviders;
+    if (currentCat) list = list.filter(p => p.category === currentCat);
+    if (q) list = list.filter(p =>
+      p.businessName.toLowerCase().includes(q) ||
+      p.category?.toLowerCase().includes(q));
+    renderProviders(list);
+  }
+
+  function renderProviders(list) {
+    const grid = document.getElementById('provGrid');
+    if (!list.length) {
+      grid.innerHTML = `<div class="empty" style="grid-column:1/-1">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <h3>Nəticə tapılmadı</h3>
+      </div>`;
+      return;
+    }
+    grid.innerHTML = list.map(p => `
+      <div class="prov-book-card ${sel.provId===p.id?'selected':''}" id="pcard-${p.id}"
+        onclick="selectProvider('${p.id}','${escQ(p.businessName)}','${p.category||''}','${p.imageUrl||''}')">
+        <div class="prov-book-avatar">
+          ${p.imageUrl ? `<img src="${p.imageUrl}" alt="${p.businessName}">` : p.businessName[0]}
+        </div>
+        <div style="flex:1;min-width:0">
+          <strong style="display:block;font-size:var(--fs-sm);margin-bottom:2px">${p.businessName}</strong>
+          <span style="font-size:var(--fs-xs);color:var(--ink-soft)">
+            <i class="fa-solid fa-tag" style="color:var(--accent);margin-right:3px"></i>${p.category||''}
+          </span>
+          <div style="font-size:var(--fs-xs);color:var(--accent-dark);margin-top:2px;font-weight:600">
+            ★ ${(p.averageRating||0).toFixed(1)}
+            <span style="color:var(--ink-soft);font-weight:400">(${p.reviewCount||0})</span>
+          </div>
+        </div>
+        <div style="flex-shrink:0">
+          ${sel.provId===p.id
+            ? `<i class="fa-solid fa-circle-check" style="color:var(--accent);font-size:1.2rem"></i>`
+            : `<i class="fa-regular fa-circle" style="color:var(--border-strong);font-size:1.2rem"></i>`}
+        </div>
+      </div>`).join('');
+  }
+
+  function selectProvider(id, name, cat, img) {
+    sel.provId   = id;
+    sel.provName = name;
+    sel.svcId = sel.svcName = sel.svcPrice = sel.svcDur = null;
+    sel.date  = sel.slot = null;
+    document.getElementById('step1Next').disabled = false;
+    updateSummary();
+    /* Visual */
+    document.querySelectorAll('[id^="pcard-"]').forEach(c => {
+      const isThis = c.id === 'pcard-'+id;
+      c.classList.toggle('selected', isThis);
+      const icon = c.querySelector('i');
+      if (icon) {
+        icon.className = isThis
+          ? 'fa-solid fa-circle-check'
+          : 'fa-regular fa-circle';
+        icon.style.color = isThis ? 'var(--accent)' : 'var(--border-strong)';
+      }
+    });
+  }
+
+  /* ══ STEP 2: Xidmət + Tarix + Saat ══ */
+  async function loadStep2() {
+    if (!sel.provId) return;
+    setStep(2);
+
+    document.getElementById('step2ProvName').textContent = sel.provName + ' · xidmətlər';
+    document.getElementById('calSection').classList.add('hidden');
+    document.getElementById('slotSection').classList.add('hidden');
+    document.getElementById('step2Next').disabled = true;
+
+    const svcList = document.getElementById('provSvcList');
+    svcList.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div></div>';
+
+    const svcs  = await cApi.getByProvider(sel.provId).catch(() => []);
+    const active = Array.isArray(svcs) ? svcs.filter(s => s.isActive) : [];
+
+    if (!active.length) {
+      svcList.innerHTML = `<div class="empty" style="padding:var(--sp-6) 0">
+        <i class="fa-solid fa-briefcase-medical"></i>
+        <h3>Bu mütəxəssisin aktiv xidməti yoxdur</h3>
+        <p>Başqa mütəxəssis seçin</p>
+      </div>`;
+      return;
+    }
+
+    svcList.innerHTML = active.map(s => `
+      <div class="prov-svc-card ${sel.svcId===s.id?'selected':''}" id="svc-${s.id}"
+        onclick="selectSvc('${s.id}','${escQ(s.name)}',${s.price},${s.durationMinutes})">
+        <div>
+          <strong style="font-size:var(--fs-sm);display:block;margin-bottom:2px">${s.name}</strong>
+          <span style="font-size:var(--fs-xs);color:var(--ink-soft)">
+            <i class="fa-regular fa-clock" style="margin-right:3px;color:var(--accent)"></i>${s.durationMinutes} dəqiqə
+          </span>
+        </div>
+        <span style="font-weight:700;color:var(--accent-dark)">${formatPrice(s.price)}</span>
+      </div>`).join('');
+
+    /* URL-dən xidmət pre-select */
+    if (urlSvcId) {
+      const found = active.find(s => s.id === urlSvcId);
+      if (found) selectSvc(found.id, found.name, found.price, found.durationMinutes);
+    }
+  }
+
+  function selectSvc(id, name, price, dur) {
+    sel.svcId    = id;
+    sel.svcName  = name;
+    sel.svcPrice = price;
+    sel.svcDur   = dur;
+    sel.date  = sel.slot = null;
+    document.getElementById('step2Next').disabled = true;
+    updateSummary();
+    /* Visual */
+    document.querySelectorAll('[id^="svc-"]').forEach(c => {
+      c.classList.toggle('selected', c.id === 'svc-'+id);
+    });
+    /* Tarix seçiminə keç */
+    document.getElementById('calSection').classList.remove('hidden');
+    document.getElementById('slotSection').classList.add('hidden');
+    renderCal();
+    document.getElementById('calSection').scrollIntoView({ behavior:'smooth', block:'start' });
+  }
+
+  /* ── Calendar ── */
+  function renderCal() {
+    const today   = new Date(); today.setHours(0,0,0,0);
+    const maxDate = new Date(today); maxDate.setDate(today.getDate()+60);
+    const first   = new Date(calYear, calMonth, 1);
+    const offset  = (first.getDay()+6)%7;
+    const daysInM = new Date(calYear, calMonth+1, 0).getDate();
+
+    document.getElementById('calMini').innerHTML = `
+      <div class="cal-mini-head">
+        <button class="btn-icon" style="width:28px;height:28px;font-size:1rem" onclick="changeMonth(-1)">‹</button>
+        <span>${MONTHS[calMonth]} ${calYear}</span>
+        <button class="btn-icon" style="width:28px;height:28px;font-size:1rem" onclick="changeMonth(1)">›</button>
+      </div>
+      <div class="cal-mini-grid">
+        ${DAYS.map(d => `<div class="cal-mini-day-head">${d}</div>`).join('')}
+        ${'<div></div>'.repeat(offset)}
+        ${Array.from({length:daysInM}, (_,i) => {
+          const day  = i+1;
+          const dt   = new Date(calYear, calMonth, day);
+          const dis  = dt < today || dt > maxDate;
+          const isSel= sel.date && dt.toDateString()===sel.date.toDateString();
+          const isTod= dt.toDateString()===today.toDateString();
+          return `<button class="cal-day-btn${isSel?' selected':''}${isTod?' today':''}"
+            ${dis?'disabled':''} onclick="selectDay(${day})">${day}</button>`;
+        }).join('')}
+      </div>`;
+  }
+
+  function changeMonth(d) {
+    calMonth += d;
+    if (calMonth < 0)  { calMonth=11; calYear--; }
+    if (calMonth > 11) { calMonth=0;  calYear++; }
+    renderCal();
+  }
+
+  async function selectDay(d) {
+    sel.date = new Date(calYear, calMonth, d);
+    sel.slot = null;
+    document.getElementById('step2Next').disabled = true;
+    updateSummary();
+    renderCal();
+
+    const slotSec = document.getElementById('slotSection');
+    slotSec.classList.remove('hidden');
+    document.getElementById('slotsList').innerHTML = '<div class="spinner-wrap"><div class="spinner"></div></div>';
+    slotSec.scrollIntoView({ behavior:'smooth', block:'start' });
+
+    const iso   = sel.date.toISOString().split('T')[0];
+    const slots = await cApi.getSlots(sel.provId, sel.svcId, iso).catch(() => []);
+    renderSlots(Array.isArray(slots) ? slots : []);
+  }
+
+  function renderSlots(slots) {
+    const c = document.getElementById('slotsList');
+    if (!slots.length) {
+      c.innerHTML = `<div style="text-align:center;padding:var(--sp-5) 0">
+        <i class="fa-regular fa-calendar-xmark" style="font-size:2rem;color:var(--border-strong);display:block;margin-bottom:var(--sp-3)"></i>
+        <p style="font-size:var(--fs-sm);color:var(--ink-soft)">Bu tarixdə boş vaxt yoxdur. Başqa tarix seçin.</p>
+      </div>`;
+      return;
+    }
+    const groups = {};
+    slots.forEach(s => {
+      const h = parseInt(s.startTime);
+      const g = h < 12 ? 'Səhər' : h < 17 ? 'Günorta' : 'Axşam';
+      if (!groups[g]) groups[g] = [];
+      groups[g].push(s);
+    });
+    c.innerHTML = Object.entries(groups).map(([g, items]) => `
+      <div class="slot-group-label">${g}</div>
+      <div class="slots-grid">
+        ${items.map(s => `
+          <button class="slot-btn" data-start="${s.startTime}" data-end="${s.endTime||''}"
+            onclick="selectSlot(this)">${trimTime(s.startTime)}</button>`).join('')}
+      </div>`).join('');
+  }
+
+  function selectSlot(el) {
+    document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    sel.slot = { startTime: el.dataset.start, endTime: el.dataset.end };
+    updateSummary();
+    document.getElementById('step2Next').disabled = false;
+  }
+
+  /* ══ STEP 3: Confirm ══ */
+  function goStep3() {
+    if (!sel.provId || !sel.svcId || !sel.date || !sel.slot) return;
+    setStep(3);
+    document.getElementById('confirmDetails').innerHTML = [
+      ['fa-building',       'Mütəxəssis', sel.provName],
+      ['fa-briefcase-medical','Xidmət',   sel.svcName||'—'],
+      ['fa-calendar',       'Tarix',      formatDate(sel.date, {day:'numeric',month:'long',year:'numeric',weekday:'long'})],
+      ['fa-clock',          'Saat',       trimTime(sel.slot.startTime)],
+      ['fa-hourglass-half', 'Müddət',     (sel.svcDur||'—') + ' dəqiqə'],
+      ['fa-tag',            'Qiymət',     formatPrice(sel.svcPrice||0)],
+    ].map(([ic, l, v]) => `
+      <div>
+        <span style="font-size:var(--fs-xs);color:var(--ink-soft);display:flex;align-items:center;gap:5px;margin-bottom:4px">
+          <i class="fa-solid ${ic}" style="color:var(--accent)"></i>${l}
+        </span>
+        <strong style="font-size:var(--fs-sm)">${v}</strong>
+      </div>`).join('');
+  }
+
+  /* ══ BOOK ══ */
+  async function doBook() {
+  const btn = document.getElementById('confirmBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Göndərilir...';
+  document.getElementById('bookingAlert').classList.add('hidden');
+
+  /* UTC problemi olmadan local vaxt göndər */
+  const dateStr = sel.date.toLocaleDateString('en-CA'); // "2026-07-10"
+  const timeStr = sel.slot.startTime.slice(0, 5);       // "10:00"
+  const startDateTime = `${dateStr}T${timeStr}:00`;     // "2026-07-10T10:00:00"
+
+  try {
+    const res = await cApi.book({
+      providerId:    sel.provId,
+      serviceId:     sel.svcId,
+      startDateTime: startDateTime,
+      notes: document.getElementById('bookingNotes').value.trim() || undefined,
+    });
+
+    setStep(4);
+    document.getElementById('successDetail').textContent =
+      `${res.serviceName || sel.svcName} · ${res.providerBusinessName || sel.provName} — ${formatDate(res.startDateTime || startDateTime)}, ${timeStr}`;
+  } catch(err) {
+    showAlert('#bookingAlert', err.message || 'Rezervasiya uğursuz oldu');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-calendar-check"></i> Rezervasiyanı təsdiqlə';
+  }
+}
+
+  /* ══ Navigation ══ */
+  function backToStep1() { setStep(1); }
+  function backToStep2() { setStep(2); }
+
+  function setStep(n) {
+    document.getElementById('step1').classList.toggle('hidden', n !== 1);
+    document.getElementById('step2').classList.toggle('hidden', n !== 2);
+    document.getElementById('step3').classList.toggle('hidden', n !== 3);
+    document.getElementById('stepSuccess').classList.toggle('hidden', n !== 4);
+
+    for (let i = 1; i <= 3; i++) {
+      const wi   = document.getElementById(`wi${i}`);
+      const wc   = document.getElementById(`wc${i}`);
+      const conn = document.getElementById(`wconn${i}`);
+      wi.classList.toggle('active', i === n);
+      wi.classList.toggle('done',   i < n);
+      if (conn) conn.classList.toggle('done', i < n);
+      if (i < n) wc.innerHTML = '<i class="fa-solid fa-check" style="font-size:.7rem"></i>';
+      else wc.textContent = String(i);
+    }
+    for (let i = 1; i <= 3; i++) {
+      const bar = document.getElementById(`prog${i}`);
+      if (bar) bar.style.background = i <= n ? 'var(--accent)' : 'var(--border)';
+    }
+    const label = document.getElementById('progLabel');
+    if (label) label.textContent = n <= 3 ? `Addım ${n} / 3` : 'Tamamlandı ✓';
+    window.scrollTo({ top:0, behavior:'smooth' });
+  }
+
+  function updateSummary() {
+    const set = (id, val, bold=false) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (val) {
+        el.textContent = val;
+        el.style.cssText = bold
+          ? 'font-size:var(--fs-sm);font-weight:600;color:var(--ink);text-align:right'
+          : 'font-size:var(--fs-sm);color:var(--ink);text-align:right';
+      } else {
+        el.textContent = 'Seçilməyib';
+        el.style.cssText = 'font-size:var(--fs-sm);color:var(--ink-soft);font-style:italic;text-align:right';
+      }
+    };
+    set('sumProv', sel.provName, true);
+    set('sumSvc',  sel.svcName, true);
+    set('sumDate', sel.date ? formatDate(sel.date, {day:'numeric',month:'short',weekday:'short'}) : null);
+    set('sumSlot', sel.slot ? trimTime(sel.slot.startTime) : null, true);
+    const durEl   = document.getElementById('sumDur');
+    if (durEl)   durEl.textContent = sel.svcDur ? sel.svcDur+' dəq' : '—';
+    const priceEl = document.getElementById('sumPrice');
+    if (priceEl) priceEl.textContent = sel.svcPrice ? formatPrice(sel.svcPrice) : '—';
+  }
+
+  function escQ(str) {
+    return String(str).replace(/'/g,"&#39;").replace(/"/g,'&quot;');
+  }
+</script>
+</body>
+</html>

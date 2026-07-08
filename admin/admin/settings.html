@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Sistem Qaydaları — Admin Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body>
+<div class="shell">
+  <div id="sidebar"></div>
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Sistem Qaydaları</div>
+        <div class="topbar-sub" id="topbarSub"></div>
+      </div>
+    </div>
+    <div class="content">
+      <div class="page-header">
+        <div><h1>Sistem Qaydaları</h1><p>Platforma miqyasında rezervasiya qaydalarını idarə edin (F8)</p></div>
+      </div>
+
+      <div class="alert hidden" id="alertBox"></div>
+
+      <div style="max-width:640px">
+
+        <!-- Booking qaydaları -->
+        <div class="card" style="margin-bottom:var(--sp-5)">
+          <div class="panel-head">
+            <h2><i class="fa-solid fa-calendar-check" style="color:var(--accent);margin-right:8px"></i>Booking Qaydaları</h2>
+          </div>
+          <div class="field">
+            <label><i class="fa-solid fa-clock" style="color:var(--accent);margin-right:6px"></i>Minimum Ləğvetmə Bildiriş Müddəti (saat)</label>
+            <input type="number" id="minCancelHours" min="0" max="168">
+            <span class="field-hint">Client bu qədər saat əvvələ kimi görüşü ləğv edə bilər. Provider-ə tətbiq edilmir.</span>
+          </div>
+          <div class="field">
+            <label><i class="fa-solid fa-calendar-days" style="color:var(--accent);margin-right:6px"></i>Maksimum Öncədən Booking Günü</label>
+            <input type="number" id="maxAdvanceDays" min="1" max="365">
+            <span class="field-hint">Client neçə gün əvvəlcədən rezervasiya edə bilər.</span>
+          </div>
+          <div class="field">
+            <label><i class="fa-solid fa-sliders" style="color:var(--accent);margin-right:6px"></i>Slot İntervalı (dəqiqə)</label>
+            <input type="number" id="slotInterval" min="5" max="120" step="5">
+            <span class="field-hint">Boş slotların neçə dəqiqə aralıqla göstəriləcəyi.</span>
+          </div>
+        </div>
+
+        <!-- Xatırlatma -->
+        <div class="card" style="margin-bottom:var(--sp-5)">
+          <div class="panel-head">
+            <h2><i class="fa-solid fa-bell" style="color:var(--accent);margin-right:8px"></i>Xatırlatma Qaydaları</h2>
+          </div>
+          <div class="field">
+            <label><i class="fa-solid fa-envelope" style="color:var(--accent);margin-right:6px"></i>Xatırlatma Bildirişi (neçə saat əvvəl)</label>
+            <input type="number" id="reminderHours" min="1" max="168">
+            <span class="field-hint">Rezervasiyadan neçə saat əvvəl xatırlatma göndərilsin.</span>
+          </div>
+        </div>
+
+        <!-- Provider qaydaları -->
+        <div class="card" style="margin-bottom:var(--sp-5)">
+          <div class="panel-head">
+            <h2><i class="fa-solid fa-building" style="color:var(--accent);margin-right:8px"></i>Provider Qaydaları</h2>
+          </div>
+          <div style="display:flex;align-items:center;gap:var(--sp-3)">
+            <label class="toggle">
+              <input type="checkbox" id="requireApproval">
+              <span class="toggle-slider"></span>
+            </label>
+            <div>
+              <strong style="font-size:var(--fs-sm)">Provider qeydiyyatında admin təsdiqi tələb edilsin</strong>
+              <p style="font-size:var(--fs-xs);color:var(--ink-soft);margin-top:2px">Söndürüldükdə, provider qeydiyyatdan dərhal sonra aktiv olur</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cari xülasə -->
+        <div class="card" id="summaryCard" style="margin-bottom:var(--sp-5);background:var(--accent-xsoft);border-color:var(--accent-soft)">
+          <h3 style="font-size:var(--fs-sm);margin-bottom:var(--sp-3);color:var(--accent-dark)">
+            <i class="fa-solid fa-circle-info" style="margin-right:6px"></i>Hazırkı Aktiv Qaydalar
+          </h3>
+          <div class="spinner-wrap"><div class="spinner"></div></div>
+        </div>
+
+        <div style="display:flex;gap:var(--sp-3)">
+          <button class="btn btn-primary" onclick="save()">
+            <i class="fa-solid fa-floppy-disk"></i> Dəyişiklikləri Saxla
+          </button>
+          <button class="btn btn-ghost" onclick="openModal('resetModal')">
+            <i class="fa-solid fa-rotate-left"></i> Sıfırla
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Reset confirm modal -->
+<div class="overlay hidden" id="resetModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3><i class="fa-solid fa-rotate-left" style="color:var(--warning);margin-right:8px"></i>Sıfırla</h3>
+      <button class="btn-icon" onclick="closeModal('resetModal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="alert alert-warning" style="display:flex">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span>Bütün dəyişikliklər ləğv ediləcək və son saxlanmış qaydalar geri yüklənəcək. Davam etmək istəyirsiniz?</span>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('resetModal')">Ləğv et</button>
+      <button class="btn btn-primary" onclick="confirmReset()">
+        <i class="fa-solid fa-rotate-left"></i> Bəli, sıfırla
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="../js/admin-api.js"></script>
+<script src="../js/layout.js"></script>
+
+<script>
+    async function loadSettings() {
+  try {
+    const data = await aApi.getSettings();
+    fillForm(data);
+    renderSummary(data);
+    return data;
+  } catch(e) {
+    showAlert('#alertBox', 'Qaydalar yüklənə bilmədi: ' + e.message);
+    return null;
+  }
+}
+
+function fillForm(data) {
+  document.getElementById('minCancelHours').value    = data.minCancellationNoticeHours;
+  document.getElementById('maxAdvanceDays').value    = data.maxAdvanceBookingDays;
+  document.getElementById('slotInterval').value      = data.defaultSlotIntervalMinutes;
+  document.getElementById('reminderHours').value     = data.reminderHoursBeforeAppointment;
+  document.getElementById('requireApproval').checked = data.requireProviderApproval;
+}
+
+function renderSummary(d) {
+  document.getElementById('summaryCard').innerHTML = `
+    <h3 style="font-size:var(--fs-sm);margin-bottom:var(--sp-3);color:var(--accent-dark)">
+      <i class="fa-solid fa-circle-info" style="margin-right:6px"></i>Hazırkı Aktiv Qaydalar
+    </h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3)">
+      ${[
+        ['Ləğvetmə bildirişi', d.minCancellationNoticeHours + ' saat'],
+        ['Öncədən booking',    d.maxAdvanceBookingDays + ' gün'],
+        ['Slot intervalı',     d.defaultSlotIntervalMinutes + ' dəq'],
+        ['Xatırlatma',         d.reminderHoursBeforeAppointment + ' saat əvvəl'],
+        ['Provider təsdiqi',   d.requireProviderApproval
+          ? '<span class="badge badge-success"><i class="fa-solid fa-circle-check"></i> Tələb olunur</span>'
+          : '<span class="badge badge-danger"><i class="fa-solid fa-circle-xmark"></i> Tələb olunmur</span>'],
+      ].map(([l, v]) => `
+        <div>
+          <span style="font-size:var(--fs-xs);color:var(--ink-soft);display:block">${l}</span>
+          <strong style="font-size:var(--fs-sm)">${v}</strong>
+        </div>`).join('')}
+    </div>`;
+}
+
+async function save() {
+  const dto = {
+    minCancellationNoticeHours:     parseInt(document.getElementById('minCancelHours').value),
+    maxAdvanceBookingDays:           parseInt(document.getElementById('maxAdvanceDays').value),
+    defaultSlotIntervalMinutes:      parseInt(document.getElementById('slotInterval').value),
+    reminderHoursBeforeAppointment:  parseInt(document.getElementById('reminderHours').value),
+    requireProviderApproval:         document.getElementById('requireApproval').checked,
+  };
+
+  if (Object.values(dto).slice(0, 4).some(isNaN)) {
+    showAlert('#alertBox', 'Bütün rəqəm sahələrini doldurun.');
+    return;
+  }
+
+  try {
+    const result = await aApi.updateSettings(dto);
+    showAlert('#alertBox', 'Qaydalar uğurla saxlandı!', 'success');
+    renderSummary(result);
+  } catch(e) {
+    showAlert('#alertBox', e.message);
+  }
+}
+
+async function confirmReset() {
+  closeModal('resetModal');
+  try {
+    await aApi.resetSettings();
+    document.getElementById('minCancelHours').value    = '';
+    document.getElementById('maxAdvanceDays').value    = '';
+    document.getElementById('slotInterval').value      = '';
+    document.getElementById('reminderHours').value     = '';
+    document.getElementById('requireApproval').checked = false;
+    document.getElementById('summaryCard').innerHTML = `
+      <h3 style="font-size:var(--fs-sm);margin-bottom:var(--sp-3);color:var(--accent-dark)">
+        <i class="fa-solid fa-circle-info" style="margin-right:6px"></i>Hazırkı Aktiv Qaydalar
+      </h3>
+      <p style="font-size:var(--fs-sm);color:var(--ink-soft)">Qaydalar sıfırlanıb. Yeni dəyərlər daxil edin.</p>`;
+    showAlert('#alertBox', 'Bütün qaydalar sıfırlandı!', 'success');
+  } catch(e) {
+    showAlert('#alertBox', 'Sıfırlama uğursuz oldu: ' + e.message);
+  }
+}
+loadSettings();
+</script>
+
+
+</body>
+</html>

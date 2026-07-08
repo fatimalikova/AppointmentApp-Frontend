@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Mütəxəssislər — Appointment System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/client.css">
+  <style>
+    .search-hero{
+      background:linear-gradient(135deg,var(--primary-dark),var(--primary));
+      padding:var(--sp-10) 0;
+    }
+    .search-hero h1{color:#fff;font-size:var(--fs-2xl);margin-bottom:var(--sp-3)}
+    .search-hero p{color:rgba(255,255,255,.6);margin-bottom:var(--sp-6)}
+    .search-box{
+      display:flex;gap:var(--sp-3);
+      background:var(--surface);border-radius:var(--r-lg);
+      padding:var(--sp-3);box-shadow:var(--shadow-lg);
+      max-width:700px;
+    }
+    .search-box input{
+      flex:1;border:none;outline:none;font-size:var(--fs-base);
+      color:var(--ink);background:transparent;padding:var(--sp-2) var(--sp-3);
+    }
+    .search-box input::placeholder{color:var(--ink-soft)}
+    .filter-bar-sticky{
+      background:var(--surface);border-bottom:1px solid var(--border);
+      padding:var(--sp-4) 0;position:sticky;top:70px;z-index:50;
+    }
+    .filter-chips{display:flex;gap:var(--sp-2);flex-wrap:wrap}
+    .filter-chip{
+      padding:6px 16px;border-radius:var(--r-full);
+      font-size:var(--fs-sm);font-weight:600;
+      border:1.5px solid var(--border);background:var(--surface);
+      color:var(--ink-soft);cursor:pointer;transition:all .18s ease;
+    }
+    .filter-chip:hover{border-color:var(--accent);color:var(--accent-dark)}
+    .filter-chip.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+    .sort-select{
+      padding:7px 14px;border:1.5px solid var(--border);
+      border-radius:var(--r-full);font-size:var(--fs-sm);
+      background:var(--surface);color:var(--ink);cursor:pointer;
+    }
+    .providers-count{font-size:var(--fs-sm);color:var(--ink-soft);margin-bottom:var(--sp-5)}
+  </style>
+</head>
+<body>
+<div id="navbar"></div>
+
+<!-- Search Hero -->
+<div class="search-hero">
+  <div class="container">
+    <div class="section-tag" style="background:rgba(201,145,47,.2);color:var(--accent-light)">
+      <i class="fa-solid fa-magnifying-glass"></i> Axtarış
+    </div>
+    <h1>Sizin üçün mütəxəssis tapın</h1>
+    <p>Kateqoriya, reytinq və ünvana görə filtr edin</p>
+    <div class="search-box">
+      <i class="fa-solid fa-magnifying-glass" style="color:var(--ink-soft);align-self:center;margin-left:var(--sp-2)"></i>
+      <input type="text" id="searchInput" placeholder="Mütəxəssis adı və ya kateqoriya axtar...">
+      <button class="btn btn-primary" onclick="doSearch()">
+        <i class="fa-solid fa-magnifying-glass"></i> Axtar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Filter bar -->
+<div class="filter-bar-sticky">
+  <div class="container" style="display:flex;align-items:center;justify-content:space-between;gap:var(--sp-4);flex-wrap:wrap">
+    <div class="filter-chips" id="catFilters">
+      <button class="filter-chip active" data-cat="" onclick="setCategory(this,'')">Hamısı</button>
+      <button class="filter-chip" data-cat="Stomatoloq" onclick="setCategory(this,'Stomatoloq')">
+        <i class="fa-solid fa-tooth" style="margin-right:4px"></i>Stomatoloq
+      </button>
+      <button class="filter-chip" data-cat="Gözəllik salonu" onclick="setCategory(this,'Gözəllik salonu')">
+        <i class="fa-solid fa-scissors" style="margin-right:4px"></i>Gözəllik
+      </button>
+      <button class="filter-chip" data-cat="Masaj" onclick="setCategory(this,'Masaj')">
+        <i class="fa-solid fa-hand-dots" style="margin-right:4px"></i>Masaj
+      </button>
+      <button class="filter-chip" data-cat="Repetitor" onclick="setCategory(this,'Repetitor')">
+        <i class="fa-solid fa-book-open" style="margin-right:4px"></i>Repetitor
+      </button>
+      <button class="filter-chip" data-cat="Psixoloq" onclick="setCategory(this,'Psixoloq')">
+        <i class="fa-solid fa-brain" style="margin-right:4px"></i>Psixoloq
+      </button>
+    </div>
+    <select class="sort-select" id="sortSelect" onchange="renderProviders()">
+      <option value="rating">Reytinqə görə</option>
+      <option value="reviews">Rəy sayına görə</option>
+      <option value="name">Ada görə</option>
+    </select>
+  </div>
+</div>
+
+<!-- Results -->
+<section class="section-sm">
+  <div class="container">
+    <div class="providers-count" id="resultCount"></div>
+    <div class="grid-4" id="providersGrid">
+      <div class="spinner-wrap" style="grid-column:1/-1"><div class="spinner"></div></div>
+    </div>
+  </div>
+</section>
+
+<div id="footer"></div>
+
+<script src="../js/client-api.js"></script>
+<script src="../js/layout.js"></script>
+<script>
+  let allProviders = [];
+  let currentCategory = '';
+  let currentSearch = '';
+
+  // URL-dən kateqoriya
+  const urlCat = new URLSearchParams(location.search).get('category');
+  if (urlCat) {
+    currentCategory = urlCat;
+    document.querySelectorAll('.filter-chip').forEach(b => {
+      b.classList.toggle('active', b.dataset.cat === urlCat);
+    });
+  }
+
+  (async () => {
+    allProviders = await cApi.getProviders({ pageSize:999 }).catch(() => []);
+    if (!Array.isArray(allProviders)) allProviders = [];
+    renderProviders();
+  })();
+
+  function setCategory(btn, cat) {
+    document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentCategory = cat;
+    renderProviders();
+  }
+
+  function doSearch() {
+    currentSearch = document.getElementById('searchInput').value.toLowerCase();
+    renderProviders();
+  }
+
+  document.getElementById('searchInput').addEventListener('keypress', e => {
+    if (e.key === 'Enter') doSearch();
+  });
+
+  function renderProviders() {
+    let filtered = allProviders;
+    if (currentCategory) filtered = filtered.filter(p => p.category === currentCategory);
+    if (currentSearch)   filtered = filtered.filter(p =>
+      p.businessName.toLowerCase().includes(currentSearch) ||
+      p.category.toLowerCase().includes(currentSearch)
+    );
+
+    const sort = document.getElementById('sortSelect').value;
+    if (sort === 'rating')  filtered.sort((a,b) => (b.averageRating||0) - (a.averageRating||0));
+    if (sort === 'reviews') filtered.sort((a,b) => (b.reviewCount||0) - (a.reviewCount||0));
+    if (sort === 'name')    filtered.sort((a,b) => a.businessName.localeCompare(b.businessName));
+
+    const grid = document.getElementById('providersGrid');
+    document.getElementById('resultCount').textContent = `${filtered.length} mütəxəssis tapıldı`;
+
+    if (!filtered.length) {
+      grid.innerHTML = `<div class="empty" style="grid-column:1/-1">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <h3>Nəticə tapılmadı</h3>
+        <p>Axtarış meyarlarını dəyişdirməyə cəhd edin</p>
+      </div>`;
+      return;
+    }
+
+    grid.innerHTML = filtered.map(p => `
+      <a href="provider-detail.html?id=${p.id}" class="provider-card card-hover" style="display:block">
+        <div class="provider-card-cover"></div>
+        <div class="provider-card-body">
+          <div class="provider-card-avatar">
+            ${p.imageUrl ? `<img src="${p.imageUrl}" alt="${p.businessName}">` : p.businessName[0]}
+          </div>
+          <h3 style="font-size:var(--fs-md);margin-bottom:4px">${p.businessName}</h3>
+          <div class="provider-card-cat">
+            <i class="fa-solid fa-tag" style="color:var(--accent);margin-right:4px"></i>${p.category}
+          </div>
+          <div class="provider-card-rating">
+            <span style="color:var(--accent)">${'★'.repeat(Math.round(p.averageRating||0))}${'☆'.repeat(5-Math.round(p.averageRating||0))}</span>
+            <span style="font-size:var(--fs-sm);font-weight:600">${p.averageRating||'—'}</span>
+            <span style="font-size:var(--fs-xs);color:var(--ink-soft)">(${p.reviewCount||0})</span>
+          </div>
+          <div class="provider-card-footer">
+            <span style="font-size:var(--fs-xs);color:var(--ink-soft)">
+              <i class="fa-solid fa-location-dot" style="color:var(--accent);margin-right:3px"></i>${p.address||'Bakı'}
+            </span>
+            <span class="btn btn-primary btn-sm">Bax</span>
+          </div>
+        </div>
+      </a>`).join('');
+  }
+</script>
+</body>
+</html>

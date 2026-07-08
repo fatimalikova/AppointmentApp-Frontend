@@ -1,0 +1,1536 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Appointment System — Ana Səhifə</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../css/client.css">
+  <style>
+    /* ══ FIX 1: Slider fullscreen ══ */
+    #heroCarousel {
+      height: calc(100vh - var(--nav-h));
+    }
+    #heroCarousel .carousel-item {
+      height: calc(100vh - var(--nav-h));
+    }
+    .slide-img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      filter: brightness(.5) saturate(1.1);
+    }
+    .slide-overlay {
+      position: absolute; inset: 0;
+      background:
+        linear-gradient(to right, rgba(8,38,39,.9) 0%, rgba(8,38,39,.55) 55%, rgba(8,38,39,.1) 100%),
+        linear-gradient(to top, rgba(8,38,39,.7) 0%, transparent 45%);
+    }
+    .slide-content {
+      position: absolute; inset: 0;
+      display: flex; align-items: center;
+      padding: 0 8%;
+    }
+    .slide-inner { max-width: 680px; }
+    .slide-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 5px 16px; border-radius: 999px;
+      background: rgba(201,145,47,.18);
+      border: 1px solid rgba(201,145,47,.32);
+      color: rgba(201,145,47,.95);
+      font-size: .72rem; font-weight: 700;
+      letter-spacing: .08em; text-transform: uppercase;
+      margin-bottom: 22px;
+      animation: fadeUp .6s ease both;
+    }
+    .slide-eyebrow i { animation: blink 2s ease-in-out infinite }
+    @keyframes blink { 0%,100%{opacity:.4} 50%{opacity:1} }
+    .slide-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.2rem, 4.5vw, 3.6rem);
+      color: #fff; line-height: 1.12;
+      margin-bottom: 20px;
+      text-shadow: 0 2px 32px rgba(0,0,0,.35);
+      animation: fadeUp .6s .1s ease both;
+    }
+    .slide-title em { font-style: italic; color: #dba84a }
+    .slide-desc {
+      color: rgba(255,255,255,.75);
+      font-size: clamp(.9rem, 1.5vw, 1.1rem);
+      line-height: 1.75; max-width: 500px;
+      margin-bottom: 36px;
+      animation: fadeUp .6s .2s ease both;
+    }
+    .slide-actions {
+      display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+      animation: fadeUp .6s .3s ease both;
+    }
+    @keyframes fadeUp {
+      from { opacity:0; transform: translateY(22px) }
+      to   { opacity:1; transform: translateY(0) }
+    }
+    .slide-btn-prim {
+      display: inline-flex; align-items: center; gap: 9px;
+      padding: 14px 30px; border-radius: 12px;
+      background: linear-gradient(135deg,#c9912f,#a8741f);
+      color: #fff; font-size: .95rem; font-weight: 700;
+      text-decoration: none; border: none; cursor: pointer;
+      box-shadow: 0 6px 24px rgba(201,145,47,.45);
+      transition: all .2s ease;
+    }
+    .slide-btn-prim:hover {
+      background: linear-gradient(135deg,#dba84a,#c9912f);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 32px rgba(201,145,47,.55);
+      color: #fff;
+    }
+    .slide-btn-ghost {
+      display: inline-flex; align-items: center; gap: 9px;
+      padding: 14px 30px; border-radius: 12px;
+      background: rgba(255,255,255,.1);
+      border: 1.5px solid rgba(255,255,255,.3);
+      color: #fff; font-size: .95rem; font-weight: 600;
+      text-decoration: none;
+      backdrop-filter: blur(6px);
+      transition: all .2s ease;
+    }
+    .slide-btn-ghost:hover {
+      background: rgba(255,255,255,.18);
+      color: #fff;
+    }
+    /* Custom carousel controls — no default Bootstrap arrow */
+    .carousel-control-prev, .carousel-control-next {
+      width: 54px; opacity: 1;
+    }
+    .c-ctrl {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: rgba(255,255,255,.12);
+      border: 1.5px solid rgba(255,255,255,.22);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: .95rem;
+      backdrop-filter: blur(6px);
+      transition: all .2s ease;
+    }
+    .c-ctrl:hover { background: var(--accent); border-color: var(--accent); }
+    /* ── Remove Bootstrap default indicator green/white line ── */
+    .carousel-indicators {
+      bottom: 24px; margin-bottom: 0;
+    }
+    .carousel-indicators [data-bs-target] {
+      width: 8px !important; height: 8px !important;
+      border-radius: 50% !important;
+      background: rgba(255,255,255,.38) !important;
+      border: none !important;
+      margin: 0 4px !important;
+      transition: all .25s ease !important;
+      opacity: 1 !important;
+    }
+    .carousel-indicators .active {
+      background: #c9912f !important;
+      width: 28px !important;
+      border-radius: 999px !important;
+    }
+    /* Fallback hero */
+    .hero-fallback {
+      height: calc(100vh - var(--nav-h));
+      background: linear-gradient(145deg,#060d0d 0%,#0a1f1f 40%,#0f2b2b 70%,#082627 100%);
+      display: flex; align-items: center;
+      position: relative; overflow: hidden;
+    }
+    .hero-fallback::before {
+      content:''; position:absolute; inset:0;
+      background:
+        radial-gradient(ellipse 60% 50% at 20% 50%,rgba(201,145,47,.12),transparent 60%),
+        radial-gradient(ellipse 50% 60% at 80% 40%,rgba(15,75,80,.2),transparent 55%);
+    }
+    .hero-fallback-grid {
+      position:absolute; inset:0;
+      background-image:
+        linear-gradient(rgba(201,145,47,.03) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(201,145,47,.03) 1px,transparent 1px);
+      background-size:60px 60px;
+    }
+
+    /* ══ Stats Bar ══ */
+    .stats-bar {
+      background: var(--primary);
+      padding: var(--sp-8) 0;
+    }
+    .stats-inner {
+      display: grid; grid-template-columns: repeat(4,1fr); gap: var(--sp-5);
+    }
+    .stat-cell {
+      text-align: center; position: relative; padding: var(--sp-4) 0;
+    }
+    .stat-cell::after {
+      content:''; position:absolute; right:0; top:20%;
+      height:60%; width:1px; background:rgba(255,255,255,.1);
+    }
+    .stat-cell:last-child::after { display:none; }
+    .stat-num {
+      font-family:'Playfair Display',serif;
+      font-size: 2.4rem; font-weight: 700;
+      color: var(--accent-light); line-height: 1; margin-bottom: 6px;
+    }
+    .stat-label { font-size: .8rem; color: rgba(255,255,255,.5); }
+    .stat-sub { font-size: .7rem; color: rgba(201,145,47,.55); margin-top: 3px; }
+
+    /* ══ Section header ══ */
+    .sh { margin-bottom: var(--sp-8); }
+    .sh-tag {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 5px 14px; border-radius: 999px;
+      background: var(--accent-soft); color: var(--accent-dark);
+      font-size: .72rem; font-weight: 700; letter-spacing: .06em;
+      text-transform: uppercase; margin-bottom: 14px;
+    }
+    .sh-title {
+      font-family:'Playfair Display',serif;
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      color: var(--ink); margin-bottom: 12px; line-height: 1.2;
+    }
+    .sh-title em { font-style: italic; color: var(--accent-dark); }
+    .sh-sub { color:var(--ink-soft); font-size:.95rem; max-width:520px; line-height:1.7; }
+    .sh.center { text-align:center; }
+    .sh.center .sh-sub { margin:0 auto; }
+
+    /* ══ Categories ══ */
+    .cat-grid {
+      display:grid; grid-template-columns:repeat(4,1fr); gap:var(--sp-4);
+    }
+    .cat-tile {
+      position:relative; overflow:hidden; border-radius:16px;
+      background:var(--surface); border:2px solid var(--border);
+      padding:var(--sp-5) var(--sp-4);
+      text-align:center; cursor:pointer;
+      transition:all .22s ease; text-decoration:none; display:block;
+    }
+    .cat-tile:hover, .cat-tile:focus {
+      border-color:var(--accent); transform:translateY(-4px); box-shadow:var(--shadow-lg);
+    }
+    .cat-tile-icon {
+      width:60px; height:60px; border-radius:14px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.4rem; margin:0 auto var(--sp-3);
+      transition:transform .22s ease;
+    }
+    .cat-tile:hover .cat-tile-icon { transform:scale(1.1); }
+    .cat-tile-name { font-size:.9rem; font-weight:700; color:var(--ink); margin-bottom:4px; }
+    .cat-tile-count { font-size:.72rem; color:var(--ink-soft); }
+    .ci-1{background:#e8f5ee;color:#2d6a4f}
+    .ci-2{background:#fdf3e0;color:#a8741f}
+    .ci-3{background:#e3f0fa;color:#1e5f8e}
+    .ci-4{background:#fdecea;color:#b5271d}
+    .ci-5{background:#f0e8fa;color:#7b2d6a}
+    .ci-6{background:#e8f5ee;color:#2d6a4f}
+    .ci-7{background:#fdf4db;color:#9a6b10}
+    .ci-8{background:#f3ede0;color:#6b5c3e}
+
+    /* ══ How it works ══ */
+    .how-section { background:var(--primary-dark); padding:var(--sp-12) 0; }
+    .how-grid {
+      display:grid; grid-template-columns:repeat(3,1fr); gap:var(--sp-6);
+      position:relative;
+    }
+    .how-grid::before {
+      content:''; position:absolute; top:36px;
+      left:calc(16.6% + 40px); right:calc(16.6% + 40px);
+      height:2px;
+      background:linear-gradient(90deg,rgba(201,145,47,.3),rgba(201,145,47,.15),rgba(201,145,47,.3));
+    }
+    .how-card { text-align:center; padding:var(--sp-6) var(--sp-4); }
+    .how-num-wrap {
+      width:72px; height:72px; border-radius:50%;
+      background:rgba(201,145,47,.1); border:2px solid rgba(201,145,47,.2);
+      display:flex; align-items:center; justify-content:center;
+      margin:0 auto var(--sp-5); position:relative;
+    }
+    .how-num {
+      font-family:'Playfair Display',serif;
+      font-size:1.6rem; font-weight:700; color:var(--accent);
+    }
+    .how-icon-badge {
+      position:absolute; bottom:-8px; right:-8px;
+      width:32px; height:32px; border-radius:50%;
+      background:var(--accent); color:#fff;
+      display:flex; align-items:center; justify-content:center; font-size:.75rem;
+    }
+    .how-card h3 { font-size:1.05rem; color:#fff; margin-bottom:10px; }
+    .how-card p { font-size:.85rem; color:rgba(255,255,255,.44); line-height:1.7; }
+
+    /* ══ Provider cards ══ */
+    .prov-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:var(--sp-4); }
+    .prov-card {
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:18px; overflow:hidden;
+      transition:all .22s ease; text-decoration:none; display:block;
+    }
+    .prov-card:hover { transform:translateY(-5px); box-shadow:var(--shadow-lg); }
+    .prov-card-cover {
+      height:88px; position:relative;
+      background:linear-gradient(135deg,var(--primary-dark),var(--primary));
+    }
+    .prov-card-cover::after {
+      content:''; position:absolute; inset:0; opacity:.15;
+      background-image:radial-gradient(circle,rgba(201,145,47,.8) 1px,transparent 1px);
+      background-size:16px 16px;
+    }
+    .prov-card-body { padding:0 var(--sp-4) var(--sp-4); }
+    .prov-avatar {
+      width:66px; height:66px; border-radius:50%;
+      border:3px solid var(--surface); box-shadow:0 4px 14px rgba(0,0,0,.1);
+      background:var(--accent-soft); color:var(--accent-dark);
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.5rem; font-weight:700;
+      font-family:'Playfair Display',serif;
+      margin-top:-33px; margin-bottom:var(--sp-3);
+      overflow:hidden; flex-shrink:0;
+    }
+    .prov-avatar img { width:100%; height:100%; object-fit:cover; }
+    .prov-name { font-size:.98rem; font-weight:700; color:var(--ink); margin-bottom:3px; }
+    .prov-cat {
+      font-size:.75rem; color:var(--ink-soft);
+      display:flex; align-items:center; gap:5px; margin-bottom:var(--sp-3);
+    }
+    .prov-cat i { color:var(--accent); }
+    .prov-rating { display:flex; align-items:center; gap:6px; margin-bottom:var(--sp-4); }
+    .stars { color:#f59e0b; font-size:.85rem; }
+    .prov-footer {
+      display:flex; align-items:center; justify-content:space-between;
+      padding-top:var(--sp-3); border-top:1px solid var(--border);
+    }
+    .prov-loc {
+      font-size:.72rem; color:var(--ink-soft);
+      display:flex; align-items:center; gap:4px;
+      max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    }
+    .prov-loc i { color:var(--accent); flex-shrink:0; }
+    .prov-btn {
+      padding:5px 14px; border-radius:var(--r-full);
+      background:var(--primary); color:#fff;
+      font-size:.72rem; font-weight:700; text-decoration:none;
+      transition:background .18s ease;
+    }
+    .prov-btn:hover { background:var(--primary-light); color:#fff; }
+
+    /* ══ FIX 3: Feature section CSS Mockups ══ */
+    .feat-split { display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-10); align-items:center; }
+    .feat-split.rev .feat-mock { order:2; }
+    .feat-split.rev .feat-text { order:1; }
+
+    /* Calendar mockup */
+    .mockup-cal {
+      background:#fff; border-radius:20px;
+      box-shadow:0 20px 60px rgba(15,43,43,.15), 0 0 0 1px rgba(15,43,43,.06);
+      overflow:hidden; position:relative;
+    }
+    .mockup-cal-head {
+      background:linear-gradient(135deg,#0f2b2b,#1a4040);
+      padding:20px 24px; display:flex; align-items:center; justify-content:space-between;
+    }
+    .mockup-cal-head span { color:#fff; font-size:.85rem; font-weight:600; }
+    .mockup-cal-head small { color:rgba(255,255,255,.5); font-size:.72rem; }
+    .mockup-cal-day {
+      padding:16px 24px 8px;
+      display:flex; gap:8px; overflow:hidden;
+    }
+    .mockup-day-chip {
+      flex-shrink:0; text-align:center; padding:8px 12px;
+      border-radius:10px; cursor:pointer;
+    }
+    .mockup-day-chip b { display:block; font-size:.85rem; }
+    .mockup-day-chip small { font-size:.65rem; }
+    .mdc-normal { background:var(--surface-soft); color:var(--ink-soft); }
+    .mdc-active { background:var(--accent); color:#fff; }
+    .mdc-dot { width:4px; height:4px; border-radius:50%; background:var(--accent-light); margin:3px auto 0; }
+    .mockup-cal-slots { padding:12px 24px 20px; }
+    .mockup-slots-label { font-size:.7rem; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.06em; margin-bottom:10px; }
+    .mockup-slots-row { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px; }
+    .mslot {
+      padding:7px 14px; border-radius:8px; font-size:.78rem; font-weight:600;
+    }
+    .mslot-free { background:var(--surface-soft); color:var(--ink); border:1.5px solid var(--border); }
+    .mslot-taken { background:var(--danger-soft); color:var(--danger); text-decoration:line-through; opacity:.6; border:1.5px solid transparent; }
+    .mslot-sel { background:var(--accent); color:#fff; border:1.5px solid var(--accent); }
+    .mockup-cal-foot {
+      padding:14px 24px; border-top:1px solid var(--border);
+      display:flex; align-items:center; gap:12px;
+    }
+    .mockup-confirm-badge {
+      display:flex; align-items:center; gap:8px;
+      background:var(--success-soft); color:var(--success);
+      padding:8px 16px; border-radius:10px; font-size:.78rem; font-weight:600;
+    }
+    /* Floating notification */
+    .mockup-float-notif {
+      position:absolute; top:-14px; right:-14px;
+      background:#fff; border-radius:14px; padding:12px 16px;
+      box-shadow:0 8px 32px rgba(0,0,0,.12);
+      display:flex; align-items:center; gap:10px;
+      font-size:.78rem;
+      animation:floatCard 4s ease-in-out infinite;
+    }
+    .mockup-float-notif-icon {
+      width:34px; height:34px; border-radius:9px; flex-shrink:0;
+      display:flex; align-items:center; justify-content:center; font-size:.85rem;
+    }
+    @keyframes floatCard { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+
+    /* Provider profile mockup */
+    .mockup-profile {
+      background:#fff; border-radius:20px;
+      box-shadow:0 20px 60px rgba(15,43,43,.15), 0 0 0 1px rgba(15,43,43,.06);
+      overflow:hidden; position:relative;
+    }
+    .mockup-profile-cover {
+      height:80px;
+      background:linear-gradient(135deg,#082627,#0f2b2b,#1a4040);
+      position:relative;
+    }
+    .mockup-profile-cover::after {
+      content:''; position:absolute; inset:0; opacity:.12;
+      background-image:radial-gradient(circle,rgba(201,145,47,.8) 1px,transparent 1px);
+      background-size:14px 14px;
+    }
+    .mockup-profile-head { padding:0 20px 16px; }
+    .mockup-prov-avatar {
+      width:56px; height:56px; border-radius:50%;
+      border:3px solid #fff; background:var(--accent-soft);
+      color:var(--accent-dark); display:flex; align-items:center; justify-content:center;
+      font-family:'Playfair Display',serif; font-size:1.2rem; font-weight:700;
+      margin-top:-28px; margin-bottom:10px; overflow:hidden;
+    }
+    .mockup-prov-avatar img { width:100%; height:100%; object-fit:cover; }
+    .mockup-prov-name { font-size:.95rem; font-weight:700; color:var(--ink); margin-bottom:3px; }
+    .mockup-prov-cat { font-size:.72rem; color:var(--ink-soft); }
+    .mockup-prov-stats {
+      display:flex; gap:20px; padding:12px 20px;
+      border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+    }
+    .mockup-stat { text-align:center; }
+    .mockup-stat b { display:block; font-size:.9rem; font-weight:700; }
+    .mockup-stat small { font-size:.65rem; color:var(--ink-soft); }
+    .mockup-posts-grid {
+      display:grid; grid-template-columns:repeat(3,1fr); gap:3px; padding:3px;
+    }
+    .mockup-post-thumb {
+      aspect-ratio:1; border-radius:4px; overflow:hidden; position:relative;
+    }
+    .mockup-post-thumb img { width:100%; height:100%; object-fit:cover; }
+    .mockup-post-placeholder {
+      width:100%; height:100%;
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.5rem; color:rgba(255,255,255,.4);
+    }
+    .mockup-profile-btns {
+      display:flex; gap:8px; padding:14px 20px;
+    }
+    .mockup-btn-follow {
+      flex:1; padding:9px; border-radius:9px; font-size:.78rem; font-weight:600;
+      border:1.5px solid var(--border); background:transparent; color:var(--ink); cursor:pointer;
+      text-align:center;
+    }
+    .mockup-btn-book {
+      flex:1; padding:9px; border-radius:9px; font-size:.78rem; font-weight:700;
+      background:var(--accent); color:#fff; border:none; cursor:pointer; text-align:center;
+    }
+    /* Float card for profile mockup */
+    .mockup-float-stat {
+      position:absolute; bottom:-12px; left:-12px;
+      background:#fff; border-radius:12px; padding:10px 14px;
+      box-shadow:0 8px 28px rgba(0,0,0,.1);
+      display:flex; align-items:center; gap:8px; font-size:.75rem;
+      animation:floatCard 4s ease-in-out infinite .8s;
+    }
+    .mockup-float-stat-icon {
+      width:30px; height:30px; border-radius:8px; flex-shrink:0;
+      display:flex; align-items:center; justify-content:center; font-size:.8rem;
+    }
+
+    .feat-list { display:flex; flex-direction:column; gap:var(--sp-4); margin-top:var(--sp-5); }
+    .feat-item { display:flex; align-items:flex-start; gap:14px; }
+    .feat-item-icon {
+      width:42px; height:42px; border-radius:11px; flex-shrink:0;
+      background:var(--accent-soft); color:var(--accent-dark);
+      display:flex; align-items:center; justify-content:center; font-size:.95rem;
+    }
+    .feat-item h4 { font-size:.9rem; font-weight:700; margin-bottom:3px; }
+    .feat-item p { font-size:.82rem; color:var(--ink-soft); line-height:1.6; }
+
+    /* ══ Posts Feed ══ */
+    .posts-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:var(--sp-4); }
+    .post-card {
+      border-radius:16px; overflow:hidden;
+      background:var(--surface); border:1px solid var(--border);
+      transition:all .22s ease; cursor:pointer; display:block;
+    }
+    .post-card:hover { transform:translateY(-4px); box-shadow:var(--shadow-lg); }
+    .post-img-wrap { aspect-ratio:1; overflow:hidden; position:relative; }
+    .post-img-wrap img { width:100%; height:100%; object-fit:cover; transition:transform .35s ease; }
+    .post-card:hover .post-img-wrap img { transform:scale(1.07); }
+    .post-img-overlay {
+      position:absolute; inset:0;
+      background:linear-gradient(to top,rgba(8,38,39,.75) 0%,transparent 55%);
+      opacity:0; transition:opacity .22s ease;
+    }
+    .post-card:hover .post-img-overlay { opacity:1; }
+    .post-hover-stats {
+      position:absolute; bottom:var(--sp-3); left:var(--sp-3); right:var(--sp-3);
+      display:flex; gap:var(--sp-3);
+      opacity:0; transform:translateY(6px); transition:all .22s ease;
+    }
+    .post-card:hover .post-hover-stats { opacity:1; transform:translateY(0); }
+    .post-stat-b { display:flex; align-items:center; gap:5px; color:#fff; font-size:.8rem; font-weight:600; }
+    .post-img-placeholder {
+      width:100%; aspect-ratio:1;
+      background:linear-gradient(135deg,var(--surface-soft),var(--border));
+      display:flex; align-items:center; justify-content:center;
+      font-size:2.5rem; color:var(--border-strong);
+    }
+    .post-card-body { padding:var(--sp-3) var(--sp-4); }
+    .post-prov-row { display:flex; align-items:center; gap:8px; margin-bottom:5px; }
+    .post-prov-ava {
+      width:22px; height:22px; border-radius:50%;
+      background:var(--primary); color:var(--accent);
+      display:flex; align-items:center; justify-content:center;
+      font-size:.6rem; font-weight:700; flex-shrink:0; overflow:hidden;
+    }
+    .post-prov-ava img { width:100%; height:100%; object-fit:cover; }
+    .post-prov-name { font-size:.72rem; font-weight:600; color:var(--ink-soft); }
+    .post-caption {
+      font-size:.78rem; color:var(--ink); line-height:1.45;
+      display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+    }
+
+    /* ══ FIX 5: Post Modal ══ */
+    .post-modal-grid {
+      display:grid; grid-template-columns:1fr 400px; min-height:520px;
+    }
+    .post-modal-img {
+      background:var(--primary-dark);
+      display:flex; align-items:center; justify-content:center;
+      overflow:hidden; border-radius:var(--r-lg) 0 0 var(--r-lg);
+    }
+    .post-modal-img img {
+      width:100%; height:100%; object-fit:contain; max-height:600px;
+    }
+    .post-modal-side {
+      display:flex; flex-direction:column; border-left:1px solid var(--border);
+    }
+    .post-modal-head {
+      display:flex; align-items:center; gap:12px;
+      padding:var(--sp-4) var(--sp-4);
+      border-bottom:1px solid var(--border); flex-shrink:0;
+    }
+    .post-modal-prov-ava {
+      width:40px; height:40px; border-radius:50%;
+      background:var(--primary); color:var(--accent);
+      display:flex; align-items:center; justify-content:center;
+      font-weight:700; font-size:.9rem; overflow:hidden; flex-shrink:0;
+    }
+    .post-modal-prov-ava img { width:100%; height:100%; object-fit:cover; }
+    .post-modal-comments {
+      flex:1; overflow-y:auto; padding:var(--sp-3) var(--sp-4);
+    }
+    .post-comment-item {
+      display:flex; align-items:flex-start; gap:10px;
+      padding:var(--sp-2) 0; border-bottom:1px solid var(--border);
+    }
+    .post-comment-item:last-child { border-bottom:none; }
+    .comment-ava {
+      width:28px; height:28px; border-radius:50%;
+      background:var(--primary); color:var(--accent);
+      display:flex; align-items:center; justify-content:center;
+      font-size:.65rem; font-weight:700; flex-shrink:0;
+    }
+    .comment-ava img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+    .comment-body { flex:1; min-width:0; }
+    .comment-body strong { font-size:.78rem; display:block; margin-bottom:2px; }
+    .comment-body p { font-size:.78rem; color:var(--ink-soft); line-height:1.4; }
+    .post-modal-actions {
+      padding:var(--sp-3) var(--sp-4);
+      border-top:1px solid var(--border); flex-shrink:0;
+    }
+    .post-modal-like-row {
+      display:flex; align-items:center; gap:var(--sp-3); margin-bottom:var(--sp-3);
+    }
+    .like-btn {
+      display:flex; align-items:center; gap:6px;
+      background:none; border:none; cursor:pointer;
+      font-size:.85rem; font-weight:600; color:var(--ink-soft);
+      padding:0; transition:color .18s ease;
+    }
+    .like-btn.liked { color:var(--danger); }
+    .like-btn:hover { color:var(--danger); }
+    .like-btn i { font-size:1.1rem; transition:transform .2s ease; }
+    .like-btn:hover i { transform:scale(1.15); }
+    .post-modal-comment-form {
+      display:flex; gap:var(--sp-2); align-items:flex-end;
+    }
+    .post-modal-comment-form textarea {
+      flex:1; padding:8px 12px; border:1.5px solid var(--border);
+      border-radius:var(--r-sm); font-size:.8rem; resize:none;
+      font-family:'Inter',sans-serif; transition:border-color .18s ease;
+      outline:none;
+    }
+    .post-modal-comment-form textarea:focus { border-color:var(--primary); }
+    .post-modal-comment-form button {
+      padding:8px 16px; background:var(--accent); color:#fff;
+      border:none; border-radius:var(--r-sm); font-size:.8rem; font-weight:700;
+      cursor:pointer; transition:background .18s ease; white-space:nowrap;
+    }
+    .post-modal-comment-form button:hover { background:var(--accent-dark); }
+    /* Modal full width override for post */
+    #postModal .modal { max-width:900px; padding:0; overflow:hidden; }
+    #postModal .modal-head, #postModal .modal-body, #postModal .modal-foot { display:none; }
+
+    /* ══ FIX 4: Testimonials ══ */
+    .testi-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:var(--sp-5); }
+    .testi-card {
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:18px; padding:var(--sp-6); position:relative; overflow:hidden;
+    }
+    .testi-card::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:3px;
+      background:linear-gradient(90deg,var(--accent),var(--accent-light));
+      border-radius:18px 18px 0 0;
+    }
+    .testi-quote {
+      font-family:'Playfair Display',serif; font-size:4rem;
+      color:var(--accent-soft); line-height:.7; margin-bottom:var(--sp-3);
+    }
+    .testi-stars { color:#f59e0b; margin-bottom:var(--sp-3); letter-spacing:2px; }
+    .testi-text {
+      font-size:.875rem; color:var(--ink); line-height:1.75;
+      margin-bottom:var(--sp-5); font-style:italic;
+    }
+    .testi-author { display:flex; align-items:center; gap:12px; }
+    .testi-ava {
+      width:42px; height:42px; border-radius:50%;
+      background:var(--primary); color:var(--accent);
+      display:flex; align-items:center; justify-content:center;
+      font-family:'Playfair Display',serif; font-size:.95rem; font-weight:700; flex-shrink:0;
+    }
+    .testi-author b { display:block; font-size:.875rem; }
+    .testi-author span { font-size:.75rem; color:var(--ink-soft); }
+
+    /* ══ CTA Band ══ */
+    .cta-band {
+      background:linear-gradient(135deg,var(--primary-dark) 0%,var(--primary) 60%,#1a4040 100%);
+      padding:var(--sp-12) 0; position:relative; overflow:hidden;
+    }
+    .cta-band::before {
+      content:''; position:absolute; inset:0;
+      background:
+        radial-gradient(ellipse 50% 80% at 90% 50%,rgba(201,145,47,.1),transparent 60%),
+        radial-gradient(ellipse 40% 60% at 10% 50%,rgba(15,75,80,.15),transparent 55%);
+    }
+    .cta-inner { position:relative; z-index:1; text-align:center; }
+    .cta-tag {
+      display:inline-flex; align-items:center; gap:6px; padding:5px 14px; border-radius:999px;
+      background:rgba(201,145,47,.15); border:1px solid rgba(201,145,47,.25);
+      color:rgba(201,145,47,.9); font-size:.72rem; font-weight:700; letter-spacing:.06em;
+      text-transform:uppercase; margin-bottom:20px;
+    }
+    .cta-title {
+      font-family:'Playfair Display',serif;
+      font-size:clamp(1.8rem,4vw,2.6rem); color:#fff; margin-bottom:14px; line-height:1.2;
+    }
+    .cta-title em { font-style:italic; color:#dba84a; }
+    .cta-sub { color:rgba(255,255,255,.55); font-size:1rem; margin-bottom:36px; }
+    .cta-btns { display:flex; align-items:center; justify-content:center; gap:14px; flex-wrap:wrap; }
+    .cta-btn-p {
+      display:inline-flex; align-items:center; gap:9px; padding:14px 32px; border-radius:12px;
+      background:linear-gradient(135deg,#c9912f,#a8741f); color:#fff; font-size:.95rem; font-weight:700;
+      text-decoration:none; box-shadow:0 6px 24px rgba(201,145,47,.35); transition:all .2s ease;
+    }
+    .cta-btn-p:hover { background:linear-gradient(135deg,#dba84a,#c9912f); transform:translateY(-2px); color:#fff; }
+    .cta-btn-g {
+      display:inline-flex; align-items:center; gap:9px; padding:14px 32px; border-radius:12px;
+      background:rgba(255,255,255,.08); border:1.5px solid rgba(255,255,255,.2);
+      color:#fff; font-size:.95rem; font-weight:600; text-decoration:none;
+      backdrop-filter:blur(4px); transition:all .2s ease;
+    }
+    .cta-btn-g:hover { background:rgba(255,255,255,.15); color:#fff; }
+    .cta-trust {
+      display:flex; align-items:center; justify-content:center; gap:var(--sp-6);
+      margin-top:var(--sp-6); flex-wrap:wrap;
+    }
+    .cta-trust-i { display:flex; align-items:center; gap:7px; font-size:.78rem; color:rgba(255,255,255,.4); }
+    .cta-trust-i i { color:rgba(201,145,47,.6); }
+
+    /* ══ Responsive ══ */
+    @media(max-width:1100px) {
+      .prov-grid,.cat-grid,.posts-grid { grid-template-columns:repeat(2,1fr); }
+      .testi-grid { grid-template-columns:1fr; }
+      .feat-split { grid-template-columns:1fr; }
+      .feat-split.rev .feat-mock, .feat-split.rev .feat-text { order:unset; }
+      .stats-inner { grid-template-columns:repeat(2,1fr); }
+      .post-modal-grid { grid-template-columns:1fr; }
+      .post-modal-img { border-radius:var(--r-lg) var(--r-lg) 0 0; max-height:300px; }
+      .post-modal-side { border-left:none; border-top:1px solid var(--border); }
+      #postModal .modal { max-width:560px; }
+    }
+    @media(max-width:768px) {
+      .how-grid { grid-template-columns:1fr; }
+      .how-grid::before { display:none; }
+    }
+    @media(max-width:600px) {
+      .prov-grid,.cat-grid,.posts-grid,.stats-inner { grid-template-columns:1fr; }
+      .cta-btns { flex-direction:column; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="navbar"></div>
+
+<!-- ══════════════════════════════════
+     FIX 1: HERO SLIDER — Fullscreen
+══════════════════════════════════ -->
+<div id="heroCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5500">
+  <div class="carousel-indicators" id="carouselIndicators"></div>
+  <div class="carousel-inner" id="carouselInner">
+    <!-- Default fallback -->
+    <div class="carousel-item active">
+      <div class="hero-fallback">
+        <div class="hero-fallback-grid"></div>
+        <div class="slide-content">
+          <div class="slide-inner">
+            <div class="slide-eyebrow">
+              <i class="fa-solid fa-circle" style="font-size:.45rem"></i>
+              Azərbaycanın real-time rezervasiya platforması
+            </div>
+            <h1 class="slide-title">
+              Görüşünüzü<br>
+              <em>asanlıqla</em> planlaşdırın
+            </h1>
+            <p class="slide-desc">
+              Klinikadan salona, repetitordan konsultana — hər xidmət üçün real-time rezervasiya. Anında təsdiq, avtomatik xatırlatma.
+            </p>
+            <div class="slide-actions">
+              <a href="providers.html" class="slide-btn-prim">
+                <i class="fa-solid fa-calendar-plus"></i> Rezervasiya et
+              </a>
+              <a href="providers.html" class="slide-btn-ghost">
+                <i class="fa-solid fa-magnifying-glass"></i> Mütəxəssis axtar
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+    <div class="c-ctrl"><i class="fa-solid fa-chevron-left"></i></div>
+  </button>
+  <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+    <div class="c-ctrl"><i class="fa-solid fa-chevron-right"></i></div>
+  </button>
+</div>
+
+<!-- ══════════════════════════════════
+     FIX 2: STATS BAR — Real data
+══════════════════════════════════ -->
+<div class="stats-bar">
+  <div class="container">
+    <div class="stats-inner">
+      <div class="stat-cell">
+        <div class="stat-num" id="statProviders">—</div>
+        <div class="stat-label">Aktiv mütəxəssis</div>
+        <div class="stat-sub">Təsdiqlənmiş profil</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num" id="statReviews">—</div>
+        <div class="stat-label">Müştəri rəyi</div>
+        <div class="stat-sub">Həqiqi rəylər</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num" id="statRating">—</div>
+        <div class="stat-label">Ortalama reytinq</div>
+        <div class="stat-sub">Platformada</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num">7/24</div>
+        <div class="stat-label">Onlayn rezervasiya</div>
+        <div class="stat-sub">Daima açıq</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     CATEGORIES
+══════════════════════════════════ -->
+<section class="section">
+  <div class="container">
+    <div class="sh center">
+      <div class="sh-tag"><i class="fa-solid fa-grid-2"></i> Xidmət növləri</div>
+      <h2 class="sh-title">Hər ehtiyac üçün <em>mütəxəssis</em></h2>
+      <p class="sh-sub">8 kateqoriya üzrə sertifikatlı mütəxəssislər platformamızda qeydiyyatdadır</p>
+    </div>
+    <div class="cat-grid" id="catGrid">
+      <div class="spinner-wrap" style="grid-column:1/-1"><div class="spinner"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════
+     HOW IT WORKS
+══════════════════════════════════ -->
+<div class="how-section">
+  <div class="container">
+    <div class="sh center" style="margin-bottom:var(--sp-10)">
+      <div class="sh-tag" style="background:rgba(201,145,47,.12);color:rgba(201,145,47,.9)">
+        <i class="fa-solid fa-list-check"></i> Necə işləyir?
+      </div>
+      <h2 class="sh-title" style="color:#fff">3 addımda <em>rezervasiya</em></h2>
+      <p class="sh-sub" style="color:rgba(255,255,255,.44);margin:0 auto">Görüş təyin etmək heç vaxt bu qədər asan olmamışdı</p>
+    </div>
+    <div class="how-grid">
+      <div class="how-card">
+        <div class="how-num-wrap">
+          <div class="how-num">1</div>
+          <div class="how-icon-badge"><i class="fa-solid fa-magnifying-glass"></i></div>
+        </div>
+        <h3>Mütəxəssis tapın</h3>
+        <p>Kateqoriya, reytinq və ünvana görə filtr tətbiq edərək sizə ən uyğun mütəxəssisi seçin. Profil, portfoilo və rəylərə baxın.</p>
+      </div>
+      <div class="how-card">
+        <div class="how-num-wrap">
+          <div class="how-num">2</div>
+          <div class="how-icon-badge"><i class="fa-solid fa-calendar"></i></div>
+        </div>
+        <h3>Vaxt seçin</h3>
+        <p>Real-time mövcud slotlardan özünüzə uyğun tarixi və saatı seçin. Yalnız həqiqətən boş olan vaxtlar göstərilir.</p>
+      </div>
+      <div class="how-card">
+        <div class="how-num-wrap">
+          <div class="how-num">3</div>
+          <div class="how-icon-badge"><i class="fa-solid fa-check"></i></div>
+        </div>
+        <h3>Anında təsdiq</h3>
+        <p>Rezervasiyanız dərhal təsdiqlənir. Görüşdən əvvəl email xatırlatması göndərilir — siz heç nəyi unutmursunuz.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     FEATURED PROVIDERS
+══════════════════════════════════ -->
+<section class="section">
+  <div class="container">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:var(--sp-8);flex-wrap:wrap;gap:var(--sp-4)">
+      <div class="sh" style="margin-bottom:0">
+        <div class="sh-tag"><i class="fa-solid fa-star"></i> Seçilmiş</div>
+        <h2 class="sh-title" style="margin-bottom:0">Tövsiyə olunan <em>mütəxəssislər</em></h2>
+      </div>
+      <a href="providers.html" class="btn btn-outline btn-sm">
+        Hamısına bax <i class="fa-solid fa-arrow-right"></i>
+      </a>
+    </div>
+    <div class="prov-grid" id="provGrid">
+      <div class="spinner-wrap" style="grid-column:1/-1"><div class="spinner"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════
+     FIX 3: FEATURE SPLIT — CSS Mockups
+══════════════════════════════════ -->
+<section class="section" style="background:var(--surface)">
+  <div class="container">
+
+    <!-- Feature 1: Real-time -->
+    <div class="feat-split" style="margin-bottom:var(--sp-12)">
+      <div class="feat-text">
+        <div class="sh-tag"><i class="fa-solid fa-bolt"></i> Real-time</div>
+        <h2 class="sh-title">Anında mövcudluq, <em>sıfır gözləmə</em></h2>
+        <p style="color:var(--ink-soft);line-height:1.7;margin-bottom:0">
+          Mütəxəssisin iş cədvəlini real-time izləyin. Yalnız həqiqətən boş olan slotları görürsünüz.
+        </p>
+        <div class="feat-list">
+          <div class="feat-item">
+            <div class="feat-item-icon"><i class="fa-solid fa-clock"></i></div>
+            <div>
+              <h4>Canlı slot sistemi</h4>
+              <p>Başqa müştəri rezervasiya edəndə həmin slot dərhal bağlanır</p>
+            </div>
+          </div>
+          <div class="feat-item">
+            <div class="feat-item-icon"><i class="fa-solid fa-bell"></i></div>
+            <div>
+              <h4>Avtomatik xatırlatma</h4>
+              <p>Görüşdən əvvəl email ilə xatırlatma — heç nəyi unutmursunuz</p>
+            </div>
+          </div>
+          <div class="feat-item">
+            <div class="feat-item-icon"><i class="fa-solid fa-rotate"></i></div>
+            <div>
+              <h4>Bir klikdə yenidən planlaşdır</h4>
+              <p>Lazım gəldikdə görüşü ləğv et və ya vaxtını dəyiş</p>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:var(--sp-6)">
+          <a href="providers.html" class="btn btn-primary">
+            <i class="fa-solid fa-calendar-plus"></i> İndi rezervasiya et
+          </a>
+        </div>
+      </div>
+      <!-- Calendar UI Mockup -->
+      <div class="feat-mock" style="position:relative;padding:20px 20px 20px 0">
+        <div class="mockup-cal">
+          <div class="mockup-cal-head">
+            <div>
+              <span><i class="fa-solid fa-calendar" style="color:var(--accent-light);margin-right:6px"></i>Mövcud Slotlar</span>
+              <br>
+              <small>Yanvar 2026</small>
+            </div>
+            <span style="background:rgba(201,145,47,.15);color:var(--accent-light);padding:4px 10px;border-radius:8px;font-size:.72rem;font-weight:600">Stomatoloq</span>
+          </div>
+          <div class="mockup-cal-day">
+            <div class="mockup-day-chip mdc-normal">
+              <b>5</b><small>Çər</small>
+            </div>
+            <div class="mockup-day-chip mdc-normal">
+              <b>6</b><small>C.a</small>
+            </div>
+            <div class="mockup-day-chip mdc-active">
+              <b>7</b><small>C</small>
+              <div class="mdc-dot"></div>
+            </div>
+            <div class="mockup-day-chip mdc-normal">
+              <b>8</b><small>Ş</small>
+            </div>
+            <div class="mockup-day-chip mdc-normal" style="opacity:.5">
+              <b>9</b><small>B</small>
+            </div>
+          </div>
+          <div class="mockup-cal-slots">
+            <div class="mockup-slots-label">Səhər slotları</div>
+            <div class="mockup-slots-row">
+              <span class="mslot mslot-free">09:00</span>
+              <span class="mslot mslot-taken">10:00</span>
+              <span class="mslot mslot-sel">11:00 ✓</span>
+              <span class="mslot mslot-free">12:00</span>
+            </div>
+            <div class="mockup-slots-label" style="margin-top:10px">Günorta slotları</div>
+            <div class="mockup-slots-row">
+              <span class="mslot mslot-free">14:00</span>
+              <span class="mslot mslot-free">15:00</span>
+              <span class="mslot mslot-taken">16:00</span>
+            </div>
+          </div>
+          <div class="mockup-cal-foot">
+            <div class="mockup-confirm-badge">
+              <i class="fa-solid fa-circle-check"></i>
+              11:00 seçildi — Dr. Əliyev
+            </div>
+          </div>
+        </div>
+        <!-- Float notification -->
+        <div class="mockup-float-notif">
+          <div class="mockup-float-notif-icon" style="background:var(--success-soft);color:var(--success)">
+            <i class="fa-solid fa-bell"></i>
+          </div>
+          <div>
+            <strong style="font-size:.78rem;display:block">Xatırlatma göndərildi!</strong>
+            <span style="font-size:.7rem;color:var(--ink-soft)">Görüşünüz 1 saat sonra</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feature 2: Social -->
+    <div class="feat-split rev">
+      <!-- Profile UI Mockup -->
+      <div class="feat-mock" style="position:relative;padding:20px 0 20px 20px">
+        <div class="mockup-profile" id="mockupProfile">
+          <div class="mockup-profile-cover"></div>
+          <div class="mockup-profile-head">
+            <div class="mockup-prov-avatar" id="mockupAvatar">N</div>
+            <div class="mockup-prov-name" id="mockupName">Nilan Beauty Studio</div>
+            <div class="mockup-prov-cat" id="mockupCat">Gözəllik salonu · Bakı</div>
+          </div>
+          <div class="mockup-prov-stats">
+            <div class="mockup-stat"><b id="mockupPosts">0</b><small>post</small></div>
+            <div class="mockup-stat"><b id="mockupFollowers">0</b><small>izləyici</small></div>
+            <div class="mockup-stat"><b id="mockupRating">★ 0</b><small>reytinq</small></div>
+          </div>
+          <div class="mockup-posts-grid" id="mockupPostsGrid">
+            <!-- JS ilə doldurulacaq -->
+            <div class="mockup-post-thumb"><div class="mockup-post-placeholder" style="background:linear-gradient(135deg,#0f2b2b,#1a4040)"><i class="fa-solid fa-image" style="color:rgba(201,145,47,.3)"></i></div></div>
+            <div class="mockup-post-thumb"><div class="mockup-post-placeholder" style="background:linear-gradient(135deg,#1a4040,#0a3535)"><i class="fa-solid fa-image" style="color:rgba(201,145,47,.3)"></i></div></div>
+            <div class="mockup-post-thumb"><div class="mockup-post-placeholder" style="background:linear-gradient(135deg,#082627,#0f2b2b)"><i class="fa-solid fa-image" style="color:rgba(201,145,47,.3)"></i></div></div>
+            <div class="mockup-post-thumb"><div class="mockup-post-placeholder" style="background:linear-gradient(135deg,#0a1f1f,#0a3535)"><i class="fa-solid fa-image" style="color:rgba(201,145,47,.3)"></i></div></div>
+            <div class="mockup-post-thumb"><div class="mockup-post-placeholder" style="background:linear-gradient(135deg,#0f2b2b,#082627)"><i class="fa-solid fa-image" style="color:rgba(201,145,47,.3)"></i></div></div>
+            <div class="mockup-post-thumb"><div class="mockup-post-placeholder" style="background:linear-gradient(135deg,#1a4040,#082627)"><i class="fa-solid fa-image" style="color:rgba(201,145,47,.3)"></i></div></div>
+          </div>
+          <div class="mockup-profile-btns">
+            <div class="mockup-btn-follow"><i class="fa-solid fa-heart" style="margin-right:5px;color:var(--danger)"></i>İzlə</div>
+            <div class="mockup-btn-book"><i class="fa-solid fa-calendar-plus" style="margin-right:5px"></i>Rezervasiya</div>
+          </div>
+        </div>
+        <!-- Float stat -->
+        <div class="mockup-float-stat">
+          <div class="mockup-float-stat-icon" style="background:var(--danger-soft);color:var(--danger)">
+            <i class="fa-solid fa-heart"></i>
+          </div>
+          <div>
+            <strong style="font-size:.78rem;display:block" id="mockupFloatFollowers">0 izləyici</strong>
+            <span style="font-size:.7rem;color:var(--ink-soft)">Bu həftə +12</span>
+          </div>
+        </div>
+      </div>
+      <div class="feat-text">
+        <div class="sh-tag"><i class="fa-solid fa-heart"></i> Sosial</div>
+        <h2 class="sh-title">Mütəxəssisləri <em>kəşf edin</em></h2>
+        <p style="color:var(--ink-soft);line-height:1.7;margin-bottom:0">
+          Yalnız rezervasiya deyil — mütəxəssislərin işlərini görün, rəylərini oxuyun, izləyin. Seçiminizi məlumatlı biçimdə edin.
+        </p>
+        <div class="feat-list">
+          <div class="feat-item">
+            <div class="feat-item-icon"><i class="fa-solid fa-images"></i></div>
+            <div>
+              <h4>İş nümunələri portfolio</h4>
+              <p>Mütəxəssislərin öz paylaşdığı real işlər — reklam yox, həqiqət</p>
+            </div>
+          </div>
+          <div class="feat-item">
+            <div class="feat-item-icon"><i class="fa-solid fa-star"></i></div>
+            <div>
+              <h4>Doğrulanmış rəylər</h4>
+              <p>Yalnız görüşü tamamlayan müştərilər rəy buraxa bilər</p>
+            </div>
+          </div>
+          <div class="feat-item">
+            <div class="feat-item-icon"><i class="fa-solid fa-user-plus"></i></div>
+            <div>
+              <h4>İzlə, yeniliklərə xəbərdar ol</h4>
+              <p>Sevdiyiniz mütəxəssisləri izləyin, yeni postlarını qaçırmayın</p>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:var(--sp-6)">
+          <a href="providers.html" class="btn btn-outline">
+            <i class="fa-solid fa-building"></i> Mütəxəssislərə bax
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════
+     POSTS FEED — FIX 5: Modal
+══════════════════════════════════ -->
+<section class="section">
+  <div class="container">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:var(--sp-8);flex-wrap:wrap;gap:var(--sp-4)">
+      <div class="sh" style="margin-bottom:0">
+        <div class="sh-tag"><i class="fa-solid fa-images"></i> Portfoilio</div>
+        <h2 class="sh-title" style="margin-bottom:0">Mütəxəssislərdən <em>son işlər</em></h2>
+      </div>
+      <a href="providers.html" class="btn btn-outline btn-sm">
+        Bütün mütəxəssislər <i class="fa-solid fa-arrow-right"></i>
+      </a>
+    </div>
+    <div class="posts-grid" id="postsFeed">
+      <div class="spinner-wrap" style="grid-column:1/-1"><div class="spinner"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════
+     FIX 4: TESTIMONIALS — Real data
+══════════════════════════════════ -->
+<section class="section" style="background:var(--surface)">
+  <div class="container">
+    <div class="sh center">
+      <div class="sh-tag"><i class="fa-solid fa-quote-left"></i> Müştəri rəyləri</div>
+      <h2 class="sh-title">Onlar <em>danışır</em></h2>
+      <p class="sh-sub">Platformamızdan istifadə edən müştərilərin rəyləri</p>
+    </div>
+    <div class="testi-grid" id="testiGrid">
+      <div class="spinner-wrap" style="grid-column:1/-1"><div class="spinner"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════
+     CTA BAND
+══════════════════════════════════ -->
+<div class="cta-band">
+  <div class="container">
+    <div class="cta-inner">
+      <div class="cta-tag"><i class="fa-solid fa-rocket"></i> İndi başlayın</div>
+      <h2 class="cta-title">Vaxtınızı daha <em>ağıllı</em> idarə edin</h2>
+      <p class="cta-sub">2 dəqiqəlik pulsuz qeydiyyat. Heç bir kart lazım deyil.</p>
+      <div class="cta-btns">
+        <a href="../auth/register.html" class="cta-btn-p">
+          <i class="fa-solid fa-user-plus"></i> Pulsuz hesab yarat
+        </a>
+        <a href="providers.html" class="cta-btn-g">
+          <i class="fa-solid fa-magnifying-glass"></i> Mütəxəssis axtar
+        </a>
+      </div>
+      <div class="cta-trust">
+        <div class="cta-trust-i"><i class="fa-solid fa-shield-check"></i><span>Təhlükəsiz rezervasiya</span></div>
+        <div class="cta-trust-i"><i class="fa-solid fa-lock"></i><span>Məlumat qoruması</span></div>
+        <div class="cta-trust-i"><i class="fa-solid fa-headset"></i><span>7/24 dəstək</span></div>
+        <div class="cta-trust-i"><i class="fa-solid fa-star"></i><span id="ctaRating">— reytinq</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="footer"></div>
+
+<!-- ══════════════════════════════════
+     FIX 5: POST MODAL
+══════════════════════════════════ -->
+<div class="overlay hidden" id="postModal">
+  <div class="modal" style="max-width:900px;padding:0;overflow:hidden;background:var(--surface)">
+    <div class="post-modal-grid" id="postModalGrid">
+      <!-- JS ilə doldurulacaq -->
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../js/client-api.js"></script>
+<script src="../js/layout.js"></script>
+<script>
+/* ── Overlay click to close ── */
+document.getElementById('postModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal('postModal');
+});
+
+/* ══════════════════════════════════
+   POST MODAL STATE
+══════════════════════════════════ */
+let currentPostData = null;
+let currentPostLiked = false;
+let currentPostLikeCount = 0;
+
+async function openPost(post) {
+  currentPostData = post;
+  currentPostLiked = post.isLikedByCurrentUser || false;
+  currentPostLikeCount = post.likesCount || 0;
+
+  const { access } = Token.get();
+  const isLoggedIn = !!access;
+
+  document.getElementById('postModalGrid').innerHTML = `
+    <div class="post-modal-img">
+      ${post.imageUrl
+        ? `<img src="${post.imageUrl}" alt="${post.caption||''}">` 
+        : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:4rem;color:rgba(201,145,47,.2)"><i class="fa-solid fa-image"></i></div>`}
+    </div>
+    <div class="post-modal-side">
+      <div class="post-modal-head">
+        <div class="post-modal-prov-ava">
+          ${post.providerImg
+            ? `<img src="${post.providerImg}" alt="${post.providerName}">`
+            : post.providerName[0]}
+        </div>
+        <div style="flex:1;min-width:0">
+          <a href="provider-detail.html?id=${post.providerId}" style="font-size:.88rem;font-weight:700;color:var(--ink);display:block">${post.providerName}</a>
+          <span style="font-size:.72rem;color:var(--ink-soft)">${post.providerCat||''}</span>
+        </div>
+        <button onclick="closeModal('postModal')" style="background:none;border:none;cursor:pointer;color:var(--ink-soft);font-size:1.1rem;padding:4px">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="post-modal-comments" id="postCommentList">
+        ${post.caption ? `
+          <div class="post-comment-item">
+            <div class="comment-ava">${post.providerName[0]}</div>
+            <div class="comment-body">
+              <strong>${post.providerName}</strong>
+              <p>${post.caption}</p>
+            </div>
+          </div>` : ''}
+        <div style="text-align:center;padding:var(--sp-4) 0;font-size:var(--fs-sm);color:var(--ink-soft)">
+          <i class="fa-solid fa-spinner fa-spin"></i> Şərhlər yüklənir...
+        </div>
+      </div>
+      <div class="post-modal-actions">
+        <div class="post-modal-like-row">
+          ${isLoggedIn ? `
+            <button class="like-btn ${currentPostLiked?'liked':''}" id="postLikeBtn" onclick="togglePostLike()">
+              <i class="fa-${currentPostLiked?'solid':'regular'} fa-heart"></i>
+              <span id="postLikeCount">${currentPostLikeCount}</span>
+            </button>
+            <span style="font-size:.8rem;color:var(--ink-soft)"><i class="fa-regular fa-comment" style="margin-right:4px"></i>${post.commentsCount||0} şərh</span>
+          ` : `
+            <a href="../auth/login.html" class="like-btn" style="text-decoration:none">
+              <i class="fa-regular fa-heart"></i>
+              <span>${currentPostLikeCount}</span>
+            </a>
+            <a href="../auth/login.html" style="font-size:.78rem;color:var(--accent-dark);font-weight:600;text-decoration:none">
+              <i class="fa-solid fa-right-to-bracket" style="margin-right:4px"></i>Şərh yazmaq üçün giriş edin
+            </a>
+          `}
+        </div>
+        ${isLoggedIn ? `
+          <div class="post-modal-comment-form">
+            <textarea id="newCommentInput" placeholder="Şərhinizi yazın..." rows="2"></textarea>
+            <button onclick="submitPostComment()">
+              <i class="fa-solid fa-paper-plane"></i>
+            </button>
+          </div>
+        ` : ''}
+      </div>
+    </div>`;
+
+  openModal('postModal');
+  loadPostComments(post.id);
+}
+
+async function loadPostComments(postId) {
+  try {
+    const comments = await cApi.getComments(postId);
+    const list = document.getElementById('postCommentList');
+    if (!list) return;
+
+    const currentCaption = currentPostData?.caption
+      ? `<div class="post-comment-item">
+           <div class="comment-ava">${currentPostData.providerName[0]}</div>
+           <div class="comment-body">
+             <strong>${currentPostData.providerName}</strong>
+             <p>${currentPostData.caption}</p>
+           </div>
+         </div>` : '';
+
+    if (!comments || !comments.length) {
+      list.innerHTML = currentCaption + `
+        <div style="text-align:center;padding:var(--sp-5) 0;font-size:var(--fs-sm);color:var(--ink-soft)">
+          <i class="fa-regular fa-comment" style="display:block;font-size:1.5rem;margin-bottom:8px;color:var(--border-strong)"></i>
+          Hələ şərh yoxdur. İlk şərhi siz yazın!
+        </div>`;
+      return;
+    }
+
+    list.innerHTML = currentCaption + comments.map(c => `
+      <div class="post-comment-item">
+        <div class="comment-ava">${c.userFullName?.[0]?.toUpperCase()||'?'}</div>
+        <div class="comment-body">
+          <strong>${c.userFullName}</strong>
+          <p>${c.content}</p>
+        </div>
+      </div>`).join('');
+
+    list.scrollTop = list.scrollHeight;
+  } catch(err) {
+    const list = document.getElementById('postCommentList');
+    if (list) list.innerHTML += `<p style="text-align:center;font-size:var(--fs-xs);color:var(--ink-soft);padding:var(--sp-3)">Şərhlər yüklənmədi</p>`;
+  }
+}
+
+async function togglePostLike() {
+  if (!currentPostData) return;
+  const btn = document.getElementById('postLikeBtn');
+  const countEl = document.getElementById('postLikeCount');
+  if (!btn || !countEl) return;
+
+  try {
+    if (currentPostLiked) {
+      await cApi.unlikePost(currentPostData.id);
+      currentPostLiked = false;
+      currentPostLikeCount = Math.max(0, currentPostLikeCount - 1);
+    } else {
+      await cApi.likePost(currentPostData.id);
+      currentPostLiked = true;
+      currentPostLikeCount++;
+    }
+    btn.className = `like-btn ${currentPostLiked?'liked':''}`;
+    btn.querySelector('i').className = `fa-${currentPostLiked?'solid':'regular'} fa-heart`;
+    countEl.textContent = currentPostLikeCount;
+    /* Feed card-ı da yenilə */
+    const feedLike = document.querySelector(`[data-post-id="${currentPostData.id}"] .feed-like-count`);
+    if (feedLike) feedLike.textContent = currentPostLikeCount;
+  } catch(err) {
+    console.error(err);
+  }
+}
+
+async function submitPostComment() {
+  const inp = document.getElementById('newCommentInput');
+  if (!inp || !inp.value.trim()) return;
+  const content = inp.value.trim();
+  inp.value = '';
+  try {
+    await cApi.addComment(currentPostData.id, { content });
+    await loadPostComments(currentPostData.id);
+    /* Comment sayını artır */
+    const countEl = document.querySelector(`[data-post-id="${currentPostData.id}"] .feed-comment-count`);
+    if (countEl) countEl.textContent = parseInt(countEl.textContent||0) + 1;
+  } catch(err) {
+    inp.value = content;
+    alert('Şərh göndərilmədi: ' + err.message);
+  }
+}
+
+/* ══════════════════════════════════
+   MAIN LOAD
+══════════════════════════════════ */
+(async () => {
+
+  /* ── 1. SLIDER ── */
+  const sliders = await cApi.getSliders().catch(() => []);
+  if (sliders && sliders.length) {
+    const inds  = document.getElementById('carouselIndicators');
+    const inner = document.getElementById('carouselInner');
+    inner.innerHTML = ''; inds.innerHTML = '';
+
+    sliders.forEach((s, i) => {
+      const ind = document.createElement('button');
+      ind.setAttribute('data-bs-target','#heroCarousel');
+      ind.setAttribute('data-bs-slide-to', String(i));
+      ind.setAttribute('aria-label',`Slide ${i+1}`);
+      if (i===0) ind.classList.add('active');
+      inds.appendChild(ind);
+
+      const item = document.createElement('div');
+      item.className = `carousel-item ${i===0?'active':''}`;
+      item.innerHTML = `
+        <img src="${s.imageUrl}" alt="${s.title}" class="d-block w-100 slide-img">
+        <div class="slide-overlay"></div>
+        <div class="slide-content">
+          <div class="slide-inner">
+            <div class="slide-eyebrow">
+              <i class="fa-solid fa-circle" style="font-size:.45rem"></i>
+              Discover quick booking
+            </div>
+            <h1 class="slide-title">${s.title}</h1>
+            ${s.description ? `<p class="slide-desc">${s.description}</p>` : ''}
+            <div class="slide-actions">
+              ${s.buttonText && s.buttonLink
+                ? `<a href="${s.buttonLink}" class="slide-btn-prim">
+                     <i class="fa-solid fa-calendar-plus"></i> ${s.buttonText}
+                   </a>`
+                : `<a href="providers.html" class="slide-btn-prim">
+                     <i class="fa-solid fa-calendar-plus"></i> Rezervasiya et
+                   </a>`}
+              <a href="providers.html" class="slide-btn-ghost">
+                <i class="fa-solid fa-magnifying-glass"></i> Mütəxəssislər
+              </a>
+            </div>
+          </div>
+        </div>`;
+      inner.appendChild(item);
+    });
+  }
+
+  /* ── 2. PROVIDERS + REAL STATS ── */
+  const provData = await cApi.getProviders({ pageSize:999 }).catch(() => []);
+  const provList = Array.isArray(provData) ? provData : (provData?.items||[]);
+
+  /* FIX 2: Real stats */
+  const approvedProvs  = provList.filter(p => p.status==='Approved');
+  const totalReviews   = provList.reduce((s,p) => s+(p.reviewCount||0), 0);
+  const ratedProvs     = provList.filter(p => p.averageRating > 0);
+  const avgRating      = ratedProvs.length
+    ? (ratedProvs.reduce((s,p) => s+(p.averageRating||0), 0) / ratedProvs.length).toFixed(1)
+    : '—';
+
+  function countUp(id, target, suffix='') {
+    const el = document.getElementById(id);
+    if (!el || target===0) { if(el) el.textContent=target+suffix; return; }
+    let n=0;
+    const step=Math.max(1,Math.ceil(target/60));
+    const t=setInterval(()=>{
+      n=Math.min(n+step,target); el.textContent=n+suffix;
+      if(n>=target) clearInterval(t);
+    }, 25);
+  }
+  countUp('statProviders', approvedProvs.length || provList.length, '+');
+  countUp('statReviews',   totalReviews, '+');
+  document.getElementById('statRating').textContent = avgRating + '★';
+  document.getElementById('ctaRating').textContent  = avgRating + ' reytinq';
+
+  /* ── 3. CATEGORIES ── */
+  const CATS = [
+    { name:'Stomatoloq',       icon:'fa-tooth',           ci:'ci-1' },
+    { name:'Gözəllik salonu',  icon:'fa-scissors',        ci:'ci-2' },
+    { name:'Dərzi',            icon:'fa-shirt',           ci:'ci-3' },
+    { name:'Masaj',            icon:'fa-hand-dots',       ci:'ci-4' },
+    { name:'Repetitor',        icon:'fa-book-open',       ci:'ci-5' },
+    { name:'Psixoloq',         icon:'fa-brain',           ci:'ci-6' },
+    { name:'Hüquqşünas',       icon:'fa-scale-balanced',  ci:'ci-7' },
+    { name:'Digər',            icon:'fa-ellipsis',        ci:'ci-8' },
+  ];
+  const catCounts = {};
+  provList.forEach(p => { const k=p.category||'Digər'; catCounts[k]=(catCounts[k]||0)+1; });
+
+  document.getElementById('catGrid').innerHTML = CATS.map(c => `
+    <a href="providers.html?category=${encodeURIComponent(c.name)}" class="cat-tile">
+      <div class="cat-tile-icon ${c.ci}">
+        <i class="fa-solid ${c.icon}"></i>
+      </div>
+      <div class="cat-tile-name">${c.name}</div>
+      <div class="cat-tile-count">${catCounts[c.name]||0} mütəxəssis</div>
+    </a>`).join('');
+
+  /* ── 4. FEATURED PROVIDERS ── */
+  const topProvs = approvedProvs.length ? approvedProvs : provList;
+  const featured = [...topProvs]
+    .sort((a,b)=>(b.averageRating||0)-(a.averageRating||0))
+    .slice(0,4);
+
+  const grid = document.getElementById('provGrid');
+  if (!featured.length) {
+    grid.innerHTML = `<div class="empty" style="grid-column:1/-1"><i class="fa-solid fa-building"></i><h3>Hələ mütəxəssis yoxdur</h3></div>`;
+  } else {
+    grid.innerHTML = featured.map(p => `
+      <a href="provider-detail.html?id=${p.id}" class="prov-card">
+        <div class="prov-card-cover"></div>
+        <div class="prov-card-body">
+          <div class="prov-avatar">
+            ${p.imageUrl ? `<img src="${p.imageUrl}" alt="${p.businessName}">` : p.businessName[0]}
+          </div>
+          <div class="prov-name">${p.businessName}</div>
+          <div class="prov-cat"><i class="fa-solid fa-tag"></i>${p.category}</div>
+          <div class="prov-rating">
+            <span class="stars">${'★'.repeat(Math.round(p.averageRating||0))}${'☆'.repeat(5-Math.round(p.averageRating||0))}</span>
+            <span style="font-size:.82rem;font-weight:700">${(p.averageRating||0).toFixed(1)}</span>
+            <span style="font-size:.72rem;color:var(--ink-soft)">(${p.reviewCount||0})</span>
+          </div>
+          <div class="prov-footer">
+            <div class="prov-loc"><i class="fa-solid fa-location-dot"></i>${p.address||'Bakı'}</div>
+            <span class="prov-btn">Profil</span>
+          </div>
+        </div>
+      </a>`).join('');
+  }
+
+  /* ── FIX 3: Profile mockup — real data ── */
+  if (featured.length) {
+    const fp = featured[0];
+    document.getElementById('mockupName').textContent = fp.businessName;
+    document.getElementById('mockupCat').textContent  = fp.category + (fp.address?' · '+fp.address:'');
+    document.getElementById('mockupRating').textContent = '★ '+(fp.averageRating||0).toFixed(1);
+    document.getElementById('mockupFollowers').textContent = fp.followersCount||0;
+    document.getElementById('mockupPosts').textContent = fp.postCount||0;
+    document.getElementById('mockupFloatFollowers').textContent = (fp.followersCount||0)+' izləyici';
+    if (fp.imageUrl) {
+      document.getElementById('mockupAvatar').innerHTML = `<img src="${fp.imageUrl}" alt="${fp.businessName}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+    } else {
+      document.getElementById('mockupAvatar').textContent = fp.businessName[0];
+    }
+    /* Load posts for mockup */
+    const fps = await cApi.getPostsByProvider(fp.id).catch(()=>[]);
+    document.getElementById('mockupPosts').textContent = fps.length||0;
+    if (fps.length) {
+      document.getElementById('mockupPostsGrid').innerHTML = fps.slice(0,6).map(p => `
+        <div class="mockup-post-thumb">
+          ${p.imageUrl
+            ? `<img src="${p.imageUrl}" alt="${p.caption||''}" style="width:100%;height:100%;object-fit:cover">`
+            : `<div class="mockup-post-placeholder" style="background:linear-gradient(135deg,#0f2b2b,#1a4040)"><i class="fa-solid fa-image" style="color:rgba(201,145,47,.3)"></i></div>`}
+        </div>`).join('');
+    }
+  }
+
+  /* ── 5. POSTS FEED ── */
+  const feed = document.getElementById('postsFeed');
+  let allPosts = [];
+  for (const p of provList.slice(0,8)) {
+    if (allPosts.length >= 8) break;
+    try {
+      const pp = await cApi.getPostsByProvider(p.id);
+      if (Array.isArray(pp) && pp.length) {
+        pp.forEach(x => allPosts.push({
+          ...x,
+          providerName: p.businessName,
+          providerId:   p.id,
+          providerImg:  p.imageUrl||null,
+          providerCat:  p.category||'',
+        }));
+      }
+    } catch {}
+  }
+  allPosts = allPosts.slice(0,8);
+
+  if (!allPosts.length) {
+    feed.innerHTML = `<div class="empty" style="grid-column:1/-1"><i class="fa-solid fa-images"></i><h3>Hələ post yoxdur</h3></div>`;
+  } else {
+    feed.innerHTML = allPosts.map(p => `
+      <div class="post-card" data-post-id="${p.id}" onclick='openPost(${JSON.stringify(p).replace(/"/g,"&quot;")})'>
+        <div class="post-img-wrap">
+          ${p.imageUrl
+            ? `<img src="${p.imageUrl}" alt="${p.caption||''}" loading="lazy">`
+            : `<div class="post-img-placeholder"><i class="fa-solid fa-image"></i></div>`}
+          <div class="post-img-overlay"></div>
+          <div class="post-hover-stats">
+            <div class="post-stat-b"><i class="fa-solid fa-heart"></i><span class="feed-like-count">${p.likesCount||0}</span></div>
+            <div class="post-stat-b"><i class="fa-solid fa-comment"></i><span class="feed-comment-count">${p.commentsCount||0}</span></div>
+          </div>
+        </div>
+        <div class="post-card-body">
+          <div class="post-prov-row">
+            <div class="post-prov-ava">
+              ${p.providerImg ? `<img src="${p.providerImg}" alt="${p.providerName}">` : p.providerName[0]}
+            </div>
+            <span class="post-prov-name">${p.providerName}</span>
+          </div>
+          <p class="post-caption">${p.caption||'—'}</p>
+        </div>
+      </div>`).join('');
+  }
+
+  /* ── FIX 4: REAL TESTIMONIALS ── */
+  const testiGrid = document.getElementById('testiGrid');
+  let realReviews = [];
+
+  for (const p of featured) {
+    if (realReviews.length >= 3) break;
+    try {
+      const revs = await cApi.getReviews(p.id);
+      if (Array.isArray(revs) && revs.length) {
+        const topRevs = revs.filter(r => r.rating >= 4 && r.comment).slice(0,2);
+        topRevs.forEach(r => realReviews.push({ ...r, providerName:p.businessName, providerCat:p.category }));
+      }
+    } catch {}
+  }
+
+  if (!realReviews.length) {
+    /* Fallback — static testimonials */
+    testiGrid.innerHTML = [
+      { initials:'AH', name:'Aytən Həsənova', loc:'Bakı · Stomatoloq', rating:5, text:'Həkimə gedərkən saatlarca növbə gözləmirdim. İndi evdən birbaşa uyğun vaxtı seçirəm. Xatırlatma bildirişi isə çox işə yarayır!' },
+      { initials:'NK', name:'Nigar Kərimova',  loc:'Sumqayıt · Gözəllik', rating:5, text:'Saç ustası tapmaq həmişə problem idi. İndi portfoyoya baxıram, rəyləri oxuyuram, istədiyim vaxtı alıram. 2 dəqiqə çəkir.' },
+      { initials:'EM', name:'Elnur Məmmədov',  loc:'Gəncə · Repetitor',   rating:5, text:'Uşağım üçün riyaziyyat müəllimi axtarırdım. Profilləri nəzərdən keçirdim, uyğun vaxtı seçdim. Çox rahatdır.' },
+    ].map(t => `
+      <div class="testi-card">
+        <div class="testi-quote">"</div>
+        <div class="testi-stars">${'★'.repeat(t.rating)}</div>
+        <p class="testi-text">${t.text}</p>
+        <div class="testi-author">
+          <div class="testi-ava">${t.initials}</div>
+          <div><b>${t.name}</b><span>${t.loc}</span></div>
+        </div>
+      </div>`).join('');
+  } else {
+    testiGrid.innerHTML = realReviews.slice(0,3).map(r => `
+      <div class="testi-card">
+        <div class="testi-quote">"</div>
+        <div class="testi-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
+        <p class="testi-text">${r.comment}</p>
+        <div class="testi-author">
+          <div class="testi-ava">${r.clientFullName?.[0]?.toUpperCase()||'?'}</div>
+          <div>
+            <b>${r.clientFullName}</b>
+            <span>${r.providerName} · ${r.providerCat}</span>
+          </div>
+        </div>
+      </div>`).join('');
+  }
+
+})();
+</script>
+</body>
+</html>

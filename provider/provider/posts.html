@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="az">
+  <head>
+    <meta charset="UTF-8"><meta name="viewport"
+      content="width=device-width,initial-scale=1">
+    <title>Postlar — Provider Panel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet">
+    <link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/provider.css">
+    <style>
+    .comment-item {
+      display:flex;align-items:flex-start;gap:var(--sp-3);
+      padding:var(--sp-3) 0;border-bottom:1px solid var(--border);
+    }
+    .comment-item:last-child{border-bottom:none}
+    .comment-avatar{
+      width:32px;height:32px;border-radius:50%;
+      background:var(--surface-soft);color:var(--ink-soft);
+      display:flex;align-items:center;justify-content:center;
+      font-size:var(--fs-xs);font-weight:700;flex-shrink:0;
+    }
+    .comment-body{flex:1;min-width:0}
+    .comment-body b{font-size:var(--fs-sm);display:block;margin-bottom:2px}
+    .comment-body p{font-size:var(--fs-sm);color:var(--ink-soft)}
+    .comment-actions{display:flex;gap:var(--sp-2);flex-shrink:0}
+    .post-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-4)}
+    .post-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden}
+    .post-img-wrap{aspect-ratio:4/3;background:var(--surface-soft);display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .post-img-wrap img{width:100%;height:100%;object-fit:cover}
+    .post-img-wrap i{font-size:2rem;color:var(--border-strong)}
+    .post-body{padding:var(--sp-4)}
+    .post-stats{display:flex;gap:var(--sp-4);margin-top:var(--sp-3);align-items:center}
+    .post-stat{display:flex;align-items:center;gap:5px;font-size:var(--fs-sm);color:var(--ink-soft)}
+    @media(max-width:1100px){.post-grid{grid-template-columns:repeat(2,1fr)}}
+  </style>
+  </head>
+  <body>
+    <div class="shell">
+      <div id="sidebar"></div>
+      <div class="main">
+        <div class="topbar">
+          <div>
+            <div class="topbar-title">Postlar</div>
+            <div class="topbar-sub" id="topbarSub"></div>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('createModal')">
+            <i class="fa-solid fa-plus"></i> Yeni post
+          </button>
+        </div>
+
+        <div class="content">
+          <div class="alert hidden" id="alertBox"></div>
+          <div class="post-grid" id="postGrid">
+            <div class="spinner-wrap" style="grid-column:1/-1"><div
+                class="spinner"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create Modal -->
+    <div class="overlay hidden" id="createModal">
+      <div class="modal">
+        <div class="modal-head">
+          <h3><i class="fa-solid fa-image"
+              style="color:var(--accent);margin-right:8px"></i>Yeni Post</h3>
+          <button class="btn-icon" onclick="closeModal('createModal')"><i
+              class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="modal-body">
+  <div class="alert hidden" id="createAlert"></div>
+
+  <div class="field">
+    <label><i class="fa-solid fa-image" style="color:var(--accent);margin-right:6px"></i>Şəkil</label>
+    <div style="display:flex;align-items:center;gap:var(--sp-3)">
+      <label for="photoFile" class="btn btn-outline btn-sm" style="cursor:pointer;margin:0">
+        <i class="fa-solid fa-upload"></i> Şəkil seç
+      </label>
+      <span id="photoFileName" style="font-size:var(--fs-sm);color:var(--ink-soft)">Fayl seçilməyib</span>
+    </div>
+    <input type="file" id="photoFile" accept="image/*" style="display:none" onchange="handlePhotoUpload(this)">
+    <div id="uploadStatus" style="font-size:var(--fs-xs);margin-top:var(--sp-2)"></div>
+    <input type="hidden" id="imgUrl">
+  </div>
+
+  <div class="field">
+    <label><i class="fa-solid fa-comment" style="color:var(--accent);margin-right:6px"></i>Açıqlama</label>
+    <textarea id="caption" placeholder="Post haqqında məlumat..."></textarea>
+  </div>
+
+  <div id="imgPreview" class="hidden" style="margin-top:var(--sp-3)">
+    <img id="previewImgEl" style="width:100%;border-radius:var(--r-md);max-height:200px;object-fit:cover">
+  </div>
+</div>
+        <div class="modal-foot">
+          <button class="btn btn-ghost" onclick="closeModal('createModal')">Ləğv
+            et</button>
+          <button class="btn btn-primary" onclick="createPost()">
+            <i class="fa-solid fa-paper-plane"></i> Paylaş
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete post confirm -->
+    <div class="overlay hidden" id="deleteModal">
+      <div class="modal">
+        <div class="modal-head">
+          <h3>Postu Sil</h3>
+          <button class="btn-icon" onclick="closeModal('deleteModal')"><i
+              class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="modal-body">
+          <div class="alert alert-warning" style="display:flex">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span>Bu postu silmək istədiyinizə əminsiniz?</span>
+          </div>
+          <input type="hidden" id="delPostId">
+        </div>
+        <div class="modal-foot">
+          <button class="btn btn-ghost" onclick="closeModal('deleteModal')">Ləğv
+            et</button>
+          <button class="btn btn-danger" onclick="deletePost()">
+            <i class="fa-solid fa-trash"></i> Sil
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comments Modal -->
+    <div class="overlay hidden" id="commentsModal">
+      <div class="modal modal-lg">
+        <div class="modal-head">
+          <h3><i class="fa-solid fa-comments"
+              style="color:var(--accent);margin-right:8px"></i>Şərhlər</h3>
+          <button class="btn-icon" onclick="closeModal('commentsModal')"><i
+              class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="modal-body">
+          <div class="alert hidden" id="commentAlert"></div>
+          <input type="hidden" id="currentPostId">
+
+          <!-- Comment siyahısı -->
+          <div id="commentList"
+            style="max-height:360px;overflow-y:auto;margin-bottom:var(--sp-4)">
+            <div class="spinner-wrap"><div class="spinner"></div></div>
+          </div>
+
+          <!-- Yeni comment -->
+          <div
+            style="border-top:1px solid var(--border);padding-top:var(--sp-4)">
+            <div style="display:flex;gap:var(--sp-3)">
+              <textarea id="newComment" placeholder="Şərh yazın..." rows="2"
+                style="flex:1;padding:10px var(--sp-4);border:1.5px solid var(--border);border-radius:var(--r-sm);font-size:var(--fs-sm);resize:none"></textarea>
+              <button class="btn btn-primary" onclick="addComment()"
+                style="align-self:flex-end">
+                <i class="fa-solid fa-paper-plane"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="../js/provider-api.js"></script>
+    <script src="../js/layout.js"></script>
+    <script>
+  let myUserId = '';
+
+  (async () => {
+    const profile = await pApi.profile().catch(() => null);
+    if (profile) myUserId = profile.userId || profile.id || '';
+  })();
+
+  async function handlePhotoUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  if (file.size > 5 * 1024 * 1024) {
+    showAlert('#createAlert', 'Şəkil 5MB-dan böyük ola bilməz.');
+    return;
+  }
+
+  document.getElementById('photoFileName').textContent = file.name;
+  const statusEl = document.getElementById('uploadStatus');
+  statusEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Yüklənir...';
+
+  // Lokal preview
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('previewImgEl').src = e.target.result;
+    document.getElementById('imgPreview').classList.remove('hidden');
+  };
+  reader.readAsDataURL(file);
+
+  // ImgBB upload
+  try {
+    const formData = new FormData();
+    formData.append('image', file);
+    const res  = await fetch('https://api.imgbb.com/1/upload?key=cfb112e9e8b779f0c69925b074355c2c', {
+      method: 'POST', body: formData,
+    });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('imgUrl').value = data.data.url;
+      statusEl.innerHTML = '<i class="fa-solid fa-circle-check" style="color:var(--success)"></i> Şəkil uğurla yükləndi';
+    } else throw new Error();
+  } catch {
+    document.getElementById('imgUrl').value = '';
+    statusEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="color:var(--warning)"></i> Yükləmə uğursuz — yenidən cəhd edin';
+  }
+}
+
+  async function loadPosts() {
+    const grid = document.getElementById('postGrid');
+    grid.innerHTML = '<div class="spinner-wrap" style="grid-column:1/-1"><div class="spinner"></div></div>';
+    const posts = await pApi.getMyPosts().catch(() => []);
+
+    if (!posts.length) {
+      grid.innerHTML = `<div class="empty" style="grid-column:1/-1">
+        <i class="fa-solid fa-images"></i>
+        <h3>Hələ post yoxdur</h3>
+        <p>Müştərilərin profilinizi görməsi üçün post paylaşın</p>
+        <button class="btn btn-primary btn-sm" onclick="openModal('createModal')">
+          <i class="fa-solid fa-plus"></i> İlk postu yarat
+        </button>
+      </div>`;
+      return;
+    }
+
+    grid.innerHTML = posts.map(p => `
+      <div class="post-card" id="post-${p.id}">
+        <div class="post-img-wrap">
+          ${p.imageUrl
+            ? `<img src="${p.imageUrl}" alt="${p.caption||''}" loading="lazy">`
+            : '<i class="fa-solid fa-image"></i>'}
+        </div>
+        <div class="post-body">
+          <p style="font-size:var(--fs-sm);margin-bottom:var(--sp-3);color:var(--ink)">
+            ${p.caption || '<span style="color:var(--ink-soft);font-style:italic">Açıqlama yoxdur</span>'}
+          </p>
+          <div class="post-stats">
+            <!-- Like düyməsi -->
+            <button class="btn-icon ${p.isLikedByCurrentUser?'liked':''}" id="like-${p.id}"
+              onclick="toggleLike('${p.id}', ${p.isLikedByCurrentUser})"
+              style="border:none;color:${p.isLikedByCurrentUser?'var(--danger)':'var(--ink-soft)'}">
+              <i class="fa-${p.isLikedByCurrentUser?'solid':'regular'} fa-heart"></i>
+            </button>
+            <span class="post-stat" id="likeCount-${p.id}">${p.likesCount||0}</span>
+
+            <!-- Şərhlər düyməsi -->
+            <button class="post-stat" onclick="openComments('${p.id}')"
+              style="background:none;border:none;cursor:pointer;color:var(--ink-soft);display:flex;align-items:center;gap:5px">
+              <i class="fa-regular fa-comment"></i>
+              <span id="commentCount-${p.id}">${p.commentsCount||0}</span>
+            </button>
+
+            <!-- Sil düyməsi -->
+            <button class="btn-icon" onclick="openDeletePost('${p.id}')"
+              style="margin-left:auto;color:var(--danger);border-color:var(--danger-soft)">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+        </div>
+      </div>`).join('');
+  }
+
+  /* ── Like toggle ── */
+  async function toggleLike(postId, isLiked) {
+    try {
+      if (isLiked) {
+        await pApi.unlike(postId);
+      } else {
+        await pApi.like(postId);
+      }
+      // Yenilə
+      const btn   = document.getElementById('like-' + postId);
+      const count = document.getElementById('likeCount-' + postId);
+      const newLiked = !isLiked;
+      const newCount = parseInt(count.textContent) + (newLiked ? 1 : -1);
+      count.textContent = newCount;
+      btn.style.color = newLiked ? 'var(--danger)' : 'var(--ink-soft)';
+      btn.querySelector('i').className = `fa-${newLiked?'solid':'regular'} fa-heart`;
+      btn.setAttribute('onclick', `toggleLike('${postId}', ${newLiked})`);
+    } catch(err) {
+      showAlert('#alertBox', err.message);
+    }
+  }
+
+  /* ── Comments ── */
+  async function openComments(postId) {
+    document.getElementById('currentPostId').value = postId;
+    document.getElementById('newComment').value = '';
+    document.getElementById('commentAlert').classList.add('hidden');
+    openModal('commentsModal');
+    await loadComments(postId);
+  }
+
+  async function loadComments(postId) {
+    const cl = document.getElementById('commentList');
+    cl.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div></div>';
+    const comments = await pApi.getComments(postId).catch(() => []);
+
+    if (!comments.length) {
+      cl.innerHTML = `<div class="empty" style="padding:var(--sp-6) 0">
+        <i class="fa-regular fa-comment"></i>
+        <p>Hələ şərh yoxdur</p>
+      </div>`;
+      return;
+    }
+
+    cl.innerHTML = comments.map(c => `
+  <div class="comment-item" id="comment-${c.id}">
+    <div class="comment-avatar" style="background:var(--accent-soft);color:var(--accent-dark);font-family:var(--font-head)">
+      ${c.userFullName?.[0]?.toUpperCase() || '?'}
+    </div>
+    <div class="comment-body">
+      <b>${c.userFullName}</b>
+      <p id="commentText-${c.id}">${c.content}</p>
+      <div id="editBox-${c.id}" class="hidden" style="margin-top:var(--sp-2)">
+        <textarea id="editInput-${c.id}" rows="2"
+          style="width:100%;padding:8px var(--sp-3);border:1.5px solid var(--border);border-radius:var(--r-sm);font-size:var(--fs-sm);resize:none">${c.content}</textarea>
+        <div style="display:flex;gap:var(--sp-2);margin-top:6px">
+          <button class="btn btn-primary btn-xs" onclick="saveEdit('${c.id}')">
+            <i class="fa-solid fa-check"></i> Saxla
+          </button>
+          <button class="btn btn-ghost btn-xs" onclick="cancelEdit('${c.id}')">
+            Ləğv et
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="comment-actions">
+      <button class="btn-icon" onclick="startEdit('${c.id}')" title="Redaktə et"
+        style="color:var(--ink-soft)">
+        <i class="fa-solid fa-pen"></i>
+      </button>
+      <button class="btn-icon" onclick="deleteComment('${c.id}')" title="Sil"
+        style="color:var(--danger);border-color:var(--danger-soft)">
+        <i class="fa-solid fa-trash"></i>
+      </button>
+    </div>
+  </div>`).join('');
+  }
+
+  async function addComment() {
+    const postId  = document.getElementById('currentPostId').value;
+    const content = document.getElementById('newComment').value.trim();
+    if (!content) return;
+
+    try {
+      await pApi.addComment(postId, { content });
+      document.getElementById('newComment').value = '';
+      // Comment sayını artır
+      const countEl = document.getElementById('commentCount-' + postId);
+      if (countEl) countEl.textContent = parseInt(countEl.textContent) + 1;
+      await loadComments(postId);
+    } catch(err) {
+      showAlert('#commentAlert', err.message);
+    }
+  }
+
+  async function deleteComment(commentId) {
+    if (!confirm('Bu şərhi silmək istədiyinizə əminsiniz?')) return;
+    try {
+      await pApi.deleteComment(commentId);
+      document.getElementById('comment-' + commentId)?.remove();
+      // Comment sayını azalt
+      const postId  = document.getElementById('currentPostId').value;
+      const countEl = document.getElementById('commentCount-' + postId);
+      if (countEl) countEl.textContent = Math.max(0, parseInt(countEl.textContent) - 1);
+    } catch(err) {
+      showAlert('#commentAlert', err.message);
+    }
+  }
+
+  function startEdit(commentId) {
+  document.getElementById('commentText-' + commentId).classList.add('hidden');
+  document.getElementById('editBox-' + commentId).classList.remove('hidden');
+}
+
+function cancelEdit(commentId) {
+  document.getElementById('editBox-' + commentId).classList.add('hidden');
+  document.getElementById('commentText-' + commentId).classList.remove('hidden');
+}
+
+async function saveEdit(commentId) {
+  const content = document.getElementById('editInput-' + commentId).value.trim();
+  if (!content) return;
+  try {
+    await pApi.updateComment(commentId, { content });
+    document.getElementById('commentText-' + commentId).textContent = content;
+    document.getElementById('commentText-' + commentId).classList.remove('hidden');
+    document.getElementById('editBox-' + commentId).classList.add('hidden');
+  } catch(err) {
+    showAlert('#commentAlert', err.message);
+  }
+}
+
+  /* ── Post create/delete ── */
+  async function createPost() {
+  const imageUrl = document.getElementById('imgUrl').value;
+  const caption  = document.getElementById('caption').value;
+  if (!imageUrl) { showAlert('#createAlert', 'Əvvəlcə şəkil seçin və yükləyin'); return; }
+  try {
+    await pApi.createPost({ imageUrl, caption: caption || undefined });
+    closeModal('createModal');
+    // Reset
+    document.getElementById('photoFile').value   = '';
+    document.getElementById('photoFileName').textContent = 'Fayl seçilməyib';
+    document.getElementById('uploadStatus').innerHTML    = '';
+    document.getElementById('imgUrl').value      = '';
+    document.getElementById('caption').value     = '';
+    document.getElementById('imgPreview').classList.add('hidden');
+    showAlert('#alertBox', 'Post paylaşıldı!', 'success');
+    loadPosts();
+  } catch(err) { showAlert('#createAlert', err.message); }
+}
+
+  function openDeletePost(id) {
+    document.getElementById('delPostId').value = id;
+    openModal('deleteModal');
+  }
+
+  async function deletePost() {
+    const id = document.getElementById('delPostId').value;
+    try {
+      await pApi.deletePost(id);
+      closeModal('deleteModal');
+      showAlert('#alertBox', 'Post silindi.', 'success');
+      loadPosts();
+    } catch(err) { showAlert('#alertBox', err.message); }
+  }
+
+  loadPosts();
+</script>
+  </body>
+</html>

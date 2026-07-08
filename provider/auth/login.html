@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Provider Girişi — Appointment System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      min-height:100vh;display:flex;
+      font-family:'Inter',sans-serif;
+      overflow:hidden;
+    }
+
+    /* ══════════ LEFT PANEL ══════════ */
+    .left{
+      flex:1;position:relative;
+      background:linear-gradient(145deg, #082627 0%, #0f2b2b 40%, #0a3535 70%, #082627 100%);
+      display:flex;flex-direction:column;
+      justify-content:space-between;
+      padding:48px;
+      overflow:hidden;
+    }
+
+    /* Animated mesh background */
+    .left::before{
+      content:'';position:absolute;inset:0;
+      background:
+        radial-gradient(ellipse 70% 50% at 30% 30%, rgba(201,145,47,.12) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 60% at 70% 70%, rgba(15,75,80,.3) 0%, transparent 55%),
+        radial-gradient(ellipse 40% 40% at 20% 80%, rgba(201,145,47,.08) 0%, transparent 50%);
+    }
+
+    /* Moving gradient sweep */
+    .left::after{
+      content:'';position:absolute;inset:0;
+      background:linear-gradient(225deg, transparent 30%, rgba(201,145,47,.06) 50%, transparent 70%);
+      animation:sweep 6s ease-in-out infinite alternate;
+    }
+    @keyframes sweep{
+      0%{transform:translateX(-20%) translateY(-20%) rotate(0deg)}
+      100%{transform:translateX(20%) translateY(20%) rotate(10deg)}
+    }
+
+    /* Floating icons */
+    .floats{position:absolute;inset:0;pointer-events:none}
+    .float-icon{
+      position:absolute;
+      width:52px;height:52px;
+      border-radius:14px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:1.2rem;
+      animation:floatUp linear infinite;
+    }
+    .float-icon.gold{
+      background:rgba(201,145,47,.12);
+      border:1px solid rgba(201,145,47,.2);
+      color:rgba(201,145,47,.7);
+    }
+    .float-icon.teal{
+      background:rgba(15,75,80,.2);
+      border:1px solid rgba(15,150,150,.15);
+      color:rgba(100,200,200,.6);
+    }
+    @keyframes floatUp{
+      0%{transform:translateY(110vh) rotate(0deg);opacity:0}
+      5%{opacity:1}
+      95%{opacity:.6}
+      100%{transform:translateY(-120px) rotate(20deg);opacity:0}
+    }
+
+    /* Grid overlay */
+    .left-grid{
+      position:absolute;inset:0;
+      background-image:
+        linear-gradient(rgba(201,145,47,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(201,145,47,.04) 1px, transparent 1px);
+      background-size:48px 48px;
+    }
+
+    /* Left content */
+    .left-brand{
+      display:flex;align-items:center;gap:12px;
+      position:relative;z-index:2;
+    }
+    .left-brand-icon{
+      width:44px;height:44px;background:#c9912f;
+      border-radius:12px;
+      display:flex;align-items:center;justify-content:center;
+      box-shadow:0 8px 24px rgba(201,145,47,.4);
+    }
+    .left-brand-icon i{color:#fff;font-size:1.1rem}
+    .left-brand-name{
+      color:#fff;font-family:'Playfair Display',serif;
+      font-size:1.1rem;font-weight:700;line-height:1;
+    }
+    .left-brand-name small{
+      display:block;font-family:'Inter',sans-serif;
+      font-size:.58rem;letter-spacing:.14em;
+      color:rgba(201,145,47,.7);font-weight:700;margin-top:2px;
+    }
+
+    .left-main{position:relative;z-index:2}
+    .left-tag{
+      display:inline-flex;align-items:center;gap:6px;
+      padding:5px 14px;
+      background:rgba(201,145,47,.1);
+      border:1px solid rgba(201,145,47,.2);
+      border-radius:999px;
+      font-size:.72rem;font-weight:600;
+      color:rgba(201,145,47,.85);
+      letter-spacing:.05em;margin-bottom:20px;
+    }
+    .left-tag i{font-size:.5rem;animation:pulse 2s ease-in-out infinite}
+    @keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
+
+    .left-title{
+      font-family:'Playfair Display',serif;
+      font-size:2.4rem;color:#fff;
+      line-height:1.2;margin-bottom:16px;
+    }
+    .left-title .accent{color:#c9912f}
+
+    .left-desc{
+      color:rgba(255,255,255,.45);
+      font-size:.875rem;line-height:1.7;
+      max-width:360px;margin-bottom:40px;
+    }
+
+    .features{display:flex;flex-direction:column;gap:16px}
+    .feature{
+      display:flex;align-items:center;gap:14px;
+      padding:14px 16px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.07);
+      border-radius:12px;
+      backdrop-filter:blur(4px);
+      transition:all .3s ease;
+      animation:slideIn .6s ease both;
+    }
+    .feature:hover{
+      background:rgba(201,145,47,.08);
+      border-color:rgba(201,145,47,.15);
+      transform:translateX(4px);
+    }
+    @keyframes slideIn{
+      from{opacity:0;transform:translateX(-20px)}
+      to{opacity:1;transform:translateX(0)}
+    }
+    .feature:nth-child(1){animation-delay:.1s}
+    .feature:nth-child(2){animation-delay:.2s}
+    .feature:nth-child(3){animation-delay:.3s}
+
+    .feature-icon{
+      width:38px;height:38px;border-radius:10px;
+      background:rgba(201,145,47,.15);
+      border:1px solid rgba(201,145,47,.2);
+      display:flex;align-items:center;justify-content:center;
+      color:#c9912f;font-size:.9rem;flex-shrink:0;
+    }
+    .feature-text b{display:block;color:#fff;font-size:.8rem;margin-bottom:2px}
+    .feature-text span{color:rgba(255,255,255,.4);font-size:.72rem}
+
+    .left-footer{
+      position:relative;z-index:2;
+      font-size:.7rem;color:rgba(255,255,255,.2);
+    }
+
+    /* ══════════ RIGHT PANEL ══════════ */
+    .right{
+      width:460px;
+      background:#faf7f2;
+      display:flex;align-items:center;justify-content:center;
+      padding:48px 44px;
+      position:relative;
+      flex-shrink:0;
+    }
+
+    /* Subtle texture */
+    .right::before{
+      content:'';position:absolute;inset:0;
+      background:radial-gradient(ellipse 60% 40% at 80% 20%, rgba(201,145,47,.06), transparent 60%);
+      pointer-events:none;
+    }
+
+    .form-card{width:100%;position:relative;z-index:1}
+
+    .form-logo{
+      width:52px;height:52px;background:#0f2b2b;
+      border-radius:14px;
+      display:flex;align-items:center;justify-content:center;
+      margin-bottom:24px;
+      box-shadow:0 8px 24px rgba(15,43,43,.2);
+    }
+    .form-logo i{color:#c9912f;font-size:1.3rem}
+
+    .form-title{
+      font-family:'Playfair Display',serif;
+      font-size:1.75rem;color:#1a1208;
+      margin-bottom:6px;
+    }
+    .form-sub{font-size:.8rem;color:#6b5c3e;margin-bottom:28px}
+
+    /* Alert */
+    .alert-box{
+      display:flex;align-items:center;gap:10px;
+      padding:11px 14px;
+      background:#fdecea;border:1px solid rgba(181,39,29,.2);
+      color:#b5271d;border-radius:10px;
+      font-size:.8rem;margin-bottom:16px;
+    }
+    .alert-box.hidden{display:none}
+
+    /* Fields */
+    .field{margin-bottom:16px}
+    .field label{
+      display:block;font-size:.78rem;font-weight:600;
+      color:#1a1208;margin-bottom:7px;
+    }
+    .field label i{color:#c9912f;margin-right:6px}
+    .field input{
+      width:100%;padding:11px 16px;
+      background:#fff;
+      border:1.5px solid #e8dfc8;
+      border-radius:10px;
+      color:#1a1208;font-size:.875rem;
+      font-family:'Inter',sans-serif;
+      outline:none;
+      transition:all .18s ease;
+    }
+    .field input::placeholder{color:#b8a898}
+    .field input:focus{
+      border-color:#0f2b2b;
+      box-shadow:0 0 0 3px rgba(15,43,43,.06);
+    }
+    .otp-input{
+      text-align:center !important;
+      letter-spacing:14px !important;
+      font-size:1.6rem !important;
+      font-weight:700 !important;
+    }
+
+    /* Buttons */
+    .btn-primary{
+      width:100%;padding:13px;margin-top:8px;
+      background:#c9912f;color:#fff;
+      border:none;border-radius:10px;
+      font-size:.9rem;font-weight:600;
+      font-family:'Inter',sans-serif;
+      cursor:pointer;
+      display:flex;align-items:center;justify-content:center;gap:8px;
+      transition:all .18s ease;
+      box-shadow:0 4px 16px rgba(201,145,47,.3);
+    }
+    .btn-primary:hover:not(:disabled){
+      background:#a8741f;
+      box-shadow:0 6px 24px rgba(201,145,47,.4);
+      transform:translateY(-1px);
+    }
+    .btn-primary:active{transform:translateY(0)}
+    .btn-primary:disabled{opacity:.55;cursor:not-allowed;transform:none}
+
+    .btn-ghost{
+      width:100%;padding:11px;margin-top:10px;
+      background:transparent;color:#6b5c3e;
+      border:1.5px solid #e8dfc8;border-radius:10px;
+      font-size:.875rem;font-weight:600;
+      font-family:'Inter',sans-serif;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;gap:8px;
+      transition:all .18s ease;
+    }
+    .btn-ghost:hover{background:#f3ede0;border-color:#d4c49a;color:#1a1208}
+
+    /* OTP */
+    .otp-wrap{text-align:center;padding:16px 0 22px}
+    .otp-icon{
+      width:60px;height:60px;
+      background:#fdf3e0;border:2px solid #e8dfc8;
+      border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      margin:0 auto 12px;
+    }
+    .otp-icon i{color:#c9912f;font-size:1.3rem}
+    .otp-wrap p{font-size:.8rem;color:#6b5c3e;line-height:1.6}
+
+    /* Register link */
+    .reg-link{
+      text-align:center;margin-top:22px;
+      padding-top:20px;border-top:1px solid #e8dfc8;
+      font-size:.78rem;color:#6b5c3e;
+    }
+    .reg-link a{color:#a8741f;font-weight:600}
+    .reg-link a:hover{text-decoration:underline}
+
+    /* Footer note */
+    .form-footer{
+      display:flex;align-items:center;gap:6px;
+      margin-top:20px;font-size:.7rem;color:#b8a898;
+    }
+    .form-footer i{color:#c9912f;font-size:.7rem}
+
+    .hidden{display:none!important}
+
+    @media(max-width:800px){
+      .left{display:none}
+      .right{width:100%;padding:40px 28px}
+    }
+  </style>
+</head>
+<body>
+
+<!-- LEFT -->
+<div class="left">
+  <div class="left-grid"></div>
+
+  <!-- Floating icons -->
+  <div class="floats" id="floats"></div>
+
+  <div class="left-brand">
+    <div class="left-brand-icon"><i class="fa-solid fa-calendar-check"></i></div>
+    <div class="left-brand-name">Appointment<small>PROVIDER</small></div>
+  </div>
+
+  <div class="left-main">
+    <div class="left-tag">
+      <i class="fa-solid fa-circle"></i>
+      Provider Paneli
+    </div>
+    <h1 class="left-title">Biznesinizi<br><span class="accent">rəqəmsal</span><br>gücə çevirin</h1>
+    <p class="left-desc">
+      
+    </p>
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon"><i class="fa-solid fa-briefcase-medical"></i></div>
+        <div class="feature-text">
+          <b>Xidmət İdarəetməsi</b>
+          <span>Qiymət, müddət, kateqoriya idarəsi</span>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon"><i class="fa-solid fa-calendar-days"></i></div>
+        <div class="feature-text">
+          <b>Ağıllı Təqvim</b>
+          <span>Gündəlik və həftəlik görüş cədvəli</span>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon"><i class="fa-solid fa-images"></i></div>
+        <div class="feature-text">
+          <b>Sosial Profil</b>
+          <span>Post paylaş, izləyicilərinlə əlaqədə ol</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="left-footer">
+    © 2026 Appointment System. Bütün hüquqlar qorunur.
+  </div>
+</div>
+
+<!-- RIGHT -->
+<div class="right">
+  <div class="form-card"><br>
+    <!-- <div class="form-logo"><i class="fa-solid fa-calendar-check"></i></div> -->
+
+    <br><br><h2 class="form-title" id="cardTitle">Daxil olun</h2>
+    <p class="form-sub" id="cardSub">Provider panelinə giriş edin</p>
+
+    <div class="alert-box hidden" id="alertBox">
+      <i class="fa-solid fa-circle-exclamation"></i>
+      <span id="alertMsg"></span>
+    </div>
+
+    <!-- Credentials -->
+    <form id="credForm">
+      <div class="field">
+        <label><i class="fa-solid fa-user"></i>İstifadəçi adı</label>
+        <input type="text" id="userName" placeholder="username" required autocomplete="username">
+      </div>
+      <div class="field">
+        <label><i class="fa-solid fa-lock"></i>Şifrə</label>
+        <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn-primary" id="credBtn">
+        <i class="fa-solid fa-right-to-bracket"></i> Daxil ol
+      </button>
+    </form>
+
+    <!-- OTP -->
+    <div id="otpForm" class="hidden">
+      <div class="otp-wrap">
+        <div class="otp-icon">
+          <i class="fa-solid fa-envelope-open-text"></i>
+        </div>
+        <p>Email-inizə <strong>6 rəqəmli</strong> doğrulama kodu göndərildi</p>
+      </div>
+      <div class="field">
+        <label><i class="fa-solid fa-key"></i>Doğrulama kodu</label>
+        <input type="text" id="otpCode" class="otp-input"
+          maxlength="6" placeholder="000000"
+          inputmode="numeric" required autocomplete="one-time-code">
+      </div>
+      <button class="btn-primary" id="otpBtn" onclick="verifyOtp()">
+        <i class="fa-solid fa-shield-check"></i> Təsdiqlə
+      </button>
+      <button class="btn-ghost" onclick="backToLogin()">
+        <i class="fa-solid fa-arrow-left"></i> Geri qayıt
+      </button>
+    </div>
+
+    <div id="registerLink" class="reg-link">
+      Hesabınız yoxdur?
+      <a href="register.html">Qeydiyyatdan keçin</a>
+    </div>
+
+    <div class="form-footer">
+    </div>
+  </div>
+</div>
+
+<script>
+  const BASE = 'http://localhost:5291/api';
+  const Token = {
+    set: (a,r) => {
+      localStorage.setItem('accessToken', a);
+      localStorage.setItem('refreshToken', r);
+    },
+  };
+
+  // ── Floating icons ──
+  const ICONS = [
+    'fa-calendar-check', 'fa-clock', 'fa-star',
+    'fa-bell', 'fa-briefcase-medical', 'fa-images',
+    'fa-calendar-days', 'fa-heart', 'fa-user-check',
+    'fa-comment', 'fa-calendar-plus', 'fa-award'
+  ];
+  const container = document.getElementById('floats');
+  for (let i = 0; i < 14; i++) {
+    const el = document.createElement('div');
+    const isGold = Math.random() > .5;
+    el.className = `float-icon ${isGold ? 'gold' : 'teal'}`;
+    const icon = document.createElement('i');
+    icon.className = `fa-solid ${ICONS[i % ICONS.length]}`;
+    el.appendChild(icon);
+    el.style.cssText = `
+      left:${Math.random() * 90}%;
+      animation-duration:${12 + Math.random() * 16}s;
+      animation-delay:-${Math.random() * 20}s;
+      width:${40 + Math.random() * 20}px;
+      height:${40 + Math.random() * 20}px;
+      font-size:${.8 + Math.random() * .5}rem;
+      opacity:${.4 + Math.random() * .4};
+    `;
+    container.appendChild(el);
+  }
+
+  let currentUser = '';
+
+  function showAlert(msg) {
+    document.getElementById('alertMsg').textContent = msg;
+    document.getElementById('alertBox').classList.remove('hidden');
+  }
+  function hideAlert() {
+    document.getElementById('alertBox').classList.add('hidden');
+  }
+
+  document.getElementById('credForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    hideAlert();
+    const btn = document.getElementById('credBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Yoxlanılır...';
+    try {
+      currentUser = document.getElementById('userName').value;
+      const res = await fetch(BASE + '/account/login/provider', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userName: currentUser,
+          password: document.getElementById('password').value
+        }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.errors?.[0]);
+
+      document.getElementById('credForm').classList.add('hidden');
+      document.getElementById('registerLink').classList.add('hidden');
+      document.getElementById('otpForm').classList.remove('hidden');
+      document.getElementById('cardTitle').textContent = '2FA Doğrulama';
+      document.getElementById('cardSub').textContent   = 'Email-dəki kodu daxil edin';
+      setTimeout(() => document.getElementById('otpCode').focus(), 100);
+    } catch(err) {
+      showAlert(err.message || 'Giriş uğursuz oldu');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Daxil ol';
+    }
+  });
+
+  async function verifyOtp() {
+    hideAlert();
+    const btn = document.getElementById('otpBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Yoxlanılır...';
+    try {
+      const res = await fetch(BASE + '/account/verify-2fa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userName: currentUser,
+          code: document.getElementById('otpCode').value
+        }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.errors?.[0]);
+      Token.set(data.data.accessToken, data.data.refreshToken);
+      btn.innerHTML = '<i class="fa-solid fa-check"></i> Uğurlu!';
+      setTimeout(() => { window.location.href = '../provider/dashboard.html'; }, 400);
+    } catch(err) {
+      showAlert(err.message || 'Kod yanlışdır');
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-shield-check"></i> Təsdiqlə';
+    }
+  }
+
+  function backToLogin() {
+    document.getElementById('otpForm').classList.add('hidden');
+    document.getElementById('credForm').classList.remove('hidden');
+    document.getElementById('registerLink').classList.remove('hidden');
+    document.getElementById('cardTitle').textContent = 'Daxil olun';
+    document.getElementById('cardSub').textContent   = 'Provider panelinə giriş edin';
+    document.getElementById('otpCode').value = '';
+    hideAlert();
+  }
+
+  document.addEventListener('keypress', e => {
+    if (e.key === 'Enter' && !document.getElementById('otpForm').classList.contains('hidden')) {
+      verifyOtp();
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Görüş Detalı — Appointment System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/client.css">
+  <style>
+    .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4);margin:var(--sp-5) 0}
+    .detail-field span{font-size:var(--fs-xs);color:var(--ink-soft);display:flex;align-items:center;gap:5px;margin-bottom:3px}
+    .detail-field b{font-size:var(--fs-sm)}
+    .star-btn{font-size:1.8rem;background:none;border:none;cursor:pointer;color:var(--border-strong);padding:0;transition:color .15s ease}
+    .star-btn.filled,.star-btn:hover{color:var(--accent)}
+  </style>
+</head>
+<body>
+<div id="navbar"></div>
+
+<section class="section-sm">
+  <div class="container" style="max-width:680px">
+    <button class="btn btn-ghost btn-sm" style="margin-bottom:var(--sp-4)" onclick="history.back()">
+      <i class="fa-solid fa-arrow-left"></i> Geri
+    </button>
+
+    <div class="alert alert-error hidden"   id="alertBox"></div>
+    <div class="alert alert-success hidden" id="successBox"></div>
+
+    <div id="content"><div class="spinner-wrap"><div class="spinner"></div></div></div>
+  </div>
+</section>
+
+<div id="footer"></div>
+
+<script src="../js/client-api.js"></script>
+<script src="../js/layout.js"></script>
+<script>
+  requireAuth();
+  const id = new URLSearchParams(location.search).get('id');
+  if (!id) window.location.href = 'appointments.html';
+
+  let appt = null;
+  let starRating = 0;
+
+  async function load() {
+    appt = await cApi.getById(id).catch(()=>null);
+    if (!appt) {
+      document.getElementById('content').innerHTML = '<div class="empty"><i class="fa-regular fa-calendar"></i><p>Görüş tapılmadı</p></div>';
+      return;
+    }
+    render();
+  }
+
+  function render() {
+    const canCancel    = appt.status === 'Confirmed';
+    const canReschedule= appt.status === 'Confirmed';
+    const canReview    = appt.status === 'Completed';
+
+    document.getElementById('content').innerHTML = `
+      <div class="card" style="margin-bottom:var(--sp-5)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:var(--sp-2)">
+          <h1 style="font-size:var(--fs-xl)">${appt.serviceName}</h1>
+          ${statusBadge(appt.status)}
+        </div>
+        <p style="font-size:var(--fs-sm);color:var(--ink-soft);margin-bottom:var(--sp-5)">
+          <i class="fa-solid fa-building" style="color:var(--accent);margin-right:6px"></i>${appt.providerBusinessName}
+        </p>
+
+        <div class="detail-grid">
+          <div class="detail-field">
+            <span><i class="fa-solid fa-calendar" style="color:var(--accent)"></i>Tarix</span>
+            <b>${formatDate(appt.startDateTime,{day:'numeric',month:'long',year:'numeric'})}</b>
+          </div>
+          <div class="detail-field">
+            <span><i class="fa-solid fa-clock" style="color:var(--accent)"></i>Saat</span>
+            <b>${formatTime(appt.startDateTime)} – ${formatTime(appt.endDateTime)}</b>
+          </div>
+          <div class="detail-field">
+            <span><i class="fa-solid fa-tag" style="color:var(--accent)"></i>Qiymət</span>
+            <b style="color:var(--accent-dark)">${formatPrice(appt.price)}</b>
+          </div>
+          <div class="detail-field">
+            <span><i class="fa-solid fa-comment" style="color:var(--accent)"></i>Qeyd</span>
+            <b>${appt.notes||'—'}</b>
+          </div>
+        </div>
+
+        ${canCancel || canReschedule ? `
+        <div style="display:flex;gap:var(--sp-3);flex-wrap:wrap;margin-top:var(--sp-4)">
+          ${canReschedule ? `
+          <button class="btn btn-outline btn-sm" onclick="toggleResched()">
+            <i class="fa-solid fa-rotate"></i> Yenidən planlaşdır
+          </button>` : ''}
+          ${canCancel ? `
+          <button class="btn btn-danger btn-sm" onclick="doCancel()">
+            <i class="fa-solid fa-circle-xmark"></i> Ləğv et
+          </button>` : ''}
+        </div>
+
+        <div id="reschedBox" class="hidden" style="margin-top:var(--sp-4);padding:var(--sp-4);background:var(--surface-soft);border-radius:var(--r-md);border:1px solid var(--border)">
+          <div class="field">
+            <label><i class="fa-solid fa-calendar"></i>Yeni tarix və saat</label>
+            <input type="datetime-local" id="newDateTime">
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="doReschedule()">
+            <i class="fa-solid fa-check"></i> Təsdiqlə
+          </button>
+        </div>` : ''}
+      </div>
+
+      ${canReview ? `
+      <div class="card" id="reviewCard">
+        <h3 style="font-size:var(--fs-md);margin-bottom:var(--sp-4)">
+          <i class="fa-solid fa-star" style="color:var(--accent);margin-right:8px"></i>Rəy bildirin
+        </h3>
+        <div style="display:flex;gap:var(--sp-2);margin-bottom:var(--sp-4)">
+          ${[1,2,3,4,5].map(n => `<button class="star-btn" data-val="${n}" onclick="setStar(${n})">★</button>`).join('')}
+        </div>
+        <div class="field">
+          <label>Şərh (istəyə görə)</label>
+          <textarea id="reviewComment" placeholder="Xidmət haqqında fikirlərinizi yazın..."></textarea>
+        </div>
+        <button class="btn btn-primary btn-sm" id="reviewBtn" onclick="doReview()" disabled>
+          <i class="fa-solid fa-paper-plane"></i> Rəyi göndər
+        </button>
+      </div>` : ''}`;
+  }
+
+  function toggleResched() {
+    document.getElementById('reschedBox').classList.toggle('hidden');
+  }
+
+  async function doCancel() {
+    if (!confirm('Bu görüşü ləğv etmək istədiyinizə əminsiniz?')) return;
+    try {
+      await cApi.cancel(id);
+      showMsg('Görüş ləğv edildi.', 'success');
+      await load();
+    } catch(err) { showMsg(err.message); }
+  }
+
+  async function doReschedule() {
+    const v = document.getElementById('newDateTime').value;
+    if (!v) return;
+    try {
+      await cApi.reschedule(id, { newStartDateTime: new Date(v).toISOString() });
+      showMsg('Görüş yenidən planlaşdırıldı!', 'success');
+      await load();
+    } catch(err) { showMsg(err.message); }
+  }
+
+  function setStar(n) {
+    starRating = n;
+    document.querySelectorAll('.star-btn').forEach(b => {
+      b.classList.toggle('filled', parseInt(b.dataset.val) <= n);
+    });
+    document.getElementById('reviewBtn').disabled = false;
+  }
+
+  async function doReview() {
+    if (!starRating) return;
+    try {
+      await cApi.createReview({
+        providerId:    appt.providerId,
+        appointmentId: appt.id,
+        rating:        starRating,
+        comment:       document.getElementById('reviewComment').value || undefined,
+      });
+      document.getElementById('reviewCard').innerHTML = `
+        <div style="text-align:center;padding:var(--sp-5)">
+          <i class="fa-solid fa-check-circle" style="color:var(--success);font-size:2rem;margin-bottom:var(--sp-3);display:block"></i>
+          <p>Rəyiniz üçün təşəkkürlər!</p>
+        </div>`;
+    } catch(err) { showMsg(err.message); }
+  }
+
+  function showMsg(msg, type='error') {
+    const el = document.getElementById(type==='error'?'alertBox':'successBox');
+    el.innerHTML = `<i class="fa-solid ${type==='error'?'fa-circle-exclamation':'fa-circle-check'}"></i><span>${msg}</span>`;
+    el.classList.remove('hidden');
+    setTimeout(() => el.classList.add('hidden'), 5000);
+  }
+
+  load();
+</script>
+</body>
+</html>

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="az">
+  <head>
+    <meta charset="UTF-8"><meta name="viewport"
+      content="width=device-width,initial-scale=1">
+    <title>Xidmətlər — Provider Panel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet">
+    <link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/provider.css">
+  </head>
+  <body>
+    <div class="shell">
+      <div id="sidebar"></div>
+      <div class="main">
+        <div class="topbar">
+          <div>
+            <div class="topbar-title">Xidmətlər</div>
+            <div class="topbar-sub" id="topbarSub"></div>
+          </div>
+          <button class="btn btn-primary" onclick="openCreate()">
+            <i class="fa-solid fa-plus"></i> Yeni xidmət
+          </button>
+        </div>
+
+        <div class="content">
+          <div class="alert hidden" id="alertBox"></div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th><i class="fa-solid fa-briefcase-medical"
+                      style="margin-right:6px"></i>Xidmət adı</th>
+                  <th><i class="fa-solid fa-clock"
+                      style="margin-right:6px"></i>Müddət</th>
+                  <th><i class="fa-solid fa-tag"
+                      style="margin-right:6px"></i>Qiymət</th>
+                  <th>Status</th>
+                  <th>Əməliyyatlar</th>
+                </tr>
+              </thead>
+              <tbody id="tbody">
+                <tr><td colspan="5"><div class="spinner-wrap"><div
+                        class="spinner"></div></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create/Edit Modal -->
+    <div class="overlay hidden" id="svcModal">
+      <div class="modal">
+        <div class="modal-head">
+          <h3 id="modalTitle">Yeni Xidmət</h3>
+          <button class="btn-icon" onclick="closeModal('svcModal')"><i
+              class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="modal-body">
+          <div class="alert hidden" id="modalAlert"></div>
+          <input type="hidden" id="editId">
+          <div class="field">
+            <label><i class="fa-solid fa-heading"
+                style="color:var(--accent);margin-right:6px"></i>Xidmət
+              adı</label>
+            <input type="text" id="svcName" placeholder="Məs. Diş müayinəsi"
+              required>
+          </div>
+          <div class="field">
+            <label><i class="fa-solid fa-align-left"
+                style="color:var(--accent);margin-right:6px"></i>Təsvir (istəyə
+              görə)</label>
+            <textarea id="svcDesc"
+              placeholder="Xidmət haqqında qısa məlumat..."></textarea>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label><i class="fa-solid fa-manat-sign"
+                  style="color:var(--accent);margin-right:6px"></i>Qiymət
+                (AZN)</label>
+              <input type="number" id="svcPrice" min="0" step="0.5"
+                placeholder="50">
+            </div>
+            <div class="field">
+              <label><i class="fa-solid fa-hourglass-half"
+                  style="color:var(--accent);margin-right:6px"></i>Müddət
+                (dəqiqə)</label>
+              <input type="number" id="svcDuration" min="5" step="5"
+                placeholder="30">
+            </div>
+          </div>
+          <div class="field" id="statusField" style="display:none">
+            <label>Status</label>
+            <select id="svcActive">
+              <option value="true">Aktiv</option>
+              <option value="false">Deaktiv</option>
+            </select>
+            <span class="field-hint" id="adminNote"
+              style="display:none;color:var(--danger)">
+              <i class="fa-solid fa-lock" style="margin-right:4px"></i>
+              Bu xidmət admin tərəfindən deaktiv edilib. Yalnız admin
+              aktivləşdirə bilər. Redaktə mümkün deyil.
+            </span>
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn btn-ghost" onclick="closeModal('svcModal')">Ləğv
+            et</button>
+          <button class="btn btn-primary" onclick="saveService()" id="saveBtn">
+            <i class="fa-solid fa-floppy-disk"></i> Saxla
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete confirm -->
+    <div class="overlay hidden" id="delModal">
+      <div class="modal">
+        <div class="modal-head">
+          <h3>Xidməti Sil</h3>
+          <button class="btn-icon" onclick="closeModal('delModal')"><i
+              class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="modal-body">
+          <div class="alert alert-warning" style="display:flex">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span>Bu xidməti silmək istədiyinizə əminsiniz? Bu əməliyyat geri
+              alına bilməz.</span>
+          </div>
+          <input type="hidden" id="delId">
+        </div>
+        <div class="modal-foot">
+          <button class="btn btn-ghost" onclick="closeModal('delModal')">Ləğv
+            et</button>
+          <button class="btn btn-danger" onclick="confirmDelete()">
+            <i class="fa-solid fa-trash"></i> Sil
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="../js/provider-api.js"></script>
+    <script src="../js/layout.js"></script>
+    <script>
+  let services = [];
+
+  async function loadServices() {
+    const tb = document.getElementById('tbody');
+    tb.innerHTML = '<tr><td colspan="5"><div class="spinner-wrap"><div class="spinner"></div></div></td></tr>';
+    services = await pApi.getMyServices().catch(()=>[]);
+    if (!services.length) {
+      tb.innerHTML = `<tr><td colspan="5"><div class="empty">
+        <i class="fa-solid fa-briefcase-medical"></i>
+        <h3>Xidmət yoxdur</h3><p>İlk xidmətinizi əlavə edin</p>
+      </div></td></tr>`;
+      return;
+    }
+    tb.innerHTML = services.map(s => `
+      <tr>
+        <td><strong>${s.name}</strong>${s.description ? `<div style="font-size:var(--fs-xs);color:var(--ink-soft);margin-top:2px">${s.description}</div>` : ''}</td>
+        <td><i class="fa-regular fa-clock" style="margin-right:4px;color:var(--ink-soft)"></i>${s.durationMinutes} dəq</td>
+        <td style="font-weight:700;color:var(--accent-dark)">${formatPrice(s.price)}</td>
+        <td>${s.isActive
+          ? '<span class="badge badge-success"><i class="fa-solid fa-circle-check"></i> Aktiv</span>'
+          : s.deactivatedByAdmin
+            ? '<span class="badge badge-danger"><i class="fa-solid fa-lock"></i> Admin deaktiv</span>'
+            : '<span class="badge badge-gray"><i class="fa-solid fa-circle-pause"></i> Deaktiv</span>'}</td>
+        <td>
+          <div class="td-actions">
+            <button class="btn-icon" title="Redaktə et" onclick="openEdit(${JSON.stringify(s).replace(/"/g,'&quot;')})">
+              <i class="fa-solid fa-pen"></i>
+            </button>
+            <button class="btn-icon" title="Sil" onclick="openDelete('${s.id}')" style="color:var(--danger);border-color:var(--danger-soft)">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+        </td>
+      </tr>`).join('');
+  }
+
+  function openCreate() {
+    document.getElementById('modalTitle').textContent = 'Yeni Xidmət';
+    document.getElementById('editId').value   = '';
+    document.getElementById('svcName').value  = '';
+    document.getElementById('svcDesc').value  = '';
+    document.getElementById('svcPrice').value = '';
+    document.getElementById('svcDuration').value = '';
+    document.getElementById('statusField').style.display = 'none';
+    document.getElementById('modalAlert').classList.add('hidden');
+    openModal('svcModal');
+  }
+
+  function openEdit(s) {
+  document.getElementById('modalTitle').textContent = 'Xidməti Redaktə Et';
+  document.getElementById('editId').value      = s.id;
+  document.getElementById('svcName').value     = s.name;
+  document.getElementById('svcDesc').value     = s.description || '';
+  document.getElementById('svcPrice').value    = s.price;
+  document.getElementById('svcDuration').value = s.durationMinutes;
+  document.getElementById('statusField').style.display = 'block';
+  document.getElementById('modalAlert').classList.add('hidden');
+
+  if (s.deactivatedByAdmin) {
+    /* Admin deaktiv etdisə — bütün formu readonly et */
+    document.getElementById('svcActive').value    = 'false';
+    document.getElementById('svcActive').disabled = true;
+    document.getElementById('svcName').disabled     = true;
+    document.getElementById('svcDesc').disabled     = true;
+    document.getElementById('svcPrice').disabled    = true;
+    document.getElementById('svcDuration').disabled = true;
+    document.getElementById('adminNote').style.display = 'block';
+    document.getElementById('saveBtn').disabled = true;
+    document.getElementById('saveBtn').style.opacity = '.5';
+  } else {
+    document.getElementById('svcActive').value    = s.isActive ? 'true' : 'false';
+    document.getElementById('svcActive').disabled = false;
+    document.getElementById('svcName').disabled     = false;
+    document.getElementById('svcDesc').disabled     = false;
+    document.getElementById('svcPrice').disabled    = false;
+    document.getElementById('svcDuration').disabled = false;
+    document.getElementById('adminNote').style.display = 'none';
+    document.getElementById('saveBtn').disabled = false;
+    document.getElementById('saveBtn').style.opacity = '1';
+  }
+
+  openModal('svcModal');
+}
+
+  async function saveService() {
+    const btn = document.getElementById('saveBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saxlanılır...';
+
+    const id = document.getElementById('editId').value;
+    const dto = {
+      name:            document.getElementById('svcName').value,
+      description:     document.getElementById('svcDesc').value,
+      price:           parseFloat(document.getElementById('svcPrice').value),
+      durationMinutes: parseInt(document.getElementById('svcDuration').value),
+      isActive:        document.getElementById('svcActive').value === 'true',
+    };
+
+    try {
+      if (id) await pApi.updateService(id, dto);
+      else    await pApi.createService(dto);
+      closeModal('svcModal');
+      showAlert('#alertBox', 'Xidmət uğurla saxlandı!', 'success');
+      loadServices();
+    } catch(err) {
+      showAlert('#modalAlert', err.message);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Saxla';
+    }
+  }
+
+  function openDelete(id) {
+    document.getElementById('delId').value = id;
+    openModal('delModal');
+  }
+
+  async function confirmDelete() {
+    const id = document.getElementById('delId').value;
+    try {
+      await pApi.deleteService(id);
+      closeModal('delModal');
+      showAlert('#alertBox', 'Xidmət silindi.', 'success');
+      loadServices();
+    } catch(err) { showAlert('#alertBox', err.message); }
+  }
+
+  loadServices();
+</script>
+  </body>
+</html>

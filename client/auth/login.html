@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="az">
+    <head>
+        <meta charset="UTF-8"><meta name="viewport"
+            content="width=device-width,initial-scale=1">
+        <title>Giriş — Appointment System</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link
+            href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap"
+            rel="stylesheet">
+        <link rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+        <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      min-height:100vh;display:flex;
+      font-family:'Inter',sans-serif;
+      overflow:hidden;
+    }
+
+    /* ══ LEFT — Dark animated ══ */
+    .left{
+      flex:1;position:relative;
+      background:linear-gradient(145deg,#060d0d 0%,#0a1f1f 40%,#0f2b2b 70%,#082627 100%);
+      display:flex;flex-direction:column;
+      justify-content:space-between;
+      padding:48px;overflow:hidden;
+    }
+    .left::before{
+      content:'';position:absolute;inset:0;
+      background:
+        radial-gradient(ellipse 70% 50% at 25% 35%, rgba(201,145,47,.1) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 60% at 75% 65%, rgba(15,75,80,.25) 0%, transparent 55%);
+      animation:bgPulse 8s ease-in-out infinite alternate;
+    }
+    @keyframes bgPulse{
+      0%{opacity:.6}100%{opacity:1}
+    }
+    .left-grid{
+      position:absolute;inset:0;
+      background-image:
+        linear-gradient(rgba(201,145,47,.03) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(201,145,47,.03) 1px,transparent 1px);
+      background-size:52px 52px;
+    }
+    .orbs{position:absolute;inset:0;pointer-events:none}
+    .orb{position:absolute;border-radius:50%;filter:blur(80px);animation:floatOrb ease-in-out infinite}
+    .orb-1{width:500px;height:500px;background:radial-gradient(circle,rgba(201,145,47,.12),transparent 70%);top:-120px;left:-100px;animation-duration:9s;animation-delay:0s}
+    .orb-2{width:400px;height:400px;background:radial-gradient(circle,rgba(15,75,80,.2),transparent 70%);bottom:-80px;right:-80px;animation-duration:11s;animation-delay:-4s}
+    .orb-3{width:260px;height:260px;background:radial-gradient(circle,rgba(201,145,47,.08),transparent 70%);top:50%;left:40%;animation-duration:7s;animation-delay:-6s}
+    @keyframes floatOrb{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-36px) scale(1.05)}}
+
+    /* Floating calendar icons */
+    .floats{position:absolute;inset:0;pointer-events:none}
+    .fi{
+      position:absolute;border-radius:12px;
+      display:flex;align-items:center;justify-content:center;
+      animation:floatUp linear infinite;
+    }
+    .fi.g{background:rgba(201,145,47,.1);border:1px solid rgba(201,145,47,.18);color:rgba(201,145,47,.6)}
+    .fi.t{background:rgba(15,75,80,.18);border:1px solid rgba(15,150,150,.12);color:rgba(80,180,180,.5)}
+    @keyframes floatUp{
+      0%{transform:translateY(110vh) rotate(0deg);opacity:0}
+      5%{opacity:.8}95%{opacity:.5}
+      100%{transform:translateY(-100px) rotate(15deg);opacity:0}
+    }
+
+    /* Left content */
+    .left-brand{
+      display:flex;align-items:center;gap:12px;
+      position:relative;z-index:2;
+    }
+    .left-brand-icon{
+      width:42px;height:42px;background:#c9912f;
+      border-radius:11px;display:flex;align-items:center;justify-content:center;
+      box-shadow:0 6px 20px rgba(201,145,47,.35);
+    }
+    .left-brand-icon i{color:#fff;font-size:1.05rem}
+    .left-brand-name{
+      color:#fff;font-family:'Playfair Display',serif;
+      font-size:1.05rem;font-weight:700;line-height:1;
+    }
+    .left-brand-name small{
+      display:block;font-family:'Inter',sans-serif;
+      font-size:.57rem;letter-spacing:.14em;
+      color:rgba(201,145,47,.7);font-weight:700;margin-top:2px;
+    }
+
+    .left-body{position:relative;z-index:2}
+    .left-tag{
+      display:inline-flex;align-items:center;gap:6px;
+      padding:5px 14px;border-radius:999px;
+      background:rgba(201,145,47,.1);border:1px solid rgba(201,145,47,.2);
+      color:rgba(201,145,47,.85);font-size:.72rem;font-weight:700;
+      letter-spacing:.06em;text-transform:uppercase;margin-bottom:20px;
+    }
+    .left-tag i{animation:blink 2s ease-in-out infinite}
+    @keyframes blink{0%,100%{opacity:.4}50%{opacity:1}}
+    .left-title{
+      font-family:'Playfair Display',serif;
+      font-size:2.3rem;color:#fff;line-height:1.2;margin-bottom:16px;
+    }
+    .left-title .accent{color:#c9912f}
+    .left-desc{
+      color:rgba(255,255,255,.42);
+      font-size:.875rem;line-height:1.7;
+      max-width:360px;margin-bottom:40px;
+    }
+    .left-features{display:flex;flex-direction:column;gap:14px}
+    .lf{
+      display:flex;align-items:center;gap:14px;
+      padding:13px 16px;
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:12px;
+      animation:slideIn .5s ease both;
+    }
+    .lf:hover{background:rgba(201,145,47,.07);border-color:rgba(201,145,47,.12)}
+    @keyframes slideIn{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:translateX(0)}}
+    .lf:nth-child(1){animation-delay:.1s}
+    .lf:nth-child(2){animation-delay:.2s}
+    .lf:nth-child(3){animation-delay:.3s}
+    .lf-icon{
+      width:36px;height:36px;border-radius:9px;flex-shrink:0;
+      background:rgba(201,145,47,.13);border:1px solid rgba(201,145,47,.2);
+      display:flex;align-items:center;justify-content:center;
+      color:#c9912f;font-size:.85rem;
+    }
+    .lf-text b{display:block;color:#fff;font-size:.8rem;margin-bottom:1px}
+    .lf-text span{color:rgba(255,255,255,.38);font-size:.72rem}
+
+    .left-footer{
+      position:relative;z-index:2;
+      font-size:.7rem;color:rgba(255,255,255,.18);
+    }
+
+    /* ══ RIGHT — Light form ══ */
+    .right{
+      width:460px;flex-shrink:0;
+      background:#faf7f2;
+      display:flex;align-items:center;justify-content:center;
+      padding:48px 44px;position:relative;
+    }
+    .right::before{
+      content:'';position:absolute;inset:0;pointer-events:none;
+      background:radial-gradient(ellipse 60% 40% at 80% 20%, rgba(201,145,47,.05), transparent 60%);
+    }
+
+    .form-card{width:100%;position:relative;z-index:1}
+
+    .form-logo{
+      width:52px;height:52px;background:#0f2b2b;border-radius:14px;
+      display:flex;align-items:center;justify-content:center;
+      margin-bottom:22px;
+      box-shadow:0 8px 24px rgba(15,43,43,.18);
+    }
+    .form-logo i{color:#c9912f;font-size:1.3rem}
+
+    .form-title{
+      font-family:'Playfair Display',serif;
+      font-size:1.75rem;color:#1a1208;margin-bottom:6px;
+    }
+    .form-sub{font-size:.8rem;color:#6b5c3e;margin-bottom:28px}
+
+    .alert-box{
+      display:flex;align-items:center;gap:10px;
+      padding:11px 14px;background:#fdecea;
+      border:1px solid rgba(181,39,29,.2);
+      color:#b5271d;border-radius:10px;
+      font-size:.78rem;margin-bottom:16px;
+    }
+    .alert-box.hidden{display:none}
+
+    .field{margin-bottom:16px}
+    .field label{
+      display:block;font-size:.78rem;font-weight:600;
+      color:#1a1208;margin-bottom:7px;
+    }
+    .field label i{color:#c9912f;margin-right:6px}
+    .input-wrap{position:relative}
+    .field input{
+      width:100%;padding:11px 16px;
+      background:#fff;border:1.5px solid #e8dfc8;
+      border-radius:10px;color:#1a1208;font-size:.875rem;
+      font-family:'Inter',sans-serif;outline:none;
+      transition:all .18s ease;
+    }
+    .field input:focus{border-color:#0f2b2b;box-shadow:0 0 0 3px rgba(15,43,43,.06)}
+    .field input.otp-inp{
+      text-align:center;letter-spacing:14px;
+      font-size:1.6rem!important;font-weight:700!important;
+    }
+    .pw-toggle{
+      position:absolute;right:13px;top:50%;transform:translateY(-50%);
+      background:none;border:none;color:#b8a898;cursor:pointer;
+      font-size:.9rem;transition:color .18s ease;
+    }
+    .pw-toggle:hover{color:#6b5c3e}
+
+    .btn-submit{
+      width:100%;padding:13px;margin-top:8px;
+      background:linear-gradient(135deg,#c9912f,#a8741f);
+      color:#fff;border:none;border-radius:10px;
+      font-size:.9rem;font-weight:600;
+      font-family:'Inter',sans-serif;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;gap:8px;
+      transition:all .18s ease;
+      box-shadow:0 4px 18px rgba(201,145,47,.3);
+    }
+    .btn-submit:hover:not(:disabled){
+      background:linear-gradient(135deg,#dba84a,#c9912f);
+      box-shadow:0 6px 26px rgba(201,145,47,.45);
+      transform:translateY(-1px);
+    }
+    .btn-submit:active{transform:translateY(0)}
+    .btn-submit:disabled{opacity:.55;cursor:not-allowed;transform:none}
+
+    .btn-back{
+      width:100%;padding:11px;margin-top:10px;
+      background:transparent;color:#6b5c3e;
+      border:1.5px solid #e8dfc8;border-radius:10px;
+      font-size:.875rem;font-weight:600;
+      font-family:'Inter',sans-serif;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;gap:8px;
+      transition:all .18s ease;
+    }
+    .btn-back:hover{background:#f3ede0;border-color:#d4c49a;color:#1a1208}
+
+    .otp-wrap{text-align:center;padding:18px 0 24px}
+    .otp-icon{
+      width:60px;height:60px;background:#fdf3e0;
+      border:2px solid #e8dfc8;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      margin:0 auto 12px;
+    }
+    .otp-icon i{color:#c9912f;font-size:1.3rem}
+    .otp-wrap p{font-size:.8rem;color:#6b5c3e;line-height:1.6}
+
+    .divider{
+      display:flex;align-items:center;gap:12px;margin:20px 0;
+    }
+    .divider hr{flex:1;border:none;border-top:1px solid #e8dfc8}
+    .divider span{font-size:.7rem;color:#b8a898}
+
+    .form-footer-link{
+      text-align:center;font-size:.78rem;color:#6b5c3e;
+    }
+    .form-footer-link a{color:#a8741f;font-weight:600;text-decoration:none}
+    .form-footer-link a:hover{text-decoration:underline}
+
+    .secure-note{
+      display:flex;align-items:center;gap:6px;
+      margin-top:22px;padding-top:18px;
+      border-top:1px solid #e8dfc8;
+      font-size:.7rem;color:#b8a898;
+    }
+    .secure-note i{color:#c9912f;font-size:.7rem}
+
+    .hidden{display:none!important}
+
+    @media(max-width:820px){
+      .left{display:none}
+      .right{width:100%;padding:40px 28px}
+    }
+  </style>
+    </head>
+    <body>
+
+        <!-- LEFT -->
+        <div class="left">
+            <div class="left-grid"></div>
+            <div class="orbs">
+                <div class="orb orb-1"></div>
+                <div class="orb orb-2"></div>
+                <div class="orb orb-3"></div>
+            </div>
+            <div class="floats" id="floats"></div>
+
+            <div class="left-brand">
+                <div class="left-brand-icon"><i
+                        class="fa-solid fa-calendar-check"></i></div>
+                <div
+                    class="left-brand-name">Appointment<small>SYSTEM</small></div>
+            </div>
+
+            <div class="left-body">
+                <div class="left-tag">
+                    <i class="fa-solid fa-circle" style="font-size:.45rem"></i>
+                    Online rezervasiya platforması
+                </div>
+                <h1 class="left-title">
+                    Görüşünüzü<br>
+                    <span class="accent">asanlıqla</span><br>
+                    planlaşdırın
+                </h1>
+                <p class="left-desc">
+                    
+                </p>
+                <div class="left-features">
+                    <div class="lf">
+                        <div class="lf-icon"><i
+                                class="fa-solid fa-bolt"></i></div>
+                        <div class="lf-text"><b>Anında
+                                təsdiq</b><span>Rezervasiya dərhal
+                                təsdiqlənir</span></div>
+                    </div>
+                    <div class="lf">
+                        <div class="lf-icon"><i
+                                class="fa-solid fa-bell"></i></div>
+                        <div class="lf-text"><b>Xatırlatma
+                                bildirişi</b><span>Görüşdən əvvəl email
+                                göndərilir</span></div>
+                    </div>
+                    <div class="lf">
+                        <div class="lf-icon"><i
+                                class="fa-solid fa-star"></i></div>
+                        <div class="lf-text"><b>Rəy sistemi</b><span>Həqiqi
+                                müştəri rəyləri</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="left-footer">© 2026 Appointment System. Bütün hüquqlar
+                qorunur.</div>
+        </div>
+
+        <!-- RIGHT -->
+        <div class="right">
+            <div class="form-card"><br><br>
+                <!-- <div class="form-logo">
+                  <i class="fa-solid fa-calendar-check"></i>
+                      </div> -->
+                <br><br><h2 class="form-title" id="cardTitle">Xoş gəldiniz</h2>
+                <p class="form-sub" id="cardSub">Hesabınıza daxil olun</p>
+
+                <div class="alert-box hidden" id="alertBox">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <span id="alertMsg"></span>
+                </div>
+
+                <!-- Credentials -->
+                <form id="credForm">
+                    <div class="field">
+                        <label><i class="fa-solid fa-user"></i>İstifadəçi
+                            adı</label>
+                        <input type="text" id="userName" placeholder="username"
+                            required autocomplete="username">
+                    </div>
+                    <div class="field">
+                        <label><i class="fa-solid fa-lock"></i>Şifrə</label>
+                        <div class="input-wrap">
+                            <input type="password" id="password"
+                                placeholder="••••••••" required
+                                autocomplete="current-password"
+                                style="padding-right:42px">
+                            <button type="button" class="pw-toggle"
+                                onclick="togglePw()">
+                                <i class="fa-regular fa-eye" id="eyeIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-submit" id="credBtn">
+                        <i class="fa-solid fa-right-to-bracket"></i> Daxil ol
+                    </button>
+                </form>
+
+                <!-- OTP -->
+                <div id="otpForm" class="hidden">
+                    <div class="otp-wrap">
+                        <div class="otp-icon"><i
+                                class="fa-solid fa-envelope-open-text"></i></div>
+                        <p>Email-inizə <strong>6 rəqəmli</strong> doğrulama kodu
+                            göndərildi</p>
+                    </div>
+                    <div class="field">
+                        <label><i class="fa-solid fa-key"></i>Doğrulama
+                            kodu</label>
+                        <input type="text" id="otpCode" class="otp-inp"
+                            maxlength="6" placeholder="000000"
+                            inputmode="numeric" required
+                            autocomplete="one-time-code">
+                    </div>
+                    <button class="btn-submit" id="otpBtn"
+                        onclick="verifyOtp()">
+                        <i class="fa-solid fa-shield-check"></i> Təsdiqlə
+                    </button>
+                    <button class="btn-back" onclick="backToLogin()">
+                        <i class="fa-solid fa-arrow-left"></i> Geri qayıt
+                    </button>
+                </div>
+
+                <div class="divider" id="divider"><hr><span>və
+                        ya</span><hr></div>
+
+                <div class="form-footer-link" id="regLink">
+                    Hesabınız yoxdur?
+                    <a href="register.html">Qeydiyyatdan keçin</a>
+                </div>
+
+                <div class="secure-note">
+                </div>
+            </div>
+        </div>
+
+        <script>
+  const BASE = 'http://localhost:5291/api';
+  const Token = {
+    set: (a,r) => { localStorage.setItem('accessToken',a); localStorage.setItem('refreshToken',r) },
+  };
+
+  /* Floating icons */
+  const ICONS = ['fa-calendar-check','fa-clock','fa-star','fa-bell',
+    'fa-heart','fa-user-check','fa-calendar-plus','fa-comment',
+    'fa-calendar-days','fa-stethoscope','fa-scissors','fa-book-open'];
+  const cont = document.getElementById('floats');
+  for (let i=0; i<16; i++) {
+    const el = document.createElement('div');
+    el.className = `fi ${Math.random()>.5?'g':'t'}`;
+    const ic = document.createElement('i');
+    ic.className = `fa-solid ${ICONS[i%ICONS.length]}`;
+    el.appendChild(ic);
+    const sz = 38 + Math.random()*18;
+    el.style.cssText = `
+      left:${Math.random()*88}%;
+      width:${sz}px;height:${sz}px;font-size:${.75+Math.random()*.5}rem;
+      opacity:${.3+Math.random()*.4};
+      animation-duration:${13+Math.random()*18}s;
+      animation-delay:-${Math.random()*22}s;
+    `;
+    cont.appendChild(el);
+  }
+
+  let currentUser = '';
+
+  function togglePw() {
+    const inp = document.getElementById('password');
+    const ic  = document.getElementById('eyeIcon');
+    inp.type = inp.type==='password' ? 'text' : 'password';
+    ic.className = inp.type==='password' ? 'fa-regular fa-eye' : 'fa-regular fa-eye-slash';
+  }
+
+  function showAlert(msg) {
+    document.getElementById('alertMsg').textContent = msg;
+    document.getElementById('alertBox').classList.remove('hidden');
+  }
+  function hideAlert() { document.getElementById('alertBox').classList.add('hidden'); }
+
+  document.getElementById('credForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    hideAlert();
+    const btn = document.getElementById('credBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Yoxlanılır...';
+    try {
+      currentUser = document.getElementById('userName').value;
+      const res  = await fetch(BASE+'/account/login/client', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ userName:currentUser, password:document.getElementById('password').value }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.errors?.[0]);
+      document.getElementById('credForm').classList.add('hidden');
+      document.getElementById('divider').classList.add('hidden');
+      document.getElementById('regLink').classList.add('hidden');
+      document.getElementById('otpForm').classList.remove('hidden');
+      document.getElementById('cardTitle').textContent = '2FA Doğrulama';
+      document.getElementById('cardSub').textContent   = 'Email-dəki kodu daxil edin';
+      setTimeout(() => document.getElementById('otpCode').focus(), 100);
+    } catch(err) {
+      showAlert(err.message || 'Giriş uğursuz oldu');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Daxil ol';
+    }
+  });
+
+  async function verifyOtp() {
+    hideAlert();
+    const btn = document.getElementById('otpBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Yoxlanılır...';
+    try {
+      const res  = await fetch(BASE+'/account/verify-2fa', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ userName:currentUser, code:document.getElementById('otpCode').value }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.errors?.[0]);
+      Token.set(data.data.accessToken, data.data.refreshToken);
+      btn.innerHTML = '<i class="fa-solid fa-check"></i> Uğurlu!';
+      const redirect = new URLSearchParams(location.search).get('redirect') || '../pages/dashboard.html';
+      setTimeout(() => { window.location.href = redirect; }, 400);
+    } catch(err) {
+      showAlert(err.message || 'Kod yanlışdır');
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-shield-check"></i> Təsdiqlə';
+    }
+  }
+
+  function backToLogin() {
+    document.getElementById('otpForm').classList.add('hidden');
+    document.getElementById('credForm').classList.remove('hidden');
+    document.getElementById('divider').classList.remove('hidden');
+    document.getElementById('regLink').classList.remove('hidden');
+    document.getElementById('cardTitle').textContent = 'Xoş gəldiniz';
+    document.getElementById('cardSub').textContent   = 'Hesabınıza daxil olun';
+    document.getElementById('otpCode').value = '';
+    hideAlert();
+  }
+
+  document.addEventListener('keypress', e => {
+    if (e.key==='Enter' && !document.getElementById('otpForm').classList.contains('hidden')) verifyOtp();
+  });
+</script>
+    </body>
+</html>

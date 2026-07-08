@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Mənim Görüşlərim — Appointment System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/client.css">
+  <style>
+    .tab-bar{display:flex;gap:var(--sp-2);background:var(--surface-soft);border-radius:var(--r-full);padding:4px;width:fit-content}
+    .tab-btn{padding:7px 20px;border-radius:var(--r-full);font-size:var(--fs-sm);font-weight:600;color:var(--ink-soft);background:none;border:none;cursor:pointer;transition:all .18s ease}
+    .tab-btn.active{background:var(--surface);color:var(--primary);box-shadow:var(--shadow-sm)}
+  </style>
+</head>
+<body>
+<div id="navbar"></div>
+
+<section class="section-sm">
+  <div class="container">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:var(--sp-6);flex-wrap:wrap;gap:var(--sp-4)">
+      <div>
+        <h1 style="font-size:var(--fs-2xl);margin-bottom:4px">Mənim görüşlərim</h1>
+        <p style="color:var(--ink-soft)">Bütün rezervasiyalarınızı bir yerdə idarə edin</p>
+      </div>
+      <a href="booking.html" class="btn btn-primary">
+        <i class="fa-solid fa-calendar-plus"></i> Yeni rezervasiya
+      </a>
+    </div>
+
+    <div class="tab-bar" style="margin-bottom:var(--sp-5)">
+      <button class="tab-btn active" data-filter="upcoming" onclick="setFilter(this)">
+        <i class="fa-solid fa-clock" style="margin-right:4px"></i>Gələcək
+      </button>
+      <button class="tab-btn" data-filter="past" onclick="setFilter(this)">
+        <i class="fa-solid fa-history" style="margin-right:4px"></i>Keçmiş
+      </button>
+      <button class="tab-btn" data-filter="" onclick="setFilter(this)">
+        <i class="fa-solid fa-list" style="margin-right:4px"></i>Hamısı
+      </button>
+    </div>
+
+    <div id="apptList"><div class="spinner-wrap"><div class="spinner"></div></div></div>
+  </div>
+</section>
+
+<div id="footer"></div>
+
+<script src="../js/client-api.js"></script>
+<script src="../js/layout.js"></script>
+<script>
+  requireAuth();
+  let currentFilter = 'upcoming';
+
+  async function loadAppts() {
+    const list = document.getElementById('apptList');
+    list.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div></div>';
+    const appts = await cApi.getMy(currentFilter).catch(()=>[]);
+    const arr   = Array.isArray(appts) ? appts : [];
+
+    if (!arr.length) {
+      list.innerHTML = `<div class="empty">
+        <i class="fa-regular fa-calendar"></i>
+        <h3>Burada heç nə yoxdur</h3>
+        <p>Bu kateqoriyada görüşünüz tapılmadı</p>
+        <a href="booking.html" class="btn btn-primary btn-sm">
+          <i class="fa-solid fa-calendar-plus"></i> Rezervasiya et
+        </a>
+      </div>`;
+      return;
+    }
+
+    list.innerHTML = arr.map(a => `
+      <a href="appointment-detail.html?id=${a.id}" class="appt-card" style="display:flex;margin-bottom:var(--sp-3)">
+        <div class="appt-date-box">
+          <b>${new Date(a.startDateTime).getDate()}</b>
+          <small>${formatDate(a.startDateTime,{month:'short'})}</small>
+        </div>
+        <div class="appt-icon-box" style="margin:0 var(--sp-4) 0 var(--sp-3)">
+          <i class="fa-solid fa-calendar-check"></i>
+        </div>
+        <div class="appt-info" style="flex:1">
+          <b>${a.serviceName}</b>
+          <span>
+            <i class="fa-solid fa-building" style="margin-right:4px;color:var(--accent)"></i>${a.providerBusinessName}
+            &nbsp;·&nbsp;
+            <i class="fa-regular fa-clock" style="margin-right:4px;color:var(--accent)"></i>${formatTime(a.startDateTime)}
+          </span>
+        </div>
+        <div style="flex-shrink:0;align-self:center">${statusBadge(a.status)}</div>
+      </a>`).join('');
+  }
+
+  function setFilter(btn) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.filter;
+    loadAppts();
+  }
+
+  loadAppts();
+</script>
+</body>
+</html>

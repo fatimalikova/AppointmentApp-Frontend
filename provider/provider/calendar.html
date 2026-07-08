@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Təqvim — Provider Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/provider.css">
+</head>
+<body>
+<div class="shell">
+  <div id="sidebar"></div>
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Təqvim</div>
+        <div class="topbar-sub" id="topbarSub"></div>
+      </div>
+      <div style="display:flex;gap:var(--sp-3);align-items:center">
+        <button class="btn-icon" id="prevBtn"><i class="fa-solid fa-chevron-left"></i></button>
+        <span id="calTitle" style="font-weight:600;min-width:160px;text-align:center"></span>
+        <button class="btn-icon" id="nextBtn"><i class="fa-solid fa-chevron-right"></i></button>
+        <button class="btn btn-outline btn-sm" onclick="goToday()">
+          <i class="fa-regular fa-calendar-dot"></i> Bu gün
+        </button>
+        <div class="view-toggle">
+          <button class="view-btn active" id="dayViewBtn" onclick="setView('day')">
+            <i class="fa-solid fa-calendar-day"></i> Gün
+          </button>
+          <button class="view-btn" id="weekViewBtn" onclick="setView('week')">
+            <i class="fa-solid fa-calendar-week"></i> Həftə
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div id="calContainer"><div class="spinner-wrap"><div class="spinner"></div></div></div>
+    </div>
+  </div>
+</div>
+
+<script src="../js/provider-api.js"></script>
+<script src="../js/layout.js"></script>
+<script>
+  const HOURS = Array.from({length:13}, (_,i) => i + 8); // 08:00 – 20:00
+  let currentDate = new Date();
+  let currentView = 'day';
+  let events = [];
+
+  document.getElementById('prevBtn').onclick = () => { navigate(-1); };
+  document.getElementById('nextBtn').onclick = () => { navigate(1); };
+
+  function navigate(dir) {
+    if (currentView === 'day') currentDate.setDate(currentDate.getDate() + dir);
+    else currentDate.setDate(currentDate.getDate() + dir * 7);
+    loadAndRender();
+  }
+
+  function goToday() { currentDate = new Date(); loadAndRender(); }
+
+  function setView(v) {
+    currentView = v;
+    document.getElementById('dayViewBtn').classList.toggle('active', v==='day');
+    document.getElementById('weekViewBtn').classList.toggle('active', v==='week');
+    loadAndRender();
+  }
+
+  async function loadAndRender() {
+    let from, to;
+    if (currentView === 'day') {
+      from = to = currentDate.toISOString().split('T')[0];
+      document.getElementById('calTitle').textContent = formatDate(currentDate, {weekday:'long',day:'numeric',month:'long'});
+    } else {
+      const mon = new Date(currentDate);
+      mon.setDate(currentDate.getDate() - ((currentDate.getDay()+6)%7));
+      const sun = new Date(mon); sun.setDate(mon.getDate()+6);
+      from = mon.toISOString().split('T')[0];
+      to   = sun.toISOString().split('T')[0];
+      document.getElementById('calTitle').textContent =
+        MONTHS_AZ[mon.getMonth()] + ' ' + mon.getFullYear();
+    }
+
+    events = await pApi.getCalendar(from, to).catch(()=>[]);
+    currentView === 'day' ? renderDay() : renderWeek();
+  }
+
+  function renderDay() {
+    const dayStr = currentDate.toISOString().split('T')[0];
+    const dayEvents = events.filter(e => e.startDateTime.startsWith(dayStr));
+
+    let html = '<div style="display:grid;grid-template-columns:64px 1fr;border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;background:var(--surface)">';
+    HOURS.forEach(h => {
+      const hStr = String(h).padStart(2,'0') + ':00';
+      const hEvents = dayEvents.filter(e => {
+        const eh = parseInt(e.startDateTime.split('T')[1]);
+        return eh === h;
+      });
+      html += `
+        <div style="padding:8px 6px;border-bottom:1px solid var(--border);font-size:var(--fs-xs);color:var(--ink-soft);text-align:right;background:var(--surface-soft)">${hStr}</div>
+        <div style="border-bottom:1px solid var(--border);border-left:1px solid var(--border);min-height:56px;padding:4px">
+          ${hEvents.map(e => `
+            <div style="background:var(--accent-soft);border-left:3px solid var(--accent);border-radius:var(--r-sm);padding:4px 8px;margin-bottom:3px;font-size:var(--fs-xs)">
+              <b style="color:var(--accent-dark)">${e.serviceName}</b>
+              <span style="color:var(--ink-soft);display:block">${e.clientFullName} · ${formatTime(e.startDateTime)}</span>
+            </div>`).join('')}
+        </div>`;
+    });
+    html += '</div>';
+    document.getElementById('calContainer').innerHTML = html;
+  }
+
+  function renderWeek() {
+    const mon = new Date(currentDate);
+    mon.setDate(currentDate.getDate() - ((currentDate.getDay()+6)%7));
+    const weekDays = Array.from({length:7}, (_,i) => { const d=new Date(mon); d.setDate(mon.getDate()+i); return d; });
+    const todayStr = new Date().toISOString().split('T')[0];
+
+    let html = '<div style="border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;background:var(--surface)">';
+    // Header
+    html += '<div style="display:grid;grid-template-columns:64px repeat(7,1fr);background:var(--surface-soft);border-bottom:1px solid var(--border)">';
+    html += '<div style="padding:10px 4px"></div>';
+    weekDays.forEach(d => {
+      const isToday = d.toISOString().split('T')[0] === todayStr;
+      html += `<div style="padding:10px 4px;text-align:center;border-left:1px solid var(--border);${isToday?'background:var(--accent-xsoft);color:var(--accent-dark)':''}">
+        <span style="font-size:var(--fs-xs);color:${isToday?'var(--accent-dark)':'var(--ink-soft)'};font-weight:700">${DAYS_SHORT[(d.getDay()+6)%7]}</span>
+        <b style="display:block;font-family:var(--font-head);font-size:var(--fs-md)">${d.getDate()}</b>
+      </div>`;
+    });
+    html += '</div>';
+
+    // Body
+    html += '<div style="display:grid;grid-template-columns:64px repeat(7,1fr)">';
+    HOURS.forEach(h => {
+      const hStr = String(h).padStart(2,'0') + ':00';
+      html += `<div style="padding:6px 6px;border-bottom:1px solid var(--border);font-size:var(--fs-xs);color:var(--ink-soft);text-align:right;background:var(--surface-soft)">${hStr}</div>`;
+      weekDays.forEach(d => {
+        const dayStr = d.toISOString().split('T')[0];
+        const dayEvents = events.filter(e => e.startDateTime.startsWith(dayStr) && parseInt(e.startDateTime.split('T')[1]) === h);
+        html += `<div style="border-left:1px solid var(--border);border-bottom:1px solid var(--border);min-height:48px;padding:2px">
+          ${dayEvents.map(e => `
+            <div style="background:var(--accent-soft);border-left:2px solid var(--accent);border-radius:3px;padding:2px 4px;font-size:.65rem;margin-bottom:2px;overflow:hidden">
+              <b style="color:var(--accent-dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block">${e.serviceName}</b>
+            </div>`).join('')}
+        </div>`;
+      });
+    });
+    html += '</div></div>';
+
+    document.getElementById('calContainer').innerHTML = html;
+  }
+
+  loadAndRender();
+</script>
+</body>
+</html>

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Admin Girişi — Appointment System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      min-height:100vh;
+      display:flex;align-items:center;justify-content:center;
+      background:#060d14;
+      font-family:'Inter',sans-serif;
+      overflow:hidden;
+    }
+
+    /* ── Background ── */
+    .bg{position:fixed;inset:0;z-index:0;overflow:hidden}
+    .bg-gradient{
+      position:absolute;inset:0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 50%, rgba(15,75,80,.6) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 30%, rgba(10,50,60,.5) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 70% at 50% 80%, rgba(8,38,39,.6) 0%, transparent 60%),
+        linear-gradient(135deg,#060d14 0%,#0a1a20 50%,#060d14 100%);
+    }
+    .orb{position:absolute;border-radius:50%;filter:blur(90px);animation:float 8s ease-in-out infinite}
+    .orb-1{width:600px;height:600px;background:radial-gradient(circle,rgba(201,145,47,.2),transparent 70%);top:-150px;left:-150px;animation-delay:0s}
+    .orb-2{width:500px;height:500px;background:radial-gradient(circle,rgba(15,75,80,.3),transparent 70%);bottom:-100px;right:-100px;animation-delay:-3s}
+    .orb-3{width:350px;height:350px;background:radial-gradient(circle,rgba(201,145,47,.12),transparent 70%);top:40%;right:25%;animation-delay:-5s}
+    .orb-4{width:280px;height:280px;background:radial-gradient(circle,rgba(15,75,80,.2),transparent 70%);bottom:20%;left:20%;animation-delay:-7s}
+    @keyframes float{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-40px) scale(1.06)}}
+
+    .grid-lines{
+      position:absolute;inset:0;
+      background-image:
+        linear-gradient(rgba(201,145,47,.03) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(201,145,47,.03) 1px,transparent 1px);
+      background-size:64px 64px;
+    }
+
+    /* ── Card ── */
+    .login-card{
+      position:relative;z-index:10;
+      width:100%;max-width:420px;
+      margin:var(--sp, 24px);
+      padding:44px 40px;
+      background:rgba(250,247,242,.07);
+      backdrop-filter:blur(24px);
+      -webkit-backdrop-filter:blur(24px);
+      border:1px solid rgba(201,145,47,.18);
+      border-radius:24px;
+      box-shadow:
+        0 40px 80px rgba(0,0,0,.5),
+        0 0 0 1px rgba(255,255,255,.04),
+        inset 0 1px 0 rgba(255,255,255,.06);
+    }
+
+    /* Brand */
+    .card-brand{
+      display:flex;align-items:center;gap:10px;
+      margin-bottom:36px;
+    }
+    .card-brand-icon{
+      width:40px;height:40px;
+      background:rgba(201,145,47,.15);
+      border:1px solid rgba(201,145,47,.25);
+      border-radius:10px;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .card-brand-icon i{color:#c9912f;font-size:1rem}
+    .card-brand-text{
+      font-family:'Playfair Display',serif;
+      font-size:1rem;font-weight:700;
+      color:#fff;line-height:1;
+    }
+    .card-brand-text small{
+      display:block;font-family:'Inter',sans-serif;
+      font-size:.58rem;letter-spacing:.14em;
+      color:rgba(201,145,47,.7);font-weight:700;margin-top:2px;
+    }
+
+    /* Head */
+    .card-head{margin-bottom:28px}
+    .card-title{
+      font-family:'Playfair Display',serif;
+      font-size:1.75rem;color:#fff;margin-bottom:6px;
+    }
+    .card-sub{font-size:.8rem;color:rgba(255,255,255,.45)}
+
+    /* Fields */
+    .field{margin-bottom:16px}
+    .field label{
+      display:block;font-size:.75rem;font-weight:600;
+      color:rgba(255,255,255,.6);margin-bottom:7px;letter-spacing:.02em;
+    }
+    .field label i{color:#c9912f;margin-right:6px}
+    .field input{
+      width:100%;padding:11px 16px;
+      background:rgba(255,255,255,.06);
+      border:1.5px solid rgba(255,255,255,.1);
+      border-radius:10px;
+      color:#fff;font-size:.875rem;
+      font-family:'Inter',sans-serif;
+      outline:none;
+      transition:border-color .18s ease,background .18s ease,box-shadow .18s ease;
+    }
+    .field input::placeholder{color:rgba(255,255,255,.25)}
+    .field input:focus{
+      border-color:rgba(201,145,47,.5);
+      background:rgba(255,255,255,.09);
+      box-shadow:0 0 0 3px rgba(201,145,47,.1);
+    }
+    .field input.otp-input{
+      text-align:center;letter-spacing:14px;
+      font-size:1.6rem !important;font-weight:700 !important;
+    }
+
+    /* Button */
+    .btn-login{
+      width:100%;padding:13px;margin-top:8px;
+      background:linear-gradient(135deg,#c9912f,#a8741f);
+      color:#fff;border:none;border-radius:10px;
+      font-size:.9rem;font-weight:600;
+      font-family:'Inter',sans-serif;
+      cursor:pointer;
+      display:flex;align-items:center;justify-content:center;gap:8px;
+      transition:all .18s ease;
+      box-shadow:0 4px 20px rgba(201,145,47,.35);
+    }
+    .btn-login:hover:not(:disabled){
+      background:linear-gradient(135deg,#dba84a,#c9912f);
+      box-shadow:0 6px 28px rgba(201,145,47,.5);
+      transform:translateY(-1px);
+    }
+    .btn-login:active{transform:translateY(0)}
+    .btn-login:disabled{opacity:.55;cursor:not-allowed;transform:none}
+
+    .btn-back{
+      width:100%;padding:11px;margin-top:10px;
+      background:rgba(255,255,255,.05);
+      color:rgba(255,255,255,.5);
+      border:1.5px solid rgba(255,255,255,.1);
+      border-radius:10px;
+      font-size:.875rem;font-weight:600;
+      font-family:'Inter',sans-serif;
+      cursor:pointer;
+      display:flex;align-items:center;justify-content:center;gap:8px;
+      transition:all .18s ease;
+    }
+    .btn-back:hover{
+      background:rgba(255,255,255,.08);
+      border-color:rgba(255,255,255,.2);
+      color:rgba(255,255,255,.8);
+    }
+
+    /* Alert */
+    .alert-box{
+      display:flex;align-items:center;gap:10px;
+      padding:11px 14px;
+      background:rgba(181,39,29,.15);
+      border:1px solid rgba(181,39,29,.3);
+      color:#f87171;
+      border-radius:10px;font-size:.8rem;
+      margin-bottom:16px;
+    }
+    .alert-box.hidden{display:none}
+
+    /* OTP */
+    .otp-envelope{text-align:center;padding:16px 0 24px}
+    .otp-icon-wrap{
+      width:60px;height:60px;
+      background:rgba(201,145,47,.12);
+      border:1px solid rgba(201,145,47,.2);
+      border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      margin:0 auto 12px;
+    }
+    .otp-icon-wrap i{color:#c9912f;font-size:1.3rem}
+    .otp-envelope p{font-size:.8rem;color:rgba(255,255,255,.45);line-height:1.6}
+
+    /* Footer */
+    .card-footer{
+      display:flex;align-items:center;gap:6px;
+      margin-top:24px;padding-top:20px;
+      border-top:1px solid rgba(255,255,255,.07);
+      font-size:.7rem;color:rgba(255,255,255,.25);
+    }
+    .card-footer i{color:rgba(201,145,47,.5);font-size:.7rem}
+
+    /* Divider */
+    .divider{
+      display:flex;align-items:center;gap:12px;
+      margin:20px 0;
+    }
+    .divider hr{flex:1;border:none;border-top:1px solid rgba(255,255,255,.08)}
+    .divider span{font-size:.7rem;color:rgba(255,255,255,.25);white-space:nowrap}
+
+    .hidden{display:none!important}
+  </style>
+</head>
+<body>
+
+<div class="bg">
+  <div class="bg-gradient"></div>
+  <div class="grid-lines"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="orb orb-4"></div>
+</div>
+
+<div class="login-card">
+  <!-- Brand -->
+  <div class="card-brand">
+    <div class="card-brand-icon"><i class="fa-solid fa-shield-halved"></i></div>
+    <div class="card-brand-text">Appointment<small>ADMIN PANEL</small></div>
+  </div>
+
+  <!-- Head -->
+  <div class="card-head">
+    <h2 class="card-title" id="cardTitle">Admin girişi</h2>
+    <p class="card-sub" id="cardSub">Hesabınıza daxil olun</p>
+  </div>
+
+  <!-- Alert -->
+  <div class="alert-box hidden" id="alertBox">
+    <i class="fa-solid fa-circle-exclamation"></i>
+    <span id="alertMsg"></span>
+  </div>
+
+  <!-- Credentials form -->
+  <form id="credForm">
+    <div class="field">
+      <label><i class="fa-solid fa-user"></i>İstifadəçi adı</label>
+      <input type="text" id="userName" placeholder="admin" required autocomplete="username">
+    </div>
+    <div class="field">
+      <label><i class="fa-solid fa-lock"></i>Şifrə</label>
+      <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
+    </div>
+    <button type="submit" class="btn-login" id="credBtn">
+      <i class="fa-solid fa-right-to-bracket"></i> Daxil ol
+    </button>
+  </form>
+
+  <!-- OTP form -->
+  <div id="otpForm" class="hidden">
+    <div class="otp-envelope">
+      <div class="otp-icon-wrap">
+        <i class="fa-solid fa-envelope-open-text"></i>
+      </div>
+      <p>Email-inizə <strong style="color:rgba(255,255,255,.7)">6 rəqəmli</strong> doğrulama kodu göndərildi</p>
+    </div>
+    <div class="field">
+      <label><i class="fa-solid fa-key"></i>Doğrulama kodu</label>
+      <input type="text" id="otpCode" class="otp-input" maxlength="6"
+        placeholder="000000" inputmode="numeric" required autocomplete="one-time-code">
+    </div>
+    <button class="btn-login" id="otpBtn" onclick="verifyOtp()">
+      <i class="fa-solid fa-shield-check"></i> Təsdiqlə
+    </button>
+    <button class="btn-back" onclick="backToLogin()">
+      <i class="fa-solid fa-arrow-left"></i> Geri qayıt
+    </button>
+  </div>
+
+  <!-- Footer -->
+  <div class="card-footer">
+    
+  </div>
+</div>
+
+<script>
+  const BASE = 'http://localhost:5291/api';
+  const Token = {
+    set: (a,r) => { localStorage.setItem('adminAccess',a); localStorage.setItem('adminRefresh',r); },
+  };
+
+  let currentUser = '';
+
+  function showAlert(msg) {
+    document.getElementById('alertMsg').textContent = msg;
+    document.getElementById('alertBox').classList.remove('hidden');
+  }
+  function hideAlert() {
+    document.getElementById('alertBox').classList.add('hidden');
+  }
+
+  document.getElementById('credForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    hideAlert();
+    const btn = document.getElementById('credBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Yoxlanılır...';
+    try {
+      currentUser = document.getElementById('userName').value;
+      const res = await fetch(BASE + '/account/login/admin', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          userName: currentUser,
+          password: document.getElementById('password').value
+        }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.errors?.[0]);
+      document.getElementById('credForm').classList.add('hidden');
+      document.getElementById('otpForm').classList.remove('hidden');
+      document.getElementById('cardTitle').textContent = '2FA Doğrulama';
+      document.getElementById('cardSub').textContent   = 'Email-dəki kodu daxil edin';
+      setTimeout(() => document.getElementById('otpCode').focus(), 100);
+    } catch(err) {
+      showAlert(err.message || 'Giriş uğursuz oldu');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Daxil ol';
+    }
+  });
+
+  async function verifyOtp() {
+    hideAlert();
+    const btn = document.getElementById('otpBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Yoxlanılır...';
+    try {
+      const res = await fetch(BASE + '/account/verify-2fa', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          userName: currentUser,
+          code: document.getElementById('otpCode').value
+        }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.errors?.[0]);
+      Token.set(data.data.accessToken, data.data.refreshToken);
+      btn.innerHTML = '<i class="fa-solid fa-check"></i> Uğurlu!';
+      setTimeout(() => { window.location.href = '../admin/dashboard.html'; }, 400);
+    } catch(err) {
+      showAlert(err.message || 'Kod yanlışdır');
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-shield-check"></i> Təsdiqlə';
+    }
+  }
+
+  function backToLogin() {
+    document.getElementById('otpForm').classList.add('hidden');
+    document.getElementById('credForm').classList.remove('hidden');
+    document.getElementById('cardTitle').textContent = 'Admin girişi';
+    document.getElementById('cardSub').textContent   = 'Hesabınıza daxil olun';
+    document.getElementById('otpCode').value = '';
+    hideAlert();
+  }
+
+  document.addEventListener('keypress', e => {
+    if (e.key === 'Enter' && !document.getElementById('otpForm').classList.contains('hidden')) {
+      verifyOtp();
+    }
+  });
+</script>
+</body>
+</html>

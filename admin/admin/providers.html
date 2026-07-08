@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Providerlər — Admin Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body>
+<div class="shell">
+  <div id="sidebar"></div>
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Providerlər</div>
+        <div class="topbar-sub" id="topbarSub"></div>
+      </div>
+    </div>
+    <div class="content">
+      <div class="page-header">
+        <div><h1>Provider İdarəetməsi</h1><p>Bütün providerləri idarə edin</p></div>
+      </div>
+
+      <div class="alert hidden" id="alertBox"></div>
+
+      <div class="filter-bar">
+        <input type="text" id="searchInput" placeholder="Ad, kateqoriya axtar..." style="min-width:220px">
+        <select id="statusFilter" onchange="load()">
+          <option value="">Bütün statuslar</option>
+          <option value="Pending" selected>Gözləyən</option>
+          <option value="Approved">Təsdiqlənmiş</option>
+          <option value="Rejected">Rədd edilmiş</option>
+        </select>
+        <button class="btn btn-outline btn-sm" onclick="load()">
+          <i class="fa-solid fa-magnifying-glass"></i> Axtar
+        </button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Provider</th>
+              <th>Kateqoriya</th>
+              <th>Ünvan</th>
+              <th>Reytinq</th>
+              <th>Status</th>
+              <th>Tarix</th>
+              <th>Əməliyyatlar</th>
+            </tr>
+          </thead>
+          <tbody id="tbody">
+            <tr><td colspan="7"><div class="spinner-wrap"><div class="spinner"></div></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Rədd etmə modalı -->
+<div class="overlay hidden" id="rejectModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3><i class="fa-solid fa-circle-xmark" style="color:var(--danger);margin-right:8px"></i>Provideri Rədd Et</h3>
+      <button class="btn-icon" onclick="closeModal('rejectModal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:var(--fs-sm);color:var(--ink-soft)">
+        <strong id="rejectName"></strong> providerini rədd etmək istədiyinizə əminsiniz?
+      </p>
+      <input type="hidden" id="rejectId">
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('rejectModal')">Ləğv et</button>
+      <button class="btn btn-danger" onclick="confirmReject()">
+        <i class="fa-solid fa-circle-xmark"></i> Rədd et
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="../js/admin-api.js"></script>
+<script src="../js/layout.js"></script>
+<script>
+  const urlStatus = new URLSearchParams(location.search).get('status');
+  if (urlStatus) document.getElementById('statusFilter').value = urlStatus;
+
+  async function load() {
+    const tb = document.getElementById('tbody');
+    tb.innerHTML = '<tr><td colspan="7"><div class="spinner-wrap"><div class="spinner"></div></div></td></tr>';
+
+    const params = { pageSize:100 };
+    const status = document.getElementById('statusFilter').value;
+    if (status) params.status = status;
+
+    const data   = await aApi.getProviders(params).catch(()=>[]);
+    const items  = Array.isArray(data) ? data : (data?.items||[]);
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const filtered = search
+      ? items.filter(p => p.businessName.toLowerCase().includes(search) || p.category.toLowerCase().includes(search))
+      : items;
+
+    if (!filtered.length) {
+      tb.innerHTML = '<tr><td colspan="7"><div class="empty"><i class="fa-solid fa-magnifying-glass"></i><p>Nəticə tapılmadı</p></div></td></tr>';
+      return;
+    }
+
+    tb.innerHTML = filtered.map(p => `
+      <tr>
+        <td>
+          <div style="display:flex;align-items:center;gap:var(--sp-3)">
+            <div class="prov-avatar">${p.businessName[0]}</div>
+            <div>
+              <strong style="display:block;font-size:var(--fs-sm)">${p.businessName}</strong>
+              <span style="font-size:var(--fs-xs);color:var(--ink-soft)">${p.ownerFullName||'—'}</span>
+            </div>
+          </div>
+        </td>
+        <td>${p.category}</td>
+        <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.address||'—'}</td>
+        <td>★ ${p.averageRating} <span style="color:var(--ink-soft);font-size:var(--fs-xs)">(${p.reviewCount})</span></td>
+        <td>${badge(p.status)}</td>
+        <td>${formatDate(p.createdAt)}</td>
+        <td>
+          <div class="td-actions">
+            ${p.status==='Pending'||p.status==='Rejected' ? `
+              <button class="btn btn-success btn-xs" onclick="doApprove('${p.id}',this)">
+                <i class="fa-solid fa-check"></i> Təsdiqlə
+              </button>` : ''}
+            ${p.status==='Pending'||p.status==='Approved' ? `
+              <button class="btn btn-danger btn-xs" onclick="openReject('${p.id}','${p.businessName.replace(/'/g,"\\'")}')">
+                <i class="fa-solid fa-xmark"></i> Rədd et
+              </button>` : ''}
+          </div>
+        </td>
+      </tr>`).join('');
+  }
+
+  async function doApprove(id, btn) {
+    btn.disabled = true;
+    try {
+      await aApi.approveProvider(id);
+      showAlert('#alertBox', 'Provider təsdiqləndi!', 'success');
+      load();
+    } catch(e) { showAlert('#alertBox', e.message); btn.disabled=false; }
+  }
+
+  function openReject(id, name) {
+    document.getElementById('rejectId').value = id;
+    document.getElementById('rejectName').textContent = name;
+    openModal('rejectModal');
+  }
+
+  async function confirmReject() {
+    const id = document.getElementById('rejectId').value;
+    try {
+      await aApi.rejectProvider(id);
+      closeModal('rejectModal');
+      showAlert('#alertBox', 'Provider rədd edildi.', 'success');
+      load();
+    } catch(e) { showAlert('#alertBox', e.message); }
+  }
+
+  document.getElementById('searchInput').addEventListener('keypress', e => { if(e.key==='Enter') load(); });
+  load();
+</script>
+</body>
+</html>

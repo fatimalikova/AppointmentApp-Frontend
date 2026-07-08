@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Xidmətlər — Admin Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body>
+<div class="shell">
+  <div id="sidebar"></div>
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Xidmətlər</div>
+        <div class="topbar-sub" id="topbarSub"></div>
+      </div>
+    </div>
+    <div class="content">
+      <div class="page-header">
+        <div><h1>Xidmət İdarəetməsi</h1><p>Bütün providerlərin xidmətlərini nəzarətdə saxlayın</p></div>
+      </div>
+
+      <div class="alert hidden" id="alertBox"></div>
+
+      <div class="filter-bar">
+        <input type="text" id="searchInput" placeholder="Xidmət, provider axtar...">
+        <button class="btn btn-outline btn-sm" onclick="load()">
+          <i class="fa-solid fa-magnifying-glass"></i> Axtar
+        </button>
+      </div>
+
+      <!-- ══ AKTİV XİDMƏTLƏR ══ -->
+      <div style="margin-bottom:var(--sp-6)">
+        <div style="display:flex;align-items:center;gap:var(--sp-3);
+                    padding:var(--sp-3) var(--sp-4);
+                    background:var(--success-soft);border:1px solid rgba(45,106,79,.15);
+                    border-radius:var(--r-md) var(--r-md) 0 0;border-bottom:none">
+          <i class="fa-solid fa-circle-check" style="color:var(--success)"></i>
+          <div>
+            <strong style="font-size:var(--fs-sm);color:var(--success)">Aktiv xidmətlər</strong>
+            <span id="activeCount" style="margin-left:8px;font-size:var(--fs-xs);
+              background:var(--success);color:#fff;padding:1px 8px;border-radius:999px"></span>
+          </div>
+        </div>
+        <div class="table-wrap" style="border-radius:0 0 var(--r-lg) var(--r-lg)">
+          <table>
+            <thead>
+              <tr>
+                <th>Xidmət</th>
+                <th>Provider</th>
+                <th>Qiymət</th>
+                <th>Müddət</th>
+                <th>Status</th>
+                <th>Əməliyyatlar</th>
+              </tr>
+            </thead>
+            <tbody id="activeTbody">
+              <tr><td colspan="6"><div class="spinner-wrap"><div class="spinner"></div></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══ ADMİN DEAKTİV XİDMƏTLƏR ══ -->
+      <div id="deactSection" class="hidden">
+        <div style="display:flex;align-items:center;gap:var(--sp-3);
+                    padding:var(--sp-3) var(--sp-4);
+                    background:var(--danger-soft);border:1px solid rgba(181,39,29,.15);
+                    border-radius:var(--r-md) var(--r-md) 0 0;border-bottom:none">
+          <i class="fa-solid fa-lock" style="color:var(--danger)"></i>
+          <div>
+            <strong style="font-size:var(--fs-sm);color:var(--danger)">Deaktiv edilmiş xidmətlər</strong>
+            <span id="deactCount" style="margin-left:8px;font-size:var(--fs-xs);
+              background:var(--danger);color:#fff;padding:1px 8px;border-radius:999px"></span>
+          </div>
+        </div>
+        <div class="table-wrap" style="border-radius:0 0 var(--r-lg) var(--r-lg)">
+          <table>
+            <thead>
+              <tr>
+                <th>Xidmət</th>
+                <th>Provider</th>
+                <th>Qiymət</th>
+                <th>Müddət</th>
+                <th>Status</th>
+                <th>Əməliyyatlar</th>
+              </tr>
+            </thead>
+            <tbody id="deactTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Deactivate modal -->
+<div class="overlay hidden" id="deactModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3><i class="fa-solid fa-lock" style="color:var(--danger);margin-right:8px"></i>Xidməti Deaktiv Et</h3>
+      <button class="btn-icon" onclick="closeModal('deactModal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="alert alert-warning" style="display:flex">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span>Deaktiv etdikdən sonra provider bu xidməti özü geri aça bilməz.</span>
+      </div>
+      <p style="margin-top:var(--sp-3);font-size:var(--fs-sm);color:var(--ink-soft)">
+        "<strong id="deactName"></strong>" xidmətini deaktiv etmək istədiyinizə əminsiniz?
+      </p>
+      <input type="hidden" id="deactId">
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('deactModal')">Ləğv et</button>
+      <button class="btn btn-danger" onclick="confirmDeact()">
+        <i class="fa-solid fa-lock"></i> Deaktiv et
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Reactivate confirm modal -->
+<div class="overlay hidden" id="reactModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3><i class="fa-solid fa-lock-open" style="color:var(--success);margin-right:8px"></i>Xidməti Aktivləşdir</h3>
+      <button class="btn-icon" onclick="closeModal('reactModal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="alert alert-success" style="display:flex">
+        <i class="fa-solid fa-circle-check"></i>
+        <span>Bu xidmət yenidən aktivləşdiriləcək və provider istifadə edə biləcək.</span>
+      </div>
+      <p style="margin-top:var(--sp-3);font-size:var(--fs-sm);color:var(--ink-soft)">
+        "<strong id="reactName"></strong>" xidmətini aktivləşdirmək istədiyinizə əminsiniz?
+      </p>
+      <input type="hidden" id="reactId">
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('reactModal')">Ləğv et</button>
+      <button class="btn btn-success" onclick="confirmReactivate()">
+        <i class="fa-solid fa-lock-open"></i> Aktivləşdir
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="../js/admin-api.js"></script>
+<script src="../js/layout.js"></script>
+<script>
+  function renderRow(s, isDeact = false) {
+    return `
+      <tr>
+        <td><strong>${s.name}</strong></td>
+        <td>${s.providerBusinessName||'—'}</td>
+        <td style="font-weight:700;color:var(--accent-dark)">${formatPrice(s.price)}</td>
+        <td>${s.durationMinutes} dəq</td>
+        <td>
+          ${s.isActive
+            ? '<span class="badge badge-success"><i class="fa-solid fa-circle-check"></i> Aktiv</span>'
+            : s.deactivatedByAdmin
+              ? '<span class="badge badge-danger"><i class="fa-solid fa-lock"></i> Admin deaktiv</span>'
+              : '<span class="badge badge-gray"><i class="fa-solid fa-circle-pause"></i> Deaktiv</span>'}
+        </td>
+        <td>
+          <div class="td-actions">
+            ${isDeact
+              ? `<button class="btn btn-success btn-xs"
+                   onclick="openReact('${s.id}','${s.name.replace(/'/g,"\\'")}')">
+                   <i class="fa-solid fa-lock-open"></i> Aktivləşdir
+                 </button>`
+              : `<button class="btn btn-danger btn-xs"
+                   onclick="openDeact('${s.id}','${s.name.replace(/'/g,"\\'")}')">
+                   <i class="fa-solid fa-lock"></i> Deaktiv et
+                 </button>`}
+          </div>
+        </td>
+      </tr>`;
+  }
+
+  async function load() {
+  const activeTb = document.getElementById('activeTbody');
+  const deactTb  = document.getElementById('deactTbody');
+  const deactSec = document.getElementById('deactSection');
+
+  activeTb.innerHTML = '<tr><td colspan="6"><div class="spinner-wrap"><div class="spinner"></div></div></td></tr>';
+  deactSec.classList.add('hidden');
+
+  /* Hamısını yüklə — filtr yoxdur */
+  const data  = await aApi.getServices({}).catch(() => []);
+  const items = Array.isArray(data) ? data : [];
+
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const filtered = search
+    ? items.filter(s =>
+        s.name.toLowerCase().includes(search) ||
+        s.providerBusinessName?.toLowerCase().includes(search))
+    : items;
+
+  /* Client-side ayır */
+  const activeItems = filtered.filter(s => s.isActive);
+  const deactItems  = filtered.filter(s => !s.isActive);
+
+  /* Aktiv cədvəl */
+  document.getElementById('activeCount').textContent = activeItems.length;
+  if (!activeItems.length) {
+    activeTb.innerHTML = `<tr><td colspan="6">
+      <div class="empty"><i class="fa-solid fa-briefcase-medical"></i><p>Aktiv xidmət yoxdur</p></div>
+    </td></tr>`;
+  } else {
+    activeTb.innerHTML = activeItems.map(s => renderRow(s, false)).join('');
+  }
+
+  /* Deaktiv cədvəl */
+  if (deactItems.length) {
+    document.getElementById('deactCount').textContent = deactItems.length;
+    deactTb.innerHTML = deactItems.map(s => renderRow(s, true)).join('');
+    deactSec.classList.remove('hidden');
+  }
+}
+
+  /* ── Deactivate ── */
+  function openDeact(id, name) {
+    document.getElementById('deactId').value = id;
+    document.getElementById('deactName').textContent = name;
+    openModal('deactModal');
+  }
+
+  async function confirmDeact() {
+    const id = document.getElementById('deactId').value;
+    try {
+      await aApi.deactivateService(id);
+      closeModal('deactModal');
+      showAlert('#alertBox', 'Xidmət deaktiv edildi.', 'success');
+      load();
+    } catch(e) { showAlert('#alertBox', e.message); }
+  }
+
+  /* ── Reactivate ── */
+  function openReact(id, name) {
+    document.getElementById('reactId').value = id;
+    document.getElementById('reactName').textContent = name;
+    openModal('reactModal');
+  }
+
+  async function confirmReactivate() {
+    const id = document.getElementById('reactId').value;
+    const btn = document.querySelector('#reactModal .btn-success');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+    try {
+      await aApi.reactivateService(id);
+      closeModal('reactModal');
+      showAlert('#alertBox', 'Xidmət aktivləşdirildi!', 'success');
+      load();
+    } catch(e) {
+      showAlert('#alertBox', e.message);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-lock-open"></i> Aktivləşdir';
+    }
+  }
+
+  document.getElementById('searchInput').addEventListener('keypress', e => {
+    if (e.key === 'Enter') load();
+  });
+
+  load();
+</script>
+</body>
+</html>

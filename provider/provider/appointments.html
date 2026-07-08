@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Rezervasiyalar — Provider Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/provider.css">
+</head>
+<body>
+<div class="shell">
+  <div id="sidebar"></div>
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Rezervasiyalar</div>
+        <div class="topbar-sub" id="topbarSub"></div>
+      </div>
+    </div>
+    <div class="content">
+      <div class="alert hidden" id="alertBox"></div>
+
+      <!-- Filter tabs -->
+      <div style="display:flex;gap:var(--sp-2);background:var(--surface-soft);border-radius:var(--r-full);padding:3px;width:fit-content;margin-bottom:var(--sp-5)">
+        <button class="view-btn active" data-filter="" onclick="setFilter(this)">
+          <i class="fa-solid fa-list"></i> Hamısı
+        </button>
+        <button class="view-btn" data-filter="Confirmed" onclick="setFilter(this)">
+          <i class="fa-solid fa-circle-check"></i> Aktiv
+        </button>
+        <button class="view-btn" data-filter="Completed" onclick="setFilter(this)">
+          <i class="fa-solid fa-star"></i> Tamamlanmış
+        </button>
+        <button class="view-btn" data-filter="Cancelled" onclick="setFilter(this)">
+          <i class="fa-solid fa-circle-xmark"></i> Ləğv edilmiş
+        </button>
+      </div>
+
+      <div id="listContainer"><div class="spinner-wrap"><div class="spinner"></div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Detail/Action Modal -->
+<div class="overlay hidden" id="detailModal">
+  <div class="modal modal-lg">
+    <div class="modal-head">
+      <h3><i class="fa-solid fa-calendar-check" style="color:var(--accent);margin-right:8px"></i>Rezervasiya Detalı</h3>
+      <button class="btn-icon" onclick="closeModal('detailModal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body" id="detailBody"></div>
+    <div class="modal-foot" id="detailFoot"></div>
+  </div>
+</div>
+
+<!-- Reschedule Modal -->
+<div class="overlay hidden" id="reschedModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3><i class="fa-solid fa-rotate" style="color:var(--accent);margin-right:8px"></i>Yenidən Planlaşdır</h3>
+      <button class="btn-icon" onclick="closeModal('reschedModal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="alert hidden" id="reschedAlert"></div>
+      <input type="hidden" id="reschedId">
+      <div class="field">
+        <label>Yeni tarix və saat</label>
+        <input type="datetime-local" id="reschedDt">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('reschedModal')">Ləğv et</button>
+      <button class="btn btn-primary" onclick="doReschedule()">
+        <i class="fa-solid fa-check"></i> Təsdiqlə
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="../js/provider-api.js"></script>
+<script src="../js/layout.js"></script>
+<script>
+  let allAppts = [];
+  let currentFilter = '';
+
+  async function loadAppts() {
+    const today = new Date();
+    const from  = new Date(today); from.setMonth(from.getMonth()-3);
+    const to    = new Date(today); to.setMonth(to.getMonth()+2);
+    allAppts = await pApi.getCalendar(
+      from.toISOString().split('T')[0],
+      to.toISOString().split('T')[0]
+    ).catch(()=>[]);
+    render();
+  }
+
+  function render() {
+    const filtered = currentFilter ? allAppts.filter(a => a.status === currentFilter) : allAppts;
+    const lc = document.getElementById('listContainer');
+    if (!filtered.length) {
+      lc.innerHTML = `<div class="empty">
+        <i class="fa-solid fa-calendar"></i>
+        <h3>Rezervasiya tapılmadı</h3>
+        <p>Bu kateqoriyada nəticə yoxdur</p>
+      </div>`;
+      return;
+    }
+    lc.innerHTML = filtered.map(a => `
+      <div class="appt-row-card" style="cursor:pointer" onclick='showDetail(${JSON.stringify(a).replace(/'/g,"\\'")})'> 
+        <div class="appt-row-date">
+          <b>${new Date(a.startDateTime).getDate()}</b>
+          <small>${formatDate(a.startDateTime,{month:'short'})}</small>
+        </div>
+        <div class="appt-row-icon"><i class="fa-solid fa-calendar-check"></i></div>
+        <div class="appt-row-info">
+          <b>${a.serviceName}</b>
+          <span><i class="fa-regular fa-user" style="margin-right:4px"></i>${a.clientFullName} · ${formatTime(a.startDateTime)} – ${formatTime(a.endDateTime)}</span>
+        </div>
+        <span style="font-weight:600;color:var(--accent-dark);flex-shrink:0">${formatPrice(a.price)}</span>
+        ${statusBadge(a.status)}
+      </div>`).join('');
+  }
+
+  function setFilter(btn) {
+    document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.filter;
+    render();
+  }
+
+  function showDetail(a) {
+    document.getElementById('detailBody').innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3);margin-bottom:var(--sp-4)">
+        ${[
+          ['fa-briefcase-medical','Xidmət',    a.serviceName],
+          ['fa-user',             'Müştəri',   a.clientFullName],
+          ['fa-calendar',         'Tarix',     formatDate(a.startDateTime,{day:'numeric',month:'long',year:'numeric'})],
+          ['fa-clock',            'Saat',      formatTime(a.startDateTime)+' – '+formatTime(a.endDateTime)],
+          ['fa-tag',              'Qiymət',    formatPrice(a.price)],
+          ['fa-circle-dot',       'Status',    ''],
+        ].map(([ic,l,v]) => `
+          <div>
+            <span style="font-size:var(--fs-xs);color:var(--ink-soft);display:flex;align-items:center;gap:5px;margin-bottom:3px">
+              <i class="fa-solid ${ic}" style="color:var(--accent)"></i>${l}
+            </span>
+            <strong style="font-size:var(--fs-sm)">${l==='Status'?statusBadge(a.status):v||'—'}</strong>
+          </div>`).join('')}
+      </div>
+      ${a.notes ? `<div style="padding:var(--sp-3) var(--sp-4);background:var(--surface-soft);border-radius:var(--r-sm);font-size:var(--fs-sm)"><i class="fa-solid fa-comment" style="color:var(--accent);margin-right:6px"></i><strong>Qeyd:</strong> ${a.notes}</div>` : ''}`;
+
+    const foot = document.getElementById('detailFoot');
+    if (a.status === 'Confirmed') {
+      foot.innerHTML = `
+        <button class="btn btn-ghost" onclick="closeModal('detailModal')">Bağla</button>
+        <button class="btn btn-outline" onclick="openResched('${a.id}')"><i class="fa-solid fa-rotate"></i> Yenilə</button>
+        <button class="btn btn-danger" onclick="doCancel('${a.id}')"><i class="fa-solid fa-circle-xmark"></i> Ləğv et</button>
+        <button class="btn btn-success" onclick="doComplete('${a.id}')"><i class="fa-solid fa-check"></i> Tamamla</button>`;
+    } else {
+      foot.innerHTML = `<button class="btn btn-outline" onclick="closeModal('detailModal')">Bağla</button>`;
+    }
+    openModal('detailModal');
+  }
+
+  function openResched(id) {
+    document.getElementById('reschedId').value = id;
+    document.getElementById('reschedAlert').classList.add('hidden');
+    closeModal('detailModal');
+    openModal('reschedModal');
+  }
+
+  async function doReschedule() {
+    const id = document.getElementById('reschedId').value;
+    const dt = document.getElementById('reschedDt').value;
+    if (!dt) return;
+    try {
+      await pApi.rescheduleAppt(id, { newStartDateTime: new Date(dt).toISOString() });
+      closeModal('reschedModal');
+      showAlert('#alertBox', 'Rezervasiya yenidən planlaşdırıldı!', 'success');
+      loadAppts();
+    } catch(err) { showAlert('#reschedAlert', err.message); }
+  }
+
+  async function doCancel(id) {
+    if (!confirm('Bu rezervasiyanı ləğv etmək istədiyinizə əminsiniz?')) return;
+    try {
+      await pApi.cancelAppt(id);
+      closeModal('detailModal');
+      showAlert('#alertBox', 'Rezervasiya ləğv edildi.', 'success');
+      loadAppts();
+    } catch(err) { showAlert('#alertBox', err.message); }
+  }
+
+  async function doComplete(id) {
+    if (!confirm('Bu görüşü tamamlamaq istədiyinizə əminsiniz?')) return;
+    try {
+      await pApi.completeAppt(id);
+      closeModal('detailModal');
+      showAlert('#alertBox', 'Görüş tamamlandı!', 'success');
+      loadAppts();
+    } catch(err) { showAlert('#alertBox', err.message); }
+  }
+
+  loadAppts();
+</script>
+</body>
+</html>

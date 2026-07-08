@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dashboard — Provider Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/provider.css">
+  <style>
+    /* --- Statistika + görüş kartları: vahid 2x2 grid (dashboard.html-ə əlavə) --- */
+    .quad-grid{
+      display:grid !important;
+      grid-template-columns:1fr 1fr !important;
+      grid-template-rows:repeat(2, 420px) !important;
+      gap:20px !important;
+      margin-top:0;
+    }
+    @media (max-width:900px){
+      .quad-grid{grid-template-columns:1fr !important; grid-template-rows:repeat(4, 420px) !important;}
+    }
+    /* Hər 4 blok üçün eyni ölçü, sizin köhnə .card/.chart-card CSS-i nə deyirsə desin */
+    .quad-tile{
+      width:100% !important;
+      height:100% !important;
+      margin:0 !important;
+      box-sizing:border-box !important;
+      display:flex !important;
+      flex-direction:column !important;
+      overflow:hidden !important;
+    }
+    .quad-tile .panel-head{ flex-shrink:0; }
+    .quad-body{
+      flex:1 1 auto;
+      min-height:0;
+      overflow-y:auto;
+      position:relative;
+    }
+    .quad-body .empty, .quad-body .spinner-wrap{
+      height:100%;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+    }
+    .chart-legend-note{
+      display:flex;
+      gap:16px;
+      flex-wrap:wrap;
+      margin-top:10px;
+      font-size:var(--fs-sm,13px);
+      color:var(--text-muted,#8a8a8a);
+      flex-shrink:0;
+    }
+    .chart-legend-note span{display:flex;align-items:center;gap:6px}
+    .chart-legend-note i.dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <div id="sidebar"></div>
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title" id="topbarTitle">Dashboard</div>
+        <div class="topbar-sub" id="topbarSub"></div>
+      </div>
+      <a href="appointments.html" class="btn btn-primary btn-sm">
+        <i class="fa-solid fa-calendar-plus"></i> Yeni görüş
+      </a>
+    </div>
+
+    <div class="content">
+      <!-- Stat cards -->
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-icon gold"><i class="fa-solid fa-calendar-day"></i></div>
+          <div><div class="stat-val" id="statToday">—</div><div class="stat-lbl">Bugünkü görüşlər</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue"><i class="fa-solid fa-calendar-week"></i></div>
+          <div><div class="stat-val" id="statWeek">—</div><div class="stat-lbl">Bu həftə</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green"><i class="fa-solid fa-circle-check"></i></div>
+          <div><div class="stat-val" id="statDone">—</div><div class="stat-lbl">Tamamlanmış</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon gold"><i class="fa-solid fa-users"></i></div>
+          <div><div class="stat-val" id="statFollowers">—</div><div class="stat-lbl">İzləyicilər</div></div>
+        </div>
+      </div>
+
+      <!-- 4 blok — TAM EYNİ ÖLÇÜ üçün vahid grid -->
+      <div class="quad-grid" style="margin-top:20px;">
+
+        <!-- 1. Həftəlik Görüşlər -->
+        <div class="quad-tile chart-card">
+          <div class="panel-head">
+            <h2><i class="fa-solid fa-chart-column" style="color:var(--accent);margin-right:8px"></i>Həftəlik Görüşlər</h2>
+          </div>
+          <div class="quad-body" id="weekChartWrap">
+            <canvas id="weekChart"></canvas>
+          </div>
+        </div>
+
+        <!-- 2. Status Bölgüsü -->
+        <div class="quad-tile chart-card">
+          <div class="panel-head">
+            <h2><i class="fa-solid fa-chart-pie" style="color:var(--accent);margin-right:8px"></i>Status Bölgüsü</h2>
+          </div>
+          <div class="quad-body" id="statusChartWrap">
+            <canvas id="statusChart"></canvas>
+          </div>
+          <div class="chart-legend-note" id="statusLegend"></div>
+        </div>
+
+        <!-- 3. Bugünkü Görüşlər -->
+        <div class="quad-tile card">
+          <div class="panel-head">
+            <h2><i class="fa-solid fa-calendar-day" style="color:var(--accent);margin-right:8px"></i>Bugünkü Görüşlər</h2>
+            <a href="calendar.html" class="link-btn">Təqvimə bax →</a>
+          </div>
+          <div class="quad-body" id="todayList"><div class="spinner-wrap"><div class="spinner"></div></div></div>
+        </div>
+
+        <!-- 4. Növbəti Görüşlər -->
+        <div class="quad-tile card">
+          <div class="panel-head">
+            <h2><i class="fa-solid fa-clock" style="color:var(--accent);margin-right:8px"></i>Növbəti Görüşlər</h2>
+            <a href="appointments.html" class="link-btn">Hamısı →</a>
+          </div>
+          <div class="quad-body" id="upcomingList"><div class="spinner-wrap"><div class="spinner"></div></div></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="../js/provider-api.js"></script>
+<script src="../js/layout.js"></script>
+<script>
+(async () => {
+  const today = new Date();
+  const todayStr = today.toISOString().split('T')[0];
+  const nextWeek = new Date(today); nextWeek.setDate(today.getDate()+7);
+  const nextWeekStr = nextWeek.toISOString().split('T')[0];
+
+  const [todayAppts, weekAppts] = await Promise.all([
+    pApi.getCalendar(todayStr, todayStr).catch(()=>[]),
+    pApi.getCalendar(todayStr, nextWeekStr).catch(()=>[]),
+  ]);
+
+  const todayArr  = Array.isArray(todayAppts) ? todayAppts : [];
+  const weekArr   = Array.isArray(weekAppts)  ? weekAppts  : [];
+  const completed = weekArr.filter(a => a.status === 'Completed').length;
+
+  document.getElementById('statToday').textContent     = todayArr.length;
+  document.getElementById('statWeek').textContent      = weekArr.length;
+  document.getElementById('statDone').textContent      = completed;
+  document.getElementById('statFollowers').textContent = '—';
+
+  // Today list
+  const tl = document.getElementById('todayList');
+  if (!todayArr.length) {
+    tl.innerHTML = `<div class="empty">
+      <i class="fa-regular fa-calendar"></i>
+      <h3>Bugün görüş yoxdur</h3>
+      <p>Aktiv rezervasiya gözlənilmir</p>
+    </div>`;
+  } else {
+    tl.innerHTML = todayArr.map(a => `
+      <div class="appt-row-card">
+        <div class="appt-row-icon"><i class="fa-solid fa-calendar-check"></i></div>
+        <div class="appt-row-info">
+          <b>${a.serviceName}</b>
+          <span><i class="fa-regular fa-user" style="margin-right:4px"></i>${a.clientFullName}</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">
+          <span style="font-weight:600;font-size:var(--fs-sm)">${formatTime(a.startDateTime)}</span>
+          ${statusBadge(a.status)}
+        </div>
+        ${a.status==='Confirmed' ? `
+        <button class="btn btn-success btn-xs" onclick="complete('${a.id}',this)">
+          <i class="fa-solid fa-check"></i> Tamamla
+        </button>` : ''}
+      </div>`).join('');
+  }
+
+  // Upcoming (bu həftə, bugün istisna)
+  const upcoming = weekArr.filter(a => a.startDateTime.split('T')[0] !== todayStr && a.status === 'Confirmed');
+  const ul = document.getElementById('upcomingList');
+  if (!upcoming.length) {
+    ul.innerHTML = `<div class="empty">
+      <i class="fa-regular fa-calendar-check"></i>
+      <h3>Gözləyən görüş yoxdur</h3>
+    </div>`;
+  } else {
+    ul.innerHTML = upcoming.slice(0,5).map(a => `
+      <div class="appt-row-card">
+        <div class="appt-row-date">
+          <b>${new Date(a.startDateTime).getDate()}</b>
+          <small>${formatDate(a.startDateTime,{month:'short'})}</small>
+        </div>
+        <div class="appt-row-info">
+          <b>${a.serviceName}</b>
+          <span>${a.clientFullName} · ${formatTime(a.startDateTime)}</span>
+        </div>
+        ${statusBadge(a.status)}
+      </div>`).join('');
+  }
+
+  renderCharts(weekArr, today);
+})();
+
+async function complete(id, btn) {
+  if (!confirm('Bu görüşü tamamlamaq istədiyinizə əminsiniz?')) return;
+  btn.disabled = true;
+  try {
+    await pApi.completeAppt(id);
+    btn.closest('.appt-row-card').remove();
+  } catch(e) { alert(e.message); btn.disabled = false; }
+}
+
+// ---- Statistika diaqramları ----
+const AZ_DAYS = ['B','B.e','Ç.a','Ç','C.a','C','Ş'];
+const STATUS_COLORS = {
+  Confirmed: '#D4A72C',
+  Completed: '#22C55E',
+  Cancelled: '#EF4444',
+  Pending:   '#4C6FFF',
+  _other:    '#8A8A8A'
+};
+const STATUS_LABELS_AZ = {
+  Confirmed: 'Təsdiqlənmiş',
+  Completed: 'Tamamlanmış',
+  Cancelled: 'Ləğv edilmiş',
+  Pending:   'Gözləyən'
+};
+
+function emptyStateHTML(icon, title, sub) {
+  return `<div class="empty">
+    <i class="${icon}"></i>
+    <h3>${title}</h3>
+    ${sub ? `<p>${sub}</p>` : ''}
+  </div>`;
+}
+
+function renderCharts(weekArr, today) {
+  const weekWrap   = document.getElementById('weekChartWrap');
+  const statusWrap = document.getElementById('statusChartWrap');
+  const legendEl   = document.getElementById('statusLegend');
+
+  if (typeof Chart === 'undefined') {
+    weekWrap.innerHTML = emptyStateHTML('fa-regular fa-chart-bar', 'Diaqram yüklənmədi', 'Səhifəni yeniləyin');
+    statusWrap.innerHTML = emptyStateHTML('fa-regular fa-chart-bar', 'Diaqram yüklənmədi', 'Səhifəni yeniləyin');
+    if (legendEl) legendEl.innerHTML = '';
+    return;
+  }
+
+  // --- Chart 1: görüşlərin gündəlik sayı (bugündən 7 gün) ---
+  const dayBuckets = [];
+  const dayLabels = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    const dStr = d.toISOString().split('T')[0];
+    dayBuckets.push(dStr);
+    dayLabels.push(i === 0 ? 'Bugün' : AZ_DAYS[d.getDay()]);
+  }
+  const dayCounts = dayBuckets.map(dStr =>
+    weekArr.filter(a => a.startDateTime.split('T')[0] === dStr).length
+  );
+  const hasWeekData = dayCounts.some(c => c > 0);
+
+  if (!hasWeekData) {
+    weekWrap.innerHTML = emptyStateHTML('fa-regular fa-calendar', 'Bu həftə üçün görüş yoxdur', 'Qeydiyyatlar buraya əks olunacaq');
+  } else {
+    new Chart(document.getElementById('weekChart'), {
+      type: 'bar',
+      data: {
+        labels: dayLabels,
+        datasets: [{
+          label: 'Görüşlər',
+          data: dayCounts,
+          backgroundColor: dayLabels.map((l,i) => i===0 ? '#D4A72C' : 'rgba(212,167,44,0.35)'),
+          borderRadius: 8,
+          maxBarThickness: 34
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: 'rgba(0,0,0,0.05)' } },
+          x: { grid: { display: false } }
+        }
+      }
+    });
+  }
+
+  // --- Chart 2: status bölgüsü (donut) ---
+  const counts = {};
+  weekArr.forEach(a => { counts[a.status] = (counts[a.status] || 0) + 1; });
+  const statuses = Object.keys(counts);
+
+  if (!statuses.length) {
+    statusWrap.innerHTML = emptyStateHTML('fa-regular fa-chart-pie', 'Status məlumatı yoxdur', 'Görüşlər planlaşdıqda burda görünəcək');
+    if (legendEl) legendEl.innerHTML = '';
+    return;
+  }
+
+  const colors = statuses.map(s => STATUS_COLORS[s] || STATUS_COLORS._other);
+
+  new Chart(document.getElementById('statusChart'), {
+    type: 'doughnut',
+    data: {
+      labels: statuses.map(s => STATUS_LABELS_AZ[s] || s),
+      datasets: [{
+        data: statuses.map(s => counts[s]),
+        backgroundColor: colors,
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '68%',
+      plugins: { legend: { display: false } }
+    }
+  });
+
+  if (legendEl) {
+    legendEl.innerHTML = statuses.map((s, idx) => `
+      <span><i class="dot" style="background:${colors[idx]}"></i>${STATUS_LABELS_AZ[s] || s} (${counts[s]})</span>
+    `).join('');
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>İş Saatları — Provider Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/provider.css">
+</head>
+<body>
+<div class="shell">
+  <div id="sidebar"></div>
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">İş Saatları</div>
+        <div class="topbar-sub" id="topbarSub"></div>
+      </div>
+    </div>
+    <div class="content" style="max-width:700px">
+      <div class="page-header">
+        <div>
+          <h1>İş Saatları</h1>
+          <p>Həftəlik iş cədvəlinizi təyin edin</p>
+        </div>
+        <button class="btn btn-primary" onclick="saveAll()">
+          <i class="fa-solid fa-floppy-disk"></i> Dəyişiklikləri Saxla
+        </button>
+      </div>
+
+      <div class="alert hidden" id="alertBox"></div>
+
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:var(--sp-3);padding:var(--sp-3) var(--sp-4);background:var(--accent-xsoft);border-radius:var(--r-sm);margin-bottom:var(--sp-5);font-size:var(--fs-sm)">
+          <i class="fa-solid fa-circle-info" style="color:var(--accent-dark)"></i>
+          <span>Mövcud <strong>Confirmed</strong> rezervasiyanız olan günlərin saatlarını dəyişdirə bilməzsiniz.</span>
+        </div>
+
+        <div id="whContainer">
+          <div class="spinner-wrap"><div class="spinner"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../js/provider-api.js"></script>
+<script src="../js/layout.js"></script>
+<script>
+  const DAY_MAP = {
+  'Sunday':    0,
+  'Monday':    1,
+  'Tuesday':   2,
+  'Wednesday': 3,
+  'Thursday':  4,
+  'Friday':    5,
+  'Saturday':  6,
+};
+  const DAYS = [
+    { key:'Sunday',    label:'Bazar' },
+    { key:'Monday',    label:'Bazar ertəsi' },
+    { key:'Tuesday',   label:'Çərşənbə axşamı' },
+    { key:'Wednesday', label:'Çərşənbə' },
+    { key:'Thursday',  label:'Cümə axşamı' },
+    { key:'Friday',    label:'Cümə' },
+    { key:'Saturday',  label:'Şənbə' },
+  ];
+
+  let existing = [];
+
+ async function load() {
+  existing = await pApi.getWorkingHours().catch(() => []);
+  const cont = document.getElementById('whContainer');
+  cont.innerHTML = DAYS.map(d => {
+    const wh = existing.find(e => e.day === DAY_MAP[d.key]);
+    const isOpen = !!wh;
+    return `
+      <div class="wh-row" id="row-${d.key}">
+        <div class="wh-day-label">${d.label}</div>
+        <label class="toggle">
+          <input type="checkbox" id="chk-${d.key}" ${isOpen ? 'checked' : ''} onchange="toggleDay('${d.key}')">
+          <span class="toggle-slider"></span>
+        </label>
+        <div id="times-${d.key}" style="display:${isOpen ? 'flex' : 'none'};align-items:center;gap:var(--sp-3)">
+          <input type="time" id="start-${d.key}" value="${wh ? wh.startTime.slice(0,5) : '09:00'}"
+            style="padding:6px 10px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-size:var(--fs-sm)">
+          <span style="color:var(--ink-soft)">—</span>
+          <input type="time" id="end-${d.key}" value="${wh ? wh.endTime.slice(0,5) : '18:00'}"
+            style="padding:6px 10px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-size:var(--fs-sm)">
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function toggleDay(key) {
+  const isChecked = document.getElementById('chk-' + key).checked;
+  document.getElementById('times-' + key).style.display = isChecked ? 'flex' : 'none';
+}
+
+
+async function saveAll() {
+  const dtos = [];
+  DAYS.forEach(d => {
+    if (document.getElementById('chk-' + d.key).checked) {
+      dtos.push({
+        day:       DAY_MAP[d.key],
+        startTime: document.getElementById('start-' + d.key).value,
+        endTime:   document.getElementById('end-' + d.key).value,
+      });
+    }
+  });
+
+  try {
+    await pApi.setWorkingHours(dtos);
+    showAlert('#alertBox', 'İş saatları uğurla yadda saxlandı!', 'success');
+    load();
+  } catch(err) {
+    showAlert('#alertBox', err.message);
+  }
+}
+
+
+  load();
+</script>
+</body>
+</html>
