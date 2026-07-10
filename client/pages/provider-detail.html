@@ -1,13 +1,17 @@
 <!DOCTYPE html>
 <html lang="az">
-<head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Provider Profili — Appointment System</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="../css/client.css">
-  <style>
+  <head>
+    <meta charset="UTF-8"><meta name="viewport"
+      content="width=device-width,initial-scale=1">
+    <title>Provider Profili — Appointment System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet">
+    <link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/client.css">
+    <style>
     .prov-cover{
       height:240px;
       background:linear-gradient(135deg,#082627 0%,#0f2b2b 50%,#1a4040 100%);
@@ -143,65 +147,75 @@
       .post-modal-side{border-left:none;border-top:1px solid var(--border)}
     }
   </style>
-</head>
-<body>
-<div id="navbar"></div>
+  </head>
+  <body>
+    <div id="navbar"></div>
 
-<div id="pageContent">
-  <div class="spinner-wrap"><div class="spinner"></div></div>
-</div>
-
-<div id="footer"></div>
-
-<!-- ══ POST MODAL ══ -->
-<div class="overlay hidden" id="postModal">
-  <div class="modal" style="max-width:860px;padding:0;overflow:hidden">
-    <div class="post-modal-wrap" id="postModalWrap"></div>
-  </div>
-</div>
-
-<!-- ══ REVIEW MODAL ══ -->
-<div class="overlay hidden" id="reviewModal">
-  <div class="modal">
-    <div class="modal-head">
-      <h3><i class="fa-solid fa-star" style="color:var(--accent);margin-right:8px"></i>Rəy bildirin</h3>
-      <button class="btn-icon" onclick="closeModal('reviewModal')"><i class="fa-solid fa-xmark"></i></button>
+    <div id="pageContent">
+      <div class="spinner-wrap"><div class="spinner"></div></div>
     </div>
-    <div class="modal-body">
-      <div class="alert alert-error hidden" id="reviewAlert"></div>
 
-      <!-- Tamamlanmış görüş seçimi -->
-      <div id="apptSelectWrap"></div>
+    <div id="footer"></div>
 
-      <div id="reviewFormBody">
-        <div class="field">
-          <label>Reytinq</label>
-          <div class="star-row" id="starRow">
-            <button class="star-pick" data-v="1" onclick="setStar(1)"><i class="fa-solid fa-star"></i></button>
-            <button class="star-pick" data-v="2" onclick="setStar(2)"><i class="fa-solid fa-star"></i></button>
-            <button class="star-pick" data-v="3" onclick="setStar(3)"><i class="fa-solid fa-star"></i></button>
-            <button class="star-pick" data-v="4" onclick="setStar(4)"><i class="fa-solid fa-star"></i></button>
-            <button class="star-pick" data-v="5" onclick="setStar(5)"><i class="fa-solid fa-star"></i></button>
+    <!-- ══ POST MODAL ══ -->
+    <div class="overlay hidden" id="postModal">
+      <div class="modal" style="max-width:860px;padding:0;overflow:hidden">
+        <div class="post-modal-wrap" id="postModalWrap"></div>
+      </div>
+    </div>
+
+    <!-- ══ REVIEW MODAL ══ -->
+    <div class="overlay hidden" id="reviewModal">
+      <div class="modal">
+        <div class="modal-head">
+          <h3><i class="fa-solid fa-star"
+              style="color:var(--accent);margin-right:8px"></i>Rəy bildirin</h3>
+          <button class="btn-icon" onclick="closeModal('reviewModal')"><i
+              class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="modal-body">
+          <div class="alert alert-error hidden" id="reviewAlert"></div>
+
+          <!-- Tamamlanmış görüş seçimi -->
+          <div id="apptSelectWrap"></div>
+
+          <div id="reviewFormBody">
+            <div class="field">
+              <label>Reytinq</label>
+              <div class="star-row" id="starRow">
+                <button class="star-pick" data-v="1" onclick="setStar(1)"><i
+                    class="fa-solid fa-star"></i></button>
+                <button class="star-pick" data-v="2" onclick="setStar(2)"><i
+                    class="fa-solid fa-star"></i></button>
+                <button class="star-pick" data-v="3" onclick="setStar(3)"><i
+                    class="fa-solid fa-star"></i></button>
+                <button class="star-pick" data-v="4" onclick="setStar(4)"><i
+                    class="fa-solid fa-star"></i></button>
+                <button class="star-pick" data-v="5" onclick="setStar(5)"><i
+                    class="fa-solid fa-star"></i></button>
+              </div>
+            </div>
+            <div class="field">
+              <label>Şərh (istəyə görə)</label>
+              <textarea id="reviewComment"
+                placeholder="Xidmət haqqında fikirlərinizi yazın..."></textarea>
+            </div>
           </div>
         </div>
-        <div class="field">
-          <label>Şərh (istəyə görə)</label>
-          <textarea id="reviewComment" placeholder="Xidmət haqqında fikirlərinizi yazın..."></textarea>
+        <div class="modal-foot">
+          <button class="btn btn-ghost" onclick="closeModal('reviewModal')">Ləğv
+            et</button>
+          <button class="btn btn-primary" id="reviewSubmitBtn" disabled
+            onclick="submitReview()">
+            <i class="fa-solid fa-paper-plane"></i> Rəyi göndər
+          </button>
         </div>
       </div>
     </div>
-    <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="closeModal('reviewModal')">Ləğv et</button>
-      <button class="btn btn-primary" id="reviewSubmitBtn" disabled onclick="submitReview()">
-        <i class="fa-solid fa-paper-plane"></i> Rəyi göndər
-      </button>
-    </div>
-  </div>
-</div>
 
-<script src="../js/client-api.js"></script>
-<script src="../js/layout.js"></script>
-<script>
+    <script src="../js/client-api.js"></script>
+    <script src="../js/layout.js"></script>
+    <script>
   const id = new URLSearchParams(location.search).get('id');
   if (!id) window.location.href = 'providers.html';
 
@@ -234,70 +248,116 @@
     renderPage();
   })();
 
-  /* ══ PAGE ══ */
   function renderPage() {
-    const p = provData;
-    document.getElementById('pageContent').innerHTML = `
-      <div class="prov-cover"></div>
-      <div class="prov-header">
-        <div class="prov-header-inner">
-          <div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:var(--sp-3)">
-            <div>
-              <div class="prov-avatar-lg">
-                ${p.imageUrl ? `<img src="${p.imageUrl}" alt="${p.businessName}">` : p.businessName[0]}
-              </div>
-              <h1 style="font-size:var(--fs-xl);margin-bottom:6px">${p.businessName}</h1>
-              <span style="font-size:var(--fs-sm);color:var(--ink-soft)">
-                <i class="fa-solid fa-tag" style="color:var(--accent);margin-right:5px"></i>${p.category}
-                ${p.address ? `&nbsp;&middot;&nbsp;<i class="fa-solid fa-location-dot" style="color:var(--accent);margin-right:5px"></i>${p.address}` : ''}
+  const p = provData;
+  document.getElementById('pageContent').innerHTML = `
+
+    <!-- Cover — həmişə teal gradient -->
+    <div style="
+      height:240px;
+      background:linear-gradient(135deg,#082627 0%,#0f2b2b 50%,#1a4040 100%);
+      position:relative;
+      overflow:visible;
+    ">
+      <div style="position:absolute;inset:0;opacity:.12;
+        background-image:radial-gradient(circle,rgba(201,145,47,.8) 1px,transparent 1px);
+        background-size:20px 20px"></div>
+
+      <!-- Avatar cover-dan asılır — MƏRKƏZDƏ -->
+<div style="
+  position:absolute;
+  bottom:-48px;
+  left:380px;
+  transform:translateX(-50%);
+  width:96px;height:96px;border-radius:50%;
+  border:4px solid #fff;
+  box-shadow:0 4px 20px rgba(0,0,0,.2);
+  background:var(--accent-soft);color:var(--accent-dark);
+  display:flex;align-items:center;justify-content:center;
+  font-size:var(--fs-2xl);font-weight:700;
+  font-family:var(--font-head);
+  overflow:hidden;
+  z-index:10;
+">
+  ${p.imageUrl
+    ? `<img src="${p.imageUrl}" alt="${p.businessName}" style="width:100%;height:100%;object-fit:cover">`
+    : p.businessName[0]}
+</div>
+    </div>
+
+    <!-- Header -->
+    <div class="prov-header" style="padding-top:60px">
+      <div class="prov-header-inner">
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:var(--sp-3)">
+          <div>
+            <h1 style="font-size:var(--fs-xl);margin-bottom:6px">${p.businessName}</h1>
+            <span style="font-size:var(--fs-sm);color:var(--ink-soft);display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+              <span>
+                <i class="fa-solid fa-tag" style="color:var(--accent);margin-right:4px"></i>${p.category}
               </span>
-            </div>
-            <div style="display:flex;gap:var(--sp-2);padding-bottom:4px;flex-wrap:wrap">
-              <button class="btn btn-outline btn-sm" id="followBtn" onclick="toggleFollow()">
-                <i class="fa-solid ${followStatus.isFollowing?'fa-user-check':'fa-user-plus'}"></i>
-                ${followStatus.isFollowing ? 'İzlənilir' : 'İzlə'}
-              </button>
-              <button class="btn btn-outline btn-sm" onclick="openReviewModal()">
-                <i class="fa-solid fa-star" style="color:var(--accent)"></i> Rəy yaz
-              </button>
-              <a href="booking.html?providerId=${p.id}" class="btn btn-primary btn-sm">
-                <i class="fa-solid fa-calendar-plus"></i> Randevu al
-              </a>
-            </div>
+              ${p.address ? `
+              <span>·</span>
+              <a href="https://www.google.com/maps/search/${encodeURIComponent(p.address)}"
+                target="_blank"
+                style="color:var(--ink-soft);text-decoration:none;display:flex;align-items:center;gap:4px;transition:color .18s ease"
+                onmouseover="this.style.color='var(--accent)'"
+                onmouseout="this.style.color='var(--ink-soft)'">
+                <i class="fa-solid fa-location-dot" style="color:var(--accent)"></i>${p.address}
+              </a>` : ''}
+            </span>
           </div>
 
-          <div class="prov-stat-row" style="margin-top:var(--sp-3)">
-            <div class="prov-stat"><b>${postsData.length}</b><span>post</span></div>
-            <div class="prov-stat"><b id="followerCount">${followStatus.followersCount||0}</b><span>izləyici</span></div>
-            <div class="prov-stat"><b>${svcsData.length}</b><span>xidmət</span></div>
-            <div class="prov-stat">
-              <b>★ ${(p.averageRating||0).toFixed(1)}</b>
-              <span>(${p.reviewCount||0} rəy)</span>
-            </div>
-          </div>
-
-          ${p.description ? `<p style="font-size:var(--fs-sm);color:var(--ink-soft);max-width:560px;margin-bottom:var(--sp-3);margin-top:var(--sp-2)">${p.description}</p>` : ''}
-
-          <div class="prov-tabs">
-            <button class="prov-tab active" onclick="switchTab(this,'posts')">
-              <i class="fa-solid fa-grid-2" style="margin-right:6px"></i>Postlar
+          <!-- Buttons -->
+          <div style="display:flex;gap:var(--sp-2);padding-bottom:4px;flex-wrap:wrap">
+            <button class="btn btn-outline btn-sm" id="followBtn" onclick="toggleFollow()">
+              <i class="fa-solid ${followStatus.isFollowing ? 'fa-user-check' : 'fa-user-plus'}"></i>
+              ${followStatus.isFollowing ? 'İzlənilir' : 'İzlə'}
             </button>
-            <button class="prov-tab" onclick="switchTab(this,'services')">
-              <i class="fa-solid fa-briefcase-medical" style="margin-right:6px"></i>Xidmətlər
+            <button class="btn btn-outline btn-sm" onclick="openReviewModal()">
+              <i class="fa-solid fa-star" style="color:var(--accent)"></i> Rəy yaz
             </button>
-            <button class="prov-tab" onclick="switchTab(this,'reviews')">
-              <i class="fa-solid fa-star" style="margin-right:6px"></i>Rəylər
-            </button>
+            <a href="booking.html?providerId=${p.id}" class="btn btn-primary btn-sm">
+              <i class="fa-solid fa-calendar-plus"></i> Randevu al
+            </a>
           </div>
         </div>
+
+        <!-- Stats -->
+        <div class="prov-stat-row" style="margin-top:var(--sp-3)">
+          <div class="prov-stat"><b>${postsData.length}</b><span>post</span></div>
+          <div class="prov-stat"><b id="followerCount">${followStatus.followersCount||0}</b><span>izləyici</span></div>
+          <div class="prov-stat"><b>${svcsData.length}</b><span>xidmət</span></div>
+          <div class="prov-stat">
+            <b>★ ${(p.averageRating||0).toFixed(1)}</b>
+            <span>(${p.reviewCount||0} rəy)</span>
+          </div>
+        </div>
+
+        ${p.description
+          ? `<p style="font-size:var(--fs-sm);color:var(--ink-soft);max-width:560px;margin-bottom:var(--sp-3);margin-top:var(--sp-2)">${p.description}</p>`
+          : ''}
+
+        <!-- Tabs -->
+        <div class="prov-tabs">
+          <button class="prov-tab active" onclick="switchTab(this,'posts')">
+            <i class="fa-solid fa-grid-2" style="margin-right:6px"></i>Postlar
+          </button>
+          <button class="prov-tab" onclick="switchTab(this,'services')">
+            <i class="fa-solid fa-briefcase-medical" style="margin-right:6px"></i>Xidmətlər
+          </button>
+          <button class="prov-tab" onclick="switchTab(this,'reviews')">
+            <i class="fa-solid fa-star" style="margin-right:6px"></i>Rəylər
+          </button>
+        </div>
       </div>
+    </div>
 
-      <div class="container" style="max-width:900px">
-        <div id="tabContent"></div>
-      </div>`;
+    <div class="container" style="max-width:900px">
+      <div id="tabContent"></div>
+    </div>`;
 
-    renderTab('posts');
-  }
+  renderTab('posts');
+}
 
   /* ══ TABS ══ */
   function switchTab(btn, tab) {
@@ -490,42 +550,57 @@
     loadComments(postId);
   }
 
-  async function loadComments(postId) {
-    try {
-      const comments  = await cApi.getComments(postId);
-      const arr       = Array.isArray(comments) ? comments : [];
-      const container = document.getElementById('modalComments');
-      if (!container) return;
+ async function loadComments(postId) {
+  try {
+    const comments  = await cApi.getComments(postId);
+    const arr       = Array.isArray(comments) ? comments : [];
+    const container = document.getElementById('modalComments');
+    if (!container) return;
 
-      const caption = curPost?.caption
-        ? `<div class="comment-row">
-             <div class="comment-ava">${provData.businessName[0]}</div>
-             <div class="comment-body">
-               <strong>${provData.businessName}</strong>
-               <p>${curPost.caption}</p>
-             </div>
-           </div>` : '';
+    const caption = curPost?.caption
+      ? `<div class="comment-row">
+           <div class="comment-ava">
+             ${provData.imageUrl
+               ? `<img src="${provData.imageUrl}" alt="${provData.businessName}"
+                   style="width:100%;height:100%;object-fit:cover;border-radius:50%">`
+               : provData.businessName[0]}
+           </div>
+           <div class="comment-body">
+             <strong>${provData.businessName}</strong>
+             <p>${curPost.caption}</p>
+           </div>
+         </div>` : '';
 
-      if (!arr.length) {
-        container.innerHTML = caption + `
-          <div style="text-align:center;padding:var(--sp-5) 0;font-size:var(--fs-sm);color:var(--ink-soft)">
-            <i class="fa-regular fa-comment" style="display:block;font-size:1.5rem;margin-bottom:8px;color:var(--border-strong)"></i>
-            Hələ şərh yoxdur. İlk şərhi siz yazın!
-          </div>`;
-        return;
-      }
-      container.innerHTML = caption + arr.map(c => `
+    if (!arr.length) {
+      container.innerHTML = caption + `
+        <div style="text-align:center;padding:var(--sp-5) 0;font-size:var(--fs-sm);color:var(--ink-soft)">
+          <i class="fa-regular fa-comment" style="display:block;font-size:1.5rem;margin-bottom:8px;color:var(--border-strong)"></i>
+          Hələ şərh yoxdur. İlk şərhi siz yazın!
+        </div>`;
+      return;
+    }
+
+    container.innerHTML = caption + arr.map(c => {
+      const isProvider  = c.userFullName === provData.ownerFullName;
+      const displayName = isProvider ? provData.businessName : c.userFullName;
+      const avatarHtml  = isProvider && provData.imageUrl
+        ? `<img src="${provData.imageUrl}" alt="${displayName}"
+            style="width:100%;height:100%;object-fit:cover;border-radius:50%">`
+        : displayName?.[0]?.toUpperCase() || '?';
+
+      return `
         <div class="comment-row">
-          <div class="comment-ava">${c.userFullName?.[0]?.toUpperCase()||'?'}</div>
+          <div class="comment-ava">${avatarHtml}</div>
           <div class="comment-body">
-            <strong>${c.userFullName}</strong>
+            <strong>${displayName}</strong>
             <p>${c.content}</p>
           </div>
-        </div>`).join('');
-      container.scrollTop = container.scrollHeight;
-    } catch(e) { console.error('Şərhlər yüklənmədi:', e); }
-  }
+        </div>`;
+    }).join('');
 
+    container.scrollTop = container.scrollHeight;
+  } catch(e) { console.error('Şərhlər yüklənmədi:', e); }
+}
   async function toggleLike() {
   if (!curPost) return;
   const btn = document.getElementById('modalLikeBtn');
@@ -721,5 +796,5 @@
     }
   }
 </script>
-</body>
+  </body>
 </html>

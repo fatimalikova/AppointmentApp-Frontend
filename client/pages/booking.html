@@ -514,21 +514,22 @@
   }
 
   async function selectDay(d) {
-    sel.date = new Date(calYear, calMonth, d);
-    sel.slot = null;
-    document.getElementById('step2Next').disabled = true;
-    updateSummary();
-    renderCal();
+  sel.date = new Date(calYear, calMonth, d);
+  sel.slot = null;
+  document.getElementById('step2Next').disabled = true;
+  updateSummary();
+  renderCal();
 
-    const slotSec = document.getElementById('slotSection');
-    slotSec.classList.remove('hidden');
-    document.getElementById('slotsList').innerHTML = '<div class="spinner-wrap"><div class="spinner"></div></div>';
-    slotSec.scrollIntoView({ behavior:'smooth', block:'start' });
+  const slotSec = document.getElementById('slotSection');
+  slotSec.classList.remove('hidden');
+  document.getElementById('slotsList').innerHTML = '<div class="spinner-wrap"><div class="spinner"></div></div>';
+  slotSec.scrollIntoView({ behavior:'smooth', block:'start' });
 
-    const iso   = sel.date.toISOString().split('T')[0];
-    const slots = await cApi.getSlots(sel.provId, sel.svcId, iso).catch(() => []);
-    renderSlots(Array.isArray(slots) ? slots : []);
-  }
+  /* toLocaleDateString('en-CA') → "2026-07-10" lokal vaxt ilə */
+  const iso   = sel.date.toLocaleDateString('en-CA');
+  const slots = await cApi.getSlots(sel.provId, sel.svcId, iso).catch(() => []);
+  renderSlots(Array.isArray(slots) ? slots : []);
+}
 
   function renderSlots(slots) {
     const c = document.getElementById('slotsList');

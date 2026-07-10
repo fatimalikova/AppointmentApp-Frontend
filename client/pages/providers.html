@@ -1,16 +1,21 @@
 <!DOCTYPE html>
 <html lang="az">
-<head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Mütəxəssislər — Appointment System</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="../css/client.css">
-  <style>
+  <head>
+    <meta charset="UTF-8"><meta name="viewport"
+      content="width=device-width,initial-scale=1">
+    <title>Mütəxəssislər — Appointment System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet">
+    <link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/client.css">
+    <style>
     .search-hero{
       background:linear-gradient(135deg,var(--primary-dark),var(--primary));
       padding:var(--sp-10) 0;
+      z-index: 1;
     }
     .search-hero h1{color:#fff;font-size:var(--fs-2xl);margin-bottom:var(--sp-3)}
     .search-hero p{color:rgba(255,255,255,.6);margin-bottom:var(--sp-6)}
@@ -26,8 +31,13 @@
     }
     .search-box input::placeholder{color:var(--ink-soft)}
     .filter-bar-sticky{
-      background:var(--surface);border-bottom:1px solid var(--border);
-      padding:var(--sp-4) 0;position:sticky;top:70px;z-index:50;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: var(--sp-4) 0;
+      position: sticky;
+      top: var(--nav-h);  
+      z-index: 50;
+      box-shadow: var(--shadow-sm);
     }
     .filter-chips{display:flex;gap:var(--sp-2);flex-wrap:wrap}
     .filter-chip{
@@ -45,72 +55,86 @@
     }
     .providers-count{font-size:var(--fs-sm);color:var(--ink-soft);margin-bottom:var(--sp-5)}
   </style>
-</head>
-<body>
-<div id="navbar"></div>
+  </head>
+  <body>
+    <div id="navbar"></div>
 
-<!-- Search Hero -->
-<div class="search-hero">
-  <div class="container">
-    <div class="section-tag" style="background:rgba(201,145,47,.2);color:var(--accent-light)">
-      <i class="fa-solid fa-magnifying-glass"></i> Axtarış
+    <!-- Search Hero -->
+    <div class="search-hero">
+      <div class="container">
+        <div class="section-tag"
+          style="background:rgba(201,145,47,.2);color:var(--accent-light)">
+          <i class="fa-solid fa-magnifying-glass"></i> Axtarış
+        </div>
+        <h1>Sizin üçün mütəxəssis tapın</h1>
+        <p>Kateqoriya, reytinq və ünvana görə filtr edin</p>
+        <div class="search-box">
+          <i class="fa-solid fa-magnifying-glass"
+            style="color:var(--ink-soft);align-self:center;margin-left:var(--sp-2)"></i>
+          <input type="text" id="searchInput"
+            placeholder="Mütəxəssis adı və ya kateqoriya axtar...">
+          <button class="btn btn-primary" onclick="doSearch()">
+            <i class="fa-solid fa-magnifying-glass"></i> Axtar
+          </button>
+        </div>
+      </div>
     </div>
-    <h1>Sizin üçün mütəxəssis tapın</h1>
-    <p>Kateqoriya, reytinq və ünvana görə filtr edin</p>
-    <div class="search-box">
-      <i class="fa-solid fa-magnifying-glass" style="color:var(--ink-soft);align-self:center;margin-left:var(--sp-2)"></i>
-      <input type="text" id="searchInput" placeholder="Mütəxəssis adı və ya kateqoriya axtar...">
-      <button class="btn btn-primary" onclick="doSearch()">
-        <i class="fa-solid fa-magnifying-glass"></i> Axtar
-      </button>
+
+    <!-- Filter bar -->
+    <div class="filter-bar-sticky">
+      <div class="container"
+        style="display:flex;align-items:center;justify-content:space-between;gap:var(--sp-4);flex-wrap:wrap">
+        <div class="filter-chips" id="catFilters">
+          <button class="filter-chip active" data-cat
+            onclick="setCategory(this,'')">Hamısı</button>
+          <button class="filter-chip" data-cat="Stomatoloq"
+            onclick="setCategory(this,'Stomatoloq')">
+            <i class="fa-solid fa-tooth" style="margin-right:4px"></i>Stomatoloq
+          </button>
+          <button class="filter-chip" data-cat="Gözəllik salonu"
+            onclick="setCategory(this,'Gözəllik salonu')">
+            <i class="fa-solid fa-scissors"
+              style="margin-right:4px"></i>Gözəllik
+          </button>
+          <button class="filter-chip" data-cat="Masaj"
+            onclick="setCategory(this,'Masaj')">
+            <i class="fa-solid fa-hand-dots" style="margin-right:4px"></i>Masaj
+          </button>
+          <button class="filter-chip" data-cat="Repetitor"
+            onclick="setCategory(this,'Repetitor')">
+            <i class="fa-solid fa-book-open"
+              style="margin-right:4px"></i>Repetitor
+          </button>
+          <button class="filter-chip" data-cat="Psixoloq"
+            onclick="setCategory(this,'Psixoloq')">
+            <i class="fa-solid fa-brain" style="margin-right:4px"></i>Psixoloq
+          </button>
+        </div>
+        <select class="sort-select" id="sortSelect"
+          onchange="renderProviders()">
+          <option value="rating">Reytinqə görə</option>
+          <option value="reviews">Rəy sayına görə</option>
+          <option value="name">Ada görə</option>
+        </select>
+      </div>
     </div>
-  </div>
-</div>
 
-<!-- Filter bar -->
-<div class="filter-bar-sticky">
-  <div class="container" style="display:flex;align-items:center;justify-content:space-between;gap:var(--sp-4);flex-wrap:wrap">
-    <div class="filter-chips" id="catFilters">
-      <button class="filter-chip active" data-cat="" onclick="setCategory(this,'')">Hamısı</button>
-      <button class="filter-chip" data-cat="Stomatoloq" onclick="setCategory(this,'Stomatoloq')">
-        <i class="fa-solid fa-tooth" style="margin-right:4px"></i>Stomatoloq
-      </button>
-      <button class="filter-chip" data-cat="Gözəllik salonu" onclick="setCategory(this,'Gözəllik salonu')">
-        <i class="fa-solid fa-scissors" style="margin-right:4px"></i>Gözəllik
-      </button>
-      <button class="filter-chip" data-cat="Masaj" onclick="setCategory(this,'Masaj')">
-        <i class="fa-solid fa-hand-dots" style="margin-right:4px"></i>Masaj
-      </button>
-      <button class="filter-chip" data-cat="Repetitor" onclick="setCategory(this,'Repetitor')">
-        <i class="fa-solid fa-book-open" style="margin-right:4px"></i>Repetitor
-      </button>
-      <button class="filter-chip" data-cat="Psixoloq" onclick="setCategory(this,'Psixoloq')">
-        <i class="fa-solid fa-brain" style="margin-right:4px"></i>Psixoloq
-      </button>
-    </div>
-    <select class="sort-select" id="sortSelect" onchange="renderProviders()">
-      <option value="rating">Reytinqə görə</option>
-      <option value="reviews">Rəy sayına görə</option>
-      <option value="name">Ada görə</option>
-    </select>
-  </div>
-</div>
+    <!-- Results -->
+    <section class="section-sm">
+      <div class="container">
+        <div class="providers-count" id="resultCount"></div>
+        <div class="grid-4" id="providersGrid">
+          <div class="spinner-wrap" style="grid-column:1/-1"><div
+              class="spinner"></div></div>
+        </div>
+      </div>
+    </section>
 
-<!-- Results -->
-<section class="section-sm">
-  <div class="container">
-    <div class="providers-count" id="resultCount"></div>
-    <div class="grid-4" id="providersGrid">
-      <div class="spinner-wrap" style="grid-column:1/-1"><div class="spinner"></div></div>
-    </div>
-  </div>
-</section>
+    <div id="footer"></div>
 
-<div id="footer"></div>
-
-<script src="../js/client-api.js"></script>
-<script src="../js/layout.js"></script>
-<script>
+    <script src="../js/client-api.js"></script>
+    <script src="../js/layout.js"></script>
+    <script>
   let allProviders = [];
   let currentCategory = '';
   let currentSearch = '';
@@ -197,5 +221,5 @@
       </a>`).join('');
   }
 </script>
-</body>
+  </body>
 </html>

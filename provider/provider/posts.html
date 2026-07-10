@@ -72,30 +72,39 @@
               class="fa-solid fa-xmark"></i></button>
         </div>
         <div class="modal-body">
-  <div class="alert hidden" id="createAlert"></div>
+          <div class="alert hidden" id="createAlert"></div>
 
-  <div class="field">
-    <label><i class="fa-solid fa-image" style="color:var(--accent);margin-right:6px"></i>Şəkil</label>
-    <div style="display:flex;align-items:center;gap:var(--sp-3)">
-      <label for="photoFile" class="btn btn-outline btn-sm" style="cursor:pointer;margin:0">
-        <i class="fa-solid fa-upload"></i> Şəkil seç
-      </label>
-      <span id="photoFileName" style="font-size:var(--fs-sm);color:var(--ink-soft)">Fayl seçilməyib</span>
-    </div>
-    <input type="file" id="photoFile" accept="image/*" style="display:none" onchange="handlePhotoUpload(this)">
-    <div id="uploadStatus" style="font-size:var(--fs-xs);margin-top:var(--sp-2)"></div>
-    <input type="hidden" id="imgUrl">
-  </div>
+          <div class="field">
+            <label><i class="fa-solid fa-image"
+                style="color:var(--accent);margin-right:6px"></i>Şəkil</label>
+            <div style="display:flex;align-items:center;gap:var(--sp-3)">
+              <label for="photoFile" class="btn btn-outline btn-sm"
+                style="cursor:pointer;margin:0">
+                <i class="fa-solid fa-upload"></i> Şəkil seç
+              </label>
+              <span id="photoFileName"
+                style="font-size:var(--fs-sm);color:var(--ink-soft)">Fayl
+                seçilməyib</span>
+            </div>
+            <input type="file" id="photoFile" accept="image/*"
+              style="display:none" onchange="handlePhotoUpload(this)">
+            <div id="uploadStatus"
+              style="font-size:var(--fs-xs);margin-top:var(--sp-2)"></div>
+            <input type="hidden" id="imgUrl">
+          </div>
 
-  <div class="field">
-    <label><i class="fa-solid fa-comment" style="color:var(--accent);margin-right:6px"></i>Açıqlama</label>
-    <textarea id="caption" placeholder="Post haqqında məlumat..."></textarea>
-  </div>
+          <div class="field">
+            <label><i class="fa-solid fa-comment"
+                style="color:var(--accent);margin-right:6px"></i>Açıqlama</label>
+            <textarea id="caption"
+              placeholder="Post haqqında məlumat..."></textarea>
+          </div>
 
-  <div id="imgPreview" class="hidden" style="margin-top:var(--sp-3)">
-    <img id="previewImgEl" style="width:100%;border-radius:var(--r-md);max-height:200px;object-fit:cover">
-  </div>
-</div>
+          <div id="imgPreview" class="hidden" style="margin-top:var(--sp-3)">
+            <img id="previewImgEl"
+              style="width:100%;border-radius:var(--r-md);max-height:200px;object-fit:cover">
+          </div>
+        </div>
         <div class="modal-foot">
           <button class="btn btn-ghost" onclick="closeModal('createModal')">Ləğv
             et</button>
@@ -170,6 +179,15 @@
     <script src="../js/layout.js"></script>
     <script>
   let myUserId = '';
+  let myProviderName = '';
+
+(async () => {
+  const profile = await pApi.profile().catch(() => null);
+  if (profile) {
+    myUserId = profile.userId || profile.id || '';
+    myProviderName = profile.fullName || '';
+  }
+})();
 
   (async () => {
     const profile = await pApi.profile().catch(() => null);
@@ -313,7 +331,9 @@
       return;
     }
 
-    cl.innerHTML = comments.map(c => `
+    cl.innerHTML = comments.map(c => {
+  const isOwn = c.userFullName === myProviderName;
+  return `
   <div class="comment-item" id="comment-${c.id}">
     <div class="comment-avatar" style="background:var(--accent-soft);color:var(--accent-dark);font-family:var(--font-head)">
       ${c.userFullName?.[0]?.toUpperCase() || '?'}
@@ -328,23 +348,23 @@
           <button class="btn btn-primary btn-xs" onclick="saveEdit('${c.id}')">
             <i class="fa-solid fa-check"></i> Saxla
           </button>
-          <button class="btn btn-ghost btn-xs" onclick="cancelEdit('${c.id}')">
-            Ləğv et
-          </button>
+          <button class="btn btn-ghost btn-xs" onclick="cancelEdit('${c.id}')">Ləğv et</button>
         </div>
       </div>
     </div>
     <div class="comment-actions">
-      <button class="btn-icon" onclick="startEdit('${c.id}')" title="Redaktə et"
-        style="color:var(--ink-soft)">
-        <i class="fa-solid fa-pen"></i>
-      </button>
+      ${isOwn ? `
+        <button class="btn-icon" onclick="startEdit('${c.id}')" title="Redaktə et"
+          style="color:var(--ink-soft)">
+          <i class="fa-solid fa-pen"></i>
+        </button>` : ''}
       <button class="btn-icon" onclick="deleteComment('${c.id}')" title="Sil"
         style="color:var(--danger);border-color:var(--danger-soft)">
         <i class="fa-solid fa-trash"></i>
       </button>
     </div>
-  </div>`).join('');
+  </div>`;
+}).join('');
   }
 
   async function addComment() {
@@ -364,19 +384,30 @@
     }
   }
 
-  async function deleteComment(commentId) {
-    if (!confirm('Bu şərhi silmək istədiyinizə əminsiniz?')) return;
-    try {
-      await pApi.deleteComment(commentId);
-      document.getElementById('comment-' + commentId)?.remove();
-      // Comment sayını azalt
-      const postId  = document.getElementById('currentPostId').value;
-      const countEl = document.getElementById('commentCount-' + postId);
-      if (countEl) countEl.textContent = Math.max(0, parseInt(countEl.textContent) - 1);
-    } catch(err) {
-      showAlert('#commentAlert', err.message);
-    }
+  function deleteComment(commentId) {
+  document.getElementById('deleteCommentId').value = commentId;
+  openModal('deleteCommentModal');
+}
+
+async function confirmDeleteComment() {
+  const commentId = document.getElementById('deleteCommentId').value;
+  const btn = document.querySelector('#deleteCommentModal .btn-danger');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+  try {
+    await pApi.deleteComment(commentId);
+    closeModal('deleteCommentModal');
+    document.getElementById('comment-' + commentId)?.remove();
+    const postId  = document.getElementById('currentPostId').value;
+    const countEl = document.getElementById('commentCount-' + postId);
+    if (countEl) countEl.textContent = Math.max(0, parseInt(countEl.textContent) - 1);
+  } catch(err) {
+    showAlert('#commentAlert', err.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-trash"></i> Sil';
   }
+}
 
   function startEdit(commentId) {
   document.getElementById('commentText-' + commentId).classList.add('hidden');
@@ -438,5 +469,30 @@ async function saveEdit(commentId) {
 
   loadPosts();
 </script>
+
+<!-- Comment sil modal -->
+<div class="overlay hidden" id="deleteCommentModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3><i class="fa-solid fa-trash" style="color:var(--danger);margin-right:8px"></i>Şərhi Sil</h3>
+      <button class="btn-icon" onclick="closeModal('deleteCommentModal')">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="alert alert-warning" style="display:flex">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span>Bu şərhi silmək istədiyinizə əminsiniz? Bu əməliyyat geri alına bilməz.</span>
+      </div>
+      <input type="hidden" id="deleteCommentId">
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('deleteCommentModal')">Ləğv et</button>
+      <button class="btn btn-danger" onclick="confirmDeleteComment()">
+        <i class="fa-solid fa-trash"></i> Sil
+      </button>
+    </div>
+  </div>
+</div>
   </body>
 </html>

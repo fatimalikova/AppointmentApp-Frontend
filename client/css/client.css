@@ -168,20 +168,22 @@ textarea {
 }
 
 /* ═══════════ NAVBAR ═══════════ */
+#navbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
 .navbar {
     height: var(--nav-h);
     background: var(--surface);
     border-bottom: 1px solid var(--border);
-    position: sticky;
-    top: 0;
-    z-index: 100;
     transition: box-shadow .2s ease;
 }
 
 .navbar.scrolled {
     box-shadow: var(--shadow-md)
 }
-
 .nav-inner {
     height: 100%;
     display: flex;
@@ -1988,3 +1990,7 @@ textarea {
         grid-template-columns: 1fr
     }
 }
+
+html { overflow-x: clip; }
+
+body { overflow-x: clip; }
