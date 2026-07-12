@@ -1,46 +1,21 @@
 <!DOCTYPE html>
 <html lang="az">
-  <head>
-    <meta charset="UTF-8"><meta name="viewport"
-      content="width=device-width,initial-scale=1">
-    <title>Provider Profili — Appointment System</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link
-      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap"
-      rel="stylesheet">
-    <link rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="../css/client.css">
-    <style>
-    .prov-cover{
-      height:240px;
-      background:linear-gradient(135deg,#082627 0%,#0f2b2b 50%,#1a4040 100%);
-      position:relative;overflow:hidden;
-    }
-    .prov-cover::after{
-      content:'';position:absolute;inset:0;opacity:.12;
-      background-image:radial-gradient(circle,rgba(201,145,47,.8) 1px,transparent 1px);
-      background-size:20px 20px;
-    }
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Provider Profili — Appointment System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/client.css">
+  <style>
+    .prov-cover{height:240px;background:linear-gradient(135deg,#082627 0%,#0f2b2b 50%,#1a4040 100%);position:relative;overflow:hidden}
+    .prov-cover::after{content:'';position:absolute;inset:0;opacity:.12;background-image:radial-gradient(circle,rgba(201,145,47,.8) 1px,transparent 1px);background-size:20px 20px}
     .prov-header{background:var(--surface);border-bottom:1px solid var(--border);margin-bottom:var(--sp-6)}
     .prov-header-inner{max-width:900px;margin:0 auto;padding:0 var(--sp-5)}
-    .prov-avatar-lg{
-      width:104px;height:104px;border-radius:50%;
-      border:4px solid var(--surface);
-      box-shadow:0 4px 16px rgba(0,0,0,.12);
-      background:var(--accent-soft);color:var(--accent-dark);
-      display:flex;align-items:center;justify-content:center;
-      font-size:var(--fs-2xl);font-weight:700;font-family:var(--font-head);
-      margin-top:-52px;margin-bottom:var(--sp-3);overflow:hidden;flex-shrink:0;
-    }
+    .prov-avatar-lg{width:104px;height:104px;border-radius:50%;border:4px solid var(--surface);box-shadow:0 4px 16px rgba(0,0,0,.12);background:var(--accent-soft);color:var(--accent-dark);display:flex;align-items:center;justify-content:center;font-size:var(--fs-2xl);font-weight:700;font-family:var(--font-head);margin-top:-52px;margin-bottom:var(--sp-3);overflow:hidden;flex-shrink:0}
     .prov-avatar-lg img{width:100%;height:100%;object-fit:cover}
     .prov-tabs{display:flex;gap:var(--sp-5);border-bottom:1px solid var(--border);margin-top:var(--sp-4)}
-    .prov-tab{
-      padding:var(--sp-3) 0;font-size:var(--fs-sm);font-weight:600;
-      color:var(--ink-soft);border-bottom:2px solid transparent;
-      background:none;border-top:none;border-left:none;border-right:none;
-      cursor:pointer;transition:all .18s ease;
-    }
+    .prov-tab{padding:var(--sp-3) 0;font-size:var(--fs-sm);font-weight:600;color:var(--ink-soft);border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;cursor:pointer;transition:all .18s ease}
     .prov-tab:hover{color:var(--ink)}
     .prov-tab.active{color:var(--ink);border-bottom-color:var(--accent)}
     .prov-stat-row{display:flex;gap:var(--sp-6);margin-bottom:var(--sp-3)}
@@ -48,24 +23,13 @@
     .prov-stat b{font-family:var(--font-head);font-size:var(--fs-lg);color:var(--primary)}
     .prov-stat span{font-size:var(--fs-xs);color:var(--ink-soft)}
     .post-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-3)}
-    .post-tile{
-      aspect-ratio:1;border-radius:var(--r-md);overflow:hidden;
-      background:var(--surface-soft);cursor:pointer;position:relative;
-    }
+    .post-tile{aspect-ratio:4/5;border-radius:var(--r-md);overflow:hidden;background:var(--surface-soft);cursor:pointer;position:relative}
     .post-tile img{width:100%;height:100%;object-fit:cover;transition:transform .3s ease}
     .post-tile:hover img{transform:scale(1.06)}
-    .post-tile-overlay{
-      position:absolute;inset:0;background:rgba(8,38,39,.55);opacity:0;
-      transition:opacity .2s ease;display:flex;align-items:center;justify-content:center;gap:var(--sp-4);
-    }
+    .post-tile-overlay{position:absolute;inset:0;background:rgba(8,38,39,.55);opacity:0;transition:opacity .2s ease;display:flex;align-items:center;justify-content:center;gap:var(--sp-4)}
     .post-tile:hover .post-tile-overlay{opacity:1}
     .post-tile-stat{color:#fff;font-size:var(--fs-sm);font-weight:600;display:flex;align-items:center;gap:6px}
-    .svc-item{
-      display:flex;align-items:center;justify-content:space-between;
-      padding:var(--sp-4);border:1px solid var(--border);
-      border-radius:var(--r-md);margin-bottom:var(--sp-3);
-      background:var(--surface);transition:box-shadow .18s ease;
-    }
+    .svc-item{display:flex;align-items:center;justify-content:space-between;padding:var(--sp-4);border:1px solid var(--border);border-radius:var(--r-md);margin-bottom:var(--sp-3);background:var(--surface);transition:box-shadow .18s ease}
     .svc-item:hover{box-shadow:var(--shadow-md)}
     .review-item{padding:var(--sp-4);border-bottom:1px solid var(--border)}
     .review-item:last-child{border-bottom:none}
@@ -74,148 +38,109 @@
 
     /* Post Modal */
     .post-modal-wrap{display:grid;grid-template-columns:1fr 380px;min-height:520px;max-height:85vh}
-    .post-modal-img{
-      background:var(--primary-dark);display:flex;align-items:center;justify-content:center;
-      overflow:hidden;border-radius:var(--r-lg) 0 0 var(--r-lg);
-    }
+    .post-modal-img{background:var(--primary-dark);display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:var(--r-lg) 0 0 var(--r-lg)}
     .post-modal-img img{width:100%;height:100%;object-fit:contain;max-height:85vh}
     .post-modal-side{display:flex;flex-direction:column;border-left:1px solid var(--border);overflow:hidden}
-    .post-modal-head{
-      display:flex;align-items:center;gap:12px;
-      padding:var(--sp-4);border-bottom:1px solid var(--border);flex-shrink:0;
-    }
-    .post-modal-prov-ava{
-      width:40px;height:40px;border-radius:50%;
-      background:var(--primary);color:var(--accent);
-      display:flex;align-items:center;justify-content:center;
-      font-weight:700;font-size:.9rem;overflow:hidden;flex-shrink:0;
-    }
+    .post-modal-head{display:flex;align-items:center;gap:12px;padding:var(--sp-4);border-bottom:1px solid var(--border);flex-shrink:0}
+    .post-modal-prov-ava{width:40px;height:40px;border-radius:50%;background:var(--primary);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;overflow:hidden;flex-shrink:0}
     .post-modal-prov-ava img{width:100%;height:100%;object-fit:cover}
     .post-modal-comments{flex:1;overflow-y:auto;padding:var(--sp-3) var(--sp-4)}
-    .comment-row{
-      display:flex;align-items:flex-start;gap:10px;
-      padding:var(--sp-2) 0;border-bottom:1px solid var(--border);
-    }
+    .comment-row{display:flex;align-items:flex-start;gap:10px;padding:var(--sp-2) 0;border-bottom:1px solid var(--border)}
     .comment-row:last-child{border-bottom:none}
-    .comment-ava{
-      width:30px;height:30px;border-radius:50%;
-      background:var(--primary);color:var(--accent);
-      display:flex;align-items:center;justify-content:center;
-      font-size:.65rem;font-weight:700;flex-shrink:0;
-    }
+    .comment-ava{width:30px;height:30px;border-radius:50%;background:var(--primary);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;flex-shrink:0}
     .comment-body strong{font-size:.78rem;display:block;margin-bottom:2px}
     .comment-body p{font-size:.78rem;color:var(--ink-soft);line-height:1.4;margin:0}
     .post-modal-actions{padding:var(--sp-3) var(--sp-4);border-top:1px solid var(--border);flex-shrink:0}
     .like-row{display:flex;align-items:center;gap:var(--sp-3);margin-bottom:var(--sp-3)}
-    .like-btn{
-      display:flex;align-items:center;gap:6px;
-      background:none;border:none;cursor:pointer;
-      font-size:.88rem;font-weight:600;color:var(--ink-soft);
-      padding:0;transition:color .18s ease;font-family:var(--font-body);
-    }
+    .like-btn{display:flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;font-size:.88rem;font-weight:600;color:var(--ink-soft);padding:0;transition:color .18s ease;font-family:var(--font-body)}
     .like-btn.liked{color:var(--danger)}
     .like-btn:hover{color:var(--danger)}
     .like-btn i{font-size:1.1rem;transition:transform .2s ease}
     .like-btn:hover i{transform:scale(1.15)}
     .comment-form{display:flex;gap:var(--sp-2);align-items:flex-end}
-    .comment-form textarea{
-      flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--r-sm);
-      font-size:.8rem;resize:none;font-family:var(--font-body);
-      outline:none;transition:border-color .18s ease;
-    }
+    .comment-form textarea{flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-size:.8rem;resize:none;font-family:var(--font-body);outline:none;transition:border-color .18s ease}
     .comment-form textarea:focus{border-color:var(--primary)}
-    .comment-form button{
-      padding:8px 16px;background:var(--accent);color:#fff;
-      border:none;border-radius:var(--r-sm);font-size:.8rem;font-weight:700;
-      cursor:pointer;white-space:nowrap;font-family:var(--font-body);
-      transition:background .18s ease;
-    }
+    .comment-form button{padding:8px 16px;background:var(--accent);color:#fff;border:none;border-radius:var(--r-sm);font-size:.8rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:var(--font-body);transition:background .18s ease}
     .comment-form button:hover{background:var(--accent-dark)}
 
     /* Star rating */
     .star-row{display:flex;gap:4px;margin-bottom:var(--sp-4)}
-    .star-pick{
-      font-size:1.8rem;background:none;border:none;cursor:pointer;
-      color:var(--border-strong);padding:0;transition:color .15s ease;
-      font-family:var(--font-body);
-    }
+    .star-pick{font-size:1.8rem;background:none;border:none;cursor:pointer;color:var(--border-strong);padding:0;transition:color .15s ease;font-family:var(--font-body)}
     .star-pick.on{color:var(--accent)}
 
-    @media(max-width:720px){
-      .post-modal-wrap{grid-template-columns:1fr}
-      .post-modal-img{border-radius:var(--r-lg) var(--r-lg) 0 0;max-height:280px}
-      .post-modal-side{border-left:none;border-top:1px solid var(--border)}
-    }
+    /* ── Oxşar mütəxəssislər ── */
+    .similar-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(220px, 280px));
+  gap:var(--sp-5);
+  justify-content:flex-start;
+}
+    .similar-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;transition:all .2s ease;cursor:pointer;text-decoration:none;display:block}
+    .similar-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg)}
+    .similar-cover{height:100px;background:linear-gradient(135deg,#082627,#1a4040);position:relative;background-size:cover;background-position:center}
+    .similar-cover::after{content:'';position:absolute;inset:0;opacity:.1;background-image:radial-gradient(circle,rgba(201,145,47,.8) 1px,transparent 1px);background-size:16px 16px}
+    .similar-body{padding:var(--sp-3) var(--sp-4) var(--sp-4)}
+    .similar-ava{width:90px;height:90px;border-radius:50%;border:4px solid var(--surface);box-shadow:0 4px 16px rgba(0,0,0,.14);background:var(--accent-soft);color:var(--accent-dark);display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-size:var(--fs-xl);font-weight:700;overflow:hidden;margin-top:-38px;left: 80px;bottom: 18px;margin-bottom:var(--sp-3);position:relative;z-index:1}
+    .similar-ava img{width:100%;height:100%;object-fit:cover}
+
+    @media(max-width:720px){.post-modal-wrap{grid-template-columns:1fr}.post-modal-img{border-radius:var(--r-lg) var(--r-lg) 0 0;max-height:280px}.post-modal-side{border-left:none;border-top:1px solid var(--border)}}
   </style>
-  </head>
-  <body>
-    <div id="navbar"></div>
+</head>
+<body>
+<div id="navbar"></div>
 
-    <div id="pageContent">
-      <div class="spinner-wrap"><div class="spinner"></div></div>
+<div id="pageContent">
+  <div class="spinner-wrap"><div class="spinner"></div></div>
+</div>
+
+<div id="footer"></div>
+
+<!-- POST MODAL -->
+<div class="overlay hidden" id="postModal">
+  <div class="modal" style="max-width:860px;padding:0;overflow:hidden">
+    <div class="post-modal-wrap" id="postModalWrap"></div>
+  </div>
+</div>
+
+<!-- REVIEW MODAL -->
+<div class="overlay hidden" id="reviewModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3><i class="fa-solid fa-star" style="color:var(--accent);margin-right:8px"></i>Rəy bildirin</h3>
+      <button class="btn-icon" onclick="closeModal('reviewModal')"><i class="fa-solid fa-xmark"></i></button>
     </div>
-
-    <div id="footer"></div>
-
-    <!-- ══ POST MODAL ══ -->
-    <div class="overlay hidden" id="postModal">
-      <div class="modal" style="max-width:860px;padding:0;overflow:hidden">
-        <div class="post-modal-wrap" id="postModalWrap"></div>
-      </div>
-    </div>
-
-    <!-- ══ REVIEW MODAL ══ -->
-    <div class="overlay hidden" id="reviewModal">
-      <div class="modal">
-        <div class="modal-head">
-          <h3><i class="fa-solid fa-star"
-              style="color:var(--accent);margin-right:8px"></i>Rəy bildirin</h3>
-          <button class="btn-icon" onclick="closeModal('reviewModal')"><i
-              class="fa-solid fa-xmark"></i></button>
-        </div>
-        <div class="modal-body">
-          <div class="alert alert-error hidden" id="reviewAlert"></div>
-
-          <!-- Tamamlanmış görüş seçimi -->
-          <div id="apptSelectWrap"></div>
-
-          <div id="reviewFormBody">
-            <div class="field">
-              <label>Reytinq</label>
-              <div class="star-row" id="starRow">
-                <button class="star-pick" data-v="1" onclick="setStar(1)"><i
-                    class="fa-solid fa-star"></i></button>
-                <button class="star-pick" data-v="2" onclick="setStar(2)"><i
-                    class="fa-solid fa-star"></i></button>
-                <button class="star-pick" data-v="3" onclick="setStar(3)"><i
-                    class="fa-solid fa-star"></i></button>
-                <button class="star-pick" data-v="4" onclick="setStar(4)"><i
-                    class="fa-solid fa-star"></i></button>
-                <button class="star-pick" data-v="5" onclick="setStar(5)"><i
-                    class="fa-solid fa-star"></i></button>
-              </div>
-            </div>
-            <div class="field">
-              <label>Şərh (istəyə görə)</label>
-              <textarea id="reviewComment"
-                placeholder="Xidmət haqqında fikirlərinizi yazın..."></textarea>
-            </div>
+    <div class="modal-body">
+      <div class="alert alert-error hidden" id="reviewAlert"></div>
+      <div id="apptSelectWrap"></div>
+      <div id="reviewFormBody">
+        <div class="field">
+          <label>Reytinq</label>
+          <div class="star-row" id="starRow">
+            <button class="star-pick" data-v="1" onclick="setStar(1)"><i class="fa-solid fa-star"></i></button>
+            <button class="star-pick" data-v="2" onclick="setStar(2)"><i class="fa-solid fa-star"></i></button>
+            <button class="star-pick" data-v="3" onclick="setStar(3)"><i class="fa-solid fa-star"></i></button>
+            <button class="star-pick" data-v="4" onclick="setStar(4)"><i class="fa-solid fa-star"></i></button>
+            <button class="star-pick" data-v="5" onclick="setStar(5)"><i class="fa-solid fa-star"></i></button>
           </div>
         </div>
-        <div class="modal-foot">
-          <button class="btn btn-ghost" onclick="closeModal('reviewModal')">Ləğv
-            et</button>
-          <button class="btn btn-primary" id="reviewSubmitBtn" disabled
-            onclick="submitReview()">
-            <i class="fa-solid fa-paper-plane"></i> Rəyi göndər
-          </button>
+        <div class="field">
+          <label>Şərh (istəyə görə)</label>
+          <textarea id="reviewComment" placeholder="Xidmət haqqında fikirlərinizi yazın..."></textarea>
         </div>
       </div>
     </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('reviewModal')">Ləğv et</button>
+      <button class="btn btn-primary" id="reviewSubmitBtn" disabled onclick="submitReview()">
+        <i class="fa-solid fa-paper-plane"></i> Rəyi göndər
+      </button>
+    </div>
+  </div>
+</div>
 
-    <script src="../js/client-api.js"></script>
-    <script src="../js/layout.js"></script>
-    <script>
+<script src="../js/client-api.js"></script>
+<script src="../js/layout.js"></script>
+<script>
   const id = new URLSearchParams(location.search).get('id');
   if (!id) window.location.href = 'providers.html';
 
@@ -224,7 +149,6 @@
   let provData     = null;
   let svcsData     = [];
   let reviewsData  = [];
-
   let curPost      = null;
   let curLiked     = false;
   let curLikeCount = 0;
@@ -246,118 +170,188 @@
     followStatus = fstat || { isFollowing:false, followersCount:0 };
     document.title = `${prov.businessName} — Appointment System`;
     renderPage();
+    loadSimilar();
   })();
 
+  /* ══ RENDER PAGE ══ */
   function renderPage() {
-  const p = provData;
-  document.getElementById('pageContent').innerHTML = `
+    const p = provData;
+    document.getElementById('pageContent').innerHTML = `
 
-    <!-- Cover — həmişə teal gradient -->
-    <div style="
-      height:240px;
-      background:linear-gradient(135deg,#082627 0%,#0f2b2b 50%,#1a4040 100%);
-      position:relative;
-      overflow:visible;
-    ">
-      <div style="position:absolute;inset:0;opacity:.12;
+      <!-- Cover -->
+      <div style="
+        height:240px;
+        ${p.coverImageUrl
+          ? `background:url('${p.coverImageUrl}') center/cover no-repeat;`
+          : `background:linear-gradient(135deg,#082627 0%,#0f2b2b 50%,#1a4040 100%);`}
+        position:relative;overflow:visible;
+      ">
+        ${p.coverImageUrl
+    ? `<div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(8,38,39,.35) 0%,rgba(8,38,39,.15) 40%,rgba(8,38,39,.65) 100%)"></div>`
+    : `<div style="position:absolute;inset:0;opacity:.12;
         background-image:radial-gradient(circle,rgba(201,145,47,.8) 1px,transparent 1px);
-        background-size:20px 20px"></div>
-
-      <!-- Avatar cover-dan asılır — MƏRKƏZDƏ -->
-<div style="
-  position:absolute;
-  bottom:-48px;
-  left:380px;
-  transform:translateX(-50%);
-  width:96px;height:96px;border-radius:50%;
-  border:4px solid #fff;
-  box-shadow:0 4px 20px rgba(0,0,0,.2);
-  background:var(--accent-soft);color:var(--accent-dark);
-  display:flex;align-items:center;justify-content:center;
-  font-size:var(--fs-2xl);font-weight:700;
-  font-family:var(--font-head);
-  overflow:hidden;
-  z-index:10;
-">
-  ${p.imageUrl
-    ? `<img src="${p.imageUrl}" alt="${p.businessName}" style="width:100%;height:100%;object-fit:cover">`
-    : p.businessName[0]}
-</div>
-    </div>
-
-    <!-- Header -->
-    <div class="prov-header" style="padding-top:60px">
-      <div class="prov-header-inner">
-        <div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:var(--sp-3)">
-          <div>
-            <h1 style="font-size:var(--fs-xl);margin-bottom:6px">${p.businessName}</h1>
-            <span style="font-size:var(--fs-sm);color:var(--ink-soft);display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-              <span>
-                <i class="fa-solid fa-tag" style="color:var(--accent);margin-right:4px"></i>${p.category}
-              </span>
-              ${p.address ? `
-              <span>·</span>
-              <a href="https://www.google.com/maps/search/${encodeURIComponent(p.address)}"
-                target="_blank"
-                style="color:var(--ink-soft);text-decoration:none;display:flex;align-items:center;gap:4px;transition:color .18s ease"
-                onmouseover="this.style.color='var(--accent)'"
-                onmouseout="this.style.color='var(--ink-soft)'">
-                <i class="fa-solid fa-location-dot" style="color:var(--accent)"></i>${p.address}
-              </a>` : ''}
-            </span>
+        background-size:20px 20px"></div>`}
+        <div style="max-width:900px;margin:0 auto;padding:0 var(--sp-5);position:relative;height:100%">
+          <div style="
+            position:absolute;bottom:-70px;left:var(--sp-5);
+            width:140px;height:140px;border-radius:50%;
+            border:5px solid #fff;box-shadow:0 6px 28px rgba(0,0,0,.22);
+            background:var(--accent-soft);color:var(--accent-dark);
+            display:flex;align-items:center;justify-content:center;
+            font-size:2.6rem;font-weight:700;font-family:var(--font-head);
+            overflow:hidden;z-index:10;
+          ">
+            ${p.imageUrl
+              ? `<img src="${p.imageUrl}" alt="${p.businessName}" style="width:100%;height:100%;object-fit:cover">`
+              : p.businessName[0]}
           </div>
-
-          <!-- Buttons -->
-          <div style="display:flex;gap:var(--sp-2);padding-bottom:4px;flex-wrap:wrap">
-            <button class="btn btn-outline btn-sm" id="followBtn" onclick="toggleFollow()">
-              <i class="fa-solid ${followStatus.isFollowing ? 'fa-user-check' : 'fa-user-plus'}"></i>
-              ${followStatus.isFollowing ? 'İzlənilir' : 'İzlə'}
-            </button>
-            <button class="btn btn-outline btn-sm" onclick="openReviewModal()">
-              <i class="fa-solid fa-star" style="color:var(--accent)"></i> Rəy yaz
-            </button>
-            <a href="booking.html?providerId=${p.id}" class="btn btn-primary btn-sm">
-              <i class="fa-solid fa-calendar-plus"></i> Randevu al
-            </a>
-          </div>
-        </div>
-
-        <!-- Stats -->
-        <div class="prov-stat-row" style="margin-top:var(--sp-3)">
-          <div class="prov-stat"><b>${postsData.length}</b><span>post</span></div>
-          <div class="prov-stat"><b id="followerCount">${followStatus.followersCount||0}</b><span>izləyici</span></div>
-          <div class="prov-stat"><b>${svcsData.length}</b><span>xidmət</span></div>
-          <div class="prov-stat">
-            <b>★ ${(p.averageRating||0).toFixed(1)}</b>
-            <span>(${p.reviewCount||0} rəy)</span>
-          </div>
-        </div>
-
-        ${p.description
-          ? `<p style="font-size:var(--fs-sm);color:var(--ink-soft);max-width:560px;margin-bottom:var(--sp-3);margin-top:var(--sp-2)">${p.description}</p>`
-          : ''}
-
-        <!-- Tabs -->
-        <div class="prov-tabs">
-          <button class="prov-tab active" onclick="switchTab(this,'posts')">
-            <i class="fa-solid fa-grid-2" style="margin-right:6px"></i>Postlar
-          </button>
-          <button class="prov-tab" onclick="switchTab(this,'services')">
-            <i class="fa-solid fa-briefcase-medical" style="margin-right:6px"></i>Xidmətlər
-          </button>
-          <button class="prov-tab" onclick="switchTab(this,'reviews')">
-            <i class="fa-solid fa-star" style="margin-right:6px"></i>Rəylər
-          </button>
         </div>
       </div>
-    </div>
 
-    <div class="container" style="max-width:900px">
-      <div id="tabContent"></div>
-    </div>`;
+      <!-- Header -->
+      <div class="prov-header" style="padding-top:90px">
+        <div class="prov-header-inner">
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:var(--sp-3)">
+            <div>
+              <h1 style="font-size:var(--fs-xl);margin-bottom:6px">${p.businessName}</h1>
+              <span style="font-size:var(--fs-sm);color:var(--ink-soft);display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+                <span><i class="fa-solid fa-tag" style="color:var(--accent);margin-right:4px"></i>${p.category}</span>
+                ${p.address ? `
+                <span>·</span>
+                <a href="https://www.google.com/maps/search/${encodeURIComponent(p.address)}"
+                  target="_blank"
+                  style="color:var(--ink-soft);text-decoration:none;display:flex;align-items:center;gap:4px;transition:color .18s ease"
+                  onmouseover="this.style.color='var(--accent)'"
+                  onmouseout="this.style.color='var(--ink-soft)'">
+                  <i class="fa-solid fa-location-dot" style="color:var(--accent)"></i>${p.address}
+                </a>` : ''}
+              </span>
+            </div>
+            <div style="display:flex;gap:var(--sp-2);padding-bottom:4px;flex-wrap:wrap">
+              <button class="btn btn-outline btn-sm" id="followBtn" onclick="toggleFollow()">
+                <i class="fa-solid ${followStatus.isFollowing?'fa-user-check':'fa-user-plus'}"></i>
+                ${followStatus.isFollowing?'İzlənilir':'İzlə'}
+              </button>
+              <button class="btn btn-outline btn-sm" onclick="openReviewModal()">
+                <i class="fa-solid fa-star" style="color:var(--accent)"></i> Rəy yaz
+              </button>
+              <a href="booking.html?providerId=${p.id}" class="btn btn-primary btn-sm">
+                <i class="fa-solid fa-calendar-plus"></i> Randevu al
+              </a>
+            </div>
+          </div>
 
-  renderTab('posts');
-}
+          <div class="prov-stat-row" style="margin-top:var(--sp-3)">
+            <div class="prov-stat"><b>${postsData.length}</b><span>post</span></div>
+            <div class="prov-stat"><b id="followerCount">${followStatus.followersCount||0}</b><span>izləyici</span></div>
+            <div class="prov-stat"><b>${svcsData.length}</b><span>xidmət</span></div>
+            <div class="prov-stat">
+              <b>★ ${(p.averageRating||0).toFixed(1)}</b>
+              <span>(${p.reviewCount||0} rəy)</span>
+            </div>
+          </div>
+
+          ${p.description
+            ? `<p style="font-size:var(--fs-sm);color:var(--ink-soft);max-width:560px;margin-bottom:var(--sp-3);margin-top:var(--sp-2)">${p.description}</p>`
+            : ''}
+
+          <div class="prov-tabs">
+            <button class="prov-tab active" onclick="switchTab(this,'posts')">
+              <i class="fa-solid fa-grid-2" style="margin-right:6px"></i>Postlar
+            </button>
+            <button class="prov-tab" onclick="switchTab(this,'services')">
+              <i class="fa-solid fa-briefcase-medical" style="margin-right:6px"></i>Xidmətlər
+            </button>
+            <button class="prov-tab" onclick="switchTab(this,'reviews')">
+              <i class="fa-solid fa-star" style="margin-right:6px"></i>Rəylər
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab content -->
+      <div class="container" style="max-width:900px">
+        <div id="tabContent"></div>
+      </div>
+
+      <!-- ══ Oxşar mütəxəssislər ══ -->
+      <div id="similarSection" style="background:var(--surface-soft);border-top:1px solid var(--border);padding:var(--sp-8) 0;margin-top:var(--sp-6)">
+        <div class="container" style="max-width:900px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp-5)">
+            <div>
+              <div style="font-size:var(--fs-xs);font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--accent-dark);margin-bottom:4px">
+                <i class="fa-solid fa-users" style="margin-right:5px"></i>Oxşar mütəxəssislər
+              </div>
+              <h2 style="font-size:var(--fs-lg);font-family:var(--font-head)">
+                ${p.category} sahəsindəki digər mütəxəssislər
+              </h2>
+            </div>
+            <a href="providers.html?category=${encodeURIComponent(p.category)}" class="btn btn-outline btn-sm">
+              Hamısına bax <i class="fa-solid fa-arrow-right" style="font-size:.7rem"></i>
+            </a>
+          </div>
+          <div class="similar-grid" id="similarGrid">
+            <div class="spinner-wrap" style="grid-column:1/-1"><div class="spinner"></div></div>
+          </div>
+        </div>
+      </div>`;
+
+    renderTab('posts');
+  }
+
+  /* ══ OXŞAR MÜTƏXƏSSİSLƏR ══ */
+  async function loadSimilar() {
+    const grid = document.getElementById('similarGrid');
+    if (!grid) return;
+
+    try {
+      const all  = await cApi.getProviders({ pageSize:100 }).catch(() => []);
+      const list = Array.isArray(all) ? all : (all?.items||[]);
+
+      const similar = list
+        .filter(p => p.category === provData.category && p.id !== provData.id)
+        .sort((a,b) => (b.averageRating||0) - (a.averageRating||0))
+        .slice(0, 4);
+
+      if (!similar.length) {
+        document.getElementById('similarSection')?.remove();
+        return;
+      }
+
+      grid.innerHTML = similar.map(p => `
+        <a href="provider-detail.html?id=${p.id}" class="similar-card">
+          <div class="similar-cover" ${p.coverImageUrl ? `style="background-image:url('${p.coverImageUrl}')"` : ''}></div>
+          <div class="similar-body">
+            <div class="similar-ava">
+              ${p.imageUrl
+                ? `<img src="${p.imageUrl}" alt="${p.businessName}">`
+                : p.businessName[0]}
+            </div>
+            <strong style="display:block;font-size:var(--fs-sm);margin-bottom:3px;
+                           white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+              ${p.businessName}
+            </strong>
+            <div style="font-size:var(--fs-xs);color:var(--ink-soft);margin-bottom:6px">
+              <i class="fa-solid fa-tag" style="color:var(--accent);margin-right:3px"></i>${p.category}
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <span style="font-size:var(--fs-xs);color:var(--accent-dark);font-weight:600">
+                ★ ${(p.averageRating||0).toFixed(1)}
+                <span style="color:var(--ink-soft);font-weight:400">(${p.reviewCount||0})</span>
+              </span>
+              <span style="font-size:var(--fs-xs);color:var(--ink-soft)">
+                <i class="fa-solid fa-location-dot" style="color:var(--accent);margin-right:3px"></i>
+                ${p.address ? p.address.split(',')[0] : 'Bakı'}
+              </span>
+            </div>
+          </div>
+        </a>`).join('');
+
+    } catch(e) {
+      console.error('Oxşar mütəxəssislər yüklənmədi:', e);
+      document.getElementById('similarSection')?.remove();
+    }
+  }
 
   /* ══ TABS ══ */
   function switchTab(btn, tab) {
@@ -411,7 +405,9 @@
               </span>
             </div>
             <div style="display:flex;align-items:center;gap:var(--sp-3)">
-              <span style="font-weight:700;color:var(--accent-dark)">${formatPrice(s.price)}</span>
+              ${s.price > 0
+                ? `<span style="font-weight:700;color:var(--accent-dark)">${formatPrice(s.price)}</span>`
+                : `<span class="badge badge-success"><i class="fa-solid fa-gift"></i> Pulsuz</span>`}
               <a href="booking.html?providerId=${id}&serviceId=${s.id}" class="btn btn-primary btn-sm">
                 <i class="fa-solid fa-calendar-plus"></i> Randevu
               </a>
@@ -507,14 +503,6 @@
           </button>
         </div>
         <div class="post-modal-comments" id="modalComments">
-          ${curPost.caption ? `
-            <div class="comment-row">
-              <div class="comment-ava">${provData.businessName[0]}</div>
-              <div class="comment-body">
-                <strong>${provData.businessName}</strong>
-                <p>${curPost.caption}</p>
-              </div>
-            </div>` : ''}
           <div style="text-align:center;padding:var(--sp-4);font-size:var(--fs-sm);color:var(--ink-soft)">
             <i class="fa-solid fa-spinner fa-spin"></i> Şərhlər yüklənir...
           </div>
@@ -550,155 +538,125 @@
     loadComments(postId);
   }
 
- async function loadComments(postId) {
-  try {
-    const comments  = await cApi.getComments(postId);
-    const arr       = Array.isArray(comments) ? comments : [];
-    const container = document.getElementById('modalComments');
-    if (!container) return;
+  async function loadComments(postId) {
+    try {
+      const comments  = await cApi.getComments(postId);
+      const arr       = Array.isArray(comments) ? comments : [];
+      const container = document.getElementById('modalComments');
+      if (!container) return;
 
-    const caption = curPost?.caption
-      ? `<div class="comment-row">
-           <div class="comment-ava">
-             ${provData.imageUrl
-               ? `<img src="${provData.imageUrl}" alt="${provData.businessName}"
-                   style="width:100%;height:100%;object-fit:cover;border-radius:50%">`
-               : provData.businessName[0]}
-           </div>
-           <div class="comment-body">
-             <strong>${provData.businessName}</strong>
-             <p>${curPost.caption}</p>
-           </div>
-         </div>` : '';
+      const caption = curPost?.caption
+        ? `<div class="comment-row">
+             <div class="comment-ava">
+               ${provData.imageUrl
+                 ? `<img src="${provData.imageUrl}" alt="${provData.businessName}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`
+                 : provData.businessName[0]}
+             </div>
+             <div class="comment-body">
+               <strong>${provData.businessName}</strong>
+               <p>${curPost.caption}</p>
+             </div>
+           </div>` : '';
 
-    if (!arr.length) {
-      container.innerHTML = caption + `
-        <div style="text-align:center;padding:var(--sp-5) 0;font-size:var(--fs-sm);color:var(--ink-soft)">
-          <i class="fa-regular fa-comment" style="display:block;font-size:1.5rem;margin-bottom:8px;color:var(--border-strong)"></i>
-          Hələ şərh yoxdur. İlk şərhi siz yazın!
-        </div>`;
-      return;
-    }
-
-    container.innerHTML = caption + arr.map(c => {
-      const isProvider  = c.userFullName === provData.ownerFullName;
-      const displayName = isProvider ? provData.businessName : c.userFullName;
-      const avatarHtml  = isProvider && provData.imageUrl
-        ? `<img src="${provData.imageUrl}" alt="${displayName}"
-            style="width:100%;height:100%;object-fit:cover;border-radius:50%">`
-        : displayName?.[0]?.toUpperCase() || '?';
-
-      return `
-        <div class="comment-row">
-          <div class="comment-ava">${avatarHtml}</div>
-          <div class="comment-body">
-            <strong>${displayName}</strong>
-            <p>${c.content}</p>
-          </div>
-        </div>`;
-    }).join('');
-
-    container.scrollTop = container.scrollHeight;
-  } catch(e) { console.error('Şərhlər yüklənmədi:', e); }
-}
-  async function toggleLike() {
-  if (!curPost) return;
-  const btn = document.getElementById('modalLikeBtn');
-  const cnt = document.getElementById('modalLikeCount');
-  if (!btn || !cnt) return;
-  btn.disabled = true;
-  try {
-    if (curLiked) {
-      await cApi.unlikePost(curPost.id);
-      curLiked = false;
-      curLikeCount = Math.max(0, curLikeCount - 1);
-    } else {
-      await cApi.likePost(curPost.id);
-      curLiked = true;
-      curLikeCount++;
-    }
-
-    /* Modal içini yenilə */
-    btn.className = `like-btn ${curLiked?'liked':''}`;
-    btn.querySelector('i').className = `fa-${curLiked?'solid':'regular'} fa-heart`;
-    cnt.textContent = curLikeCount;
-
-    /* postsData array-ini yenilə */
-    const tile = postsData.find(p => p.id === curPost.id);
-    if (tile) {
-      tile.likesCount = curLikeCount;
-      tile.isLikedByCurrentUser = curLiked;
-    }
-
-    /* Post grid tile-ını yenilə — səhifəni yeniləmədən! */
-    const tileDom = document.querySelector(`[data-post-id="${curPost.id}"]`);
-    if (tileDom) {
-      const stats = tileDom.querySelectorAll('.post-tile-stat');
-      if (stats[0]) {
-        stats[0].innerHTML = `<i class="fa-solid fa-heart"></i> ${curLikeCount}`;
+      if (!arr.length) {
+        container.innerHTML = caption + `
+          <div style="text-align:center;padding:var(--sp-5) 0;font-size:var(--fs-sm);color:var(--ink-soft)">
+            <i class="fa-regular fa-comment" style="display:block;font-size:1.5rem;margin-bottom:8px;color:var(--border-strong)"></i>
+            Hələ şərh yoxdur. İlk şərhi siz yazın!
+          </div>`;
+        return;
       }
-    }
-  } catch(e) {
-    /* alert() əvəzinə modal içindəki xəta */
-    const actionArea = btn.closest('.post-modal-actions');
-    if (actionArea) {
-      const errEl = document.createElement('p');
-      errEl.style.cssText = 'font-size:.75rem;color:var(--danger);margin-bottom:8px';
-      errEl.textContent = 'Like xətası: ' + (e.message||'Yenidən cəhd edin');
-      actionArea.prepend(errEl);
-      setTimeout(() => errEl.remove(), 3000);
-    }
-  } finally {
-    btn.disabled = false;
+
+      container.innerHTML = caption + arr.map(c => {
+        const isProvider  = c.userFullName === provData.ownerFullName;
+        const displayName = isProvider ? provData.businessName : c.userFullName;
+        const avatarHtml  = isProvider && provData.imageUrl
+          ? `<img src="${provData.imageUrl}" alt="${displayName}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`
+          : displayName?.[0]?.toUpperCase() || '?';
+
+        return `
+          <div class="comment-row">
+            <div class="comment-ava">${avatarHtml}</div>
+            <div class="comment-body">
+              <strong>${displayName}</strong>
+              <p>${c.content}</p>
+            </div>
+          </div>`;
+      }).join('');
+
+      container.scrollTop = container.scrollHeight;
+    } catch(e) { console.error('Şərhlər yüklənmədi:', e); }
   }
-}
+
+  async function toggleLike() {
+    if (!curPost) return;
+    const btn = document.getElementById('modalLikeBtn');
+    const cnt = document.getElementById('modalLikeCount');
+    if (!btn || !cnt) return;
+    btn.disabled = true;
+    try {
+      if (curLiked) {
+        await cApi.unlikePost(curPost.id);
+        curLiked = false;
+        curLikeCount = Math.max(0, curLikeCount - 1);
+      } else {
+        await cApi.likePost(curPost.id);
+        curLiked = true;
+        curLikeCount++;
+      }
+      btn.className = `like-btn ${curLiked?'liked':''}`;
+      btn.querySelector('i').className = `fa-${curLiked?'solid':'regular'} fa-heart`;
+      cnt.textContent = curLikeCount;
+      const tile = postsData.find(p => p.id === curPost.id);
+      if (tile) { tile.likesCount = curLikeCount; tile.isLikedByCurrentUser = curLiked; }
+      const tileDom = document.querySelector(`[data-post-id="${curPost.id}"]`);
+      if (tileDom) {
+        const stats = tileDom.querySelectorAll('.post-tile-stat');
+        if (stats[0]) stats[0].innerHTML = `<i class="fa-solid fa-heart"></i> ${curLikeCount}`;
+      }
+    } catch(e) {
+      const actionArea = btn.closest('.post-modal-actions');
+      if (actionArea) {
+        const errEl = document.createElement('p');
+        errEl.style.cssText = 'font-size:.75rem;color:var(--danger);margin-bottom:8px';
+        errEl.textContent = 'Like xətası: ' + (e.message||'Yenidən cəhd edin');
+        actionArea.prepend(errEl);
+        setTimeout(() => errEl.remove(), 3000);
+      }
+    } finally { btn.disabled = false; }
+  }
 
   async function postComment() {
-  const inp = document.getElementById('modalCommentInput');
-  if (!inp || !inp.value.trim()) return;
-  const content = inp.value.trim();
-  inp.value = '';
-  inp.disabled = true;
-  try {
-    await cApi.addComment(curPost.id, { content });
-    await loadComments(curPost.id);
-
-    /* commentsCount-u yenilə */
-    curPost.commentsCount = (curPost.commentsCount||0) + 1;
-
-    /* Modal içindəki şərh sayını yenilə */
-    const commentCountEl = document.querySelector('.post-modal-actions .fa-comment')?.parentElement;
-    if (commentCountEl) {
-      commentCountEl.innerHTML = `<i class="fa-regular fa-comment" style="margin-right:4px"></i>${curPost.commentsCount} şərh`;
-    }
-
-    /* postsData array-ini yenilə */
-    const tile = postsData.find(p => p.id === curPost.id);
-    if (tile) tile.commentsCount = curPost.commentsCount;
-
-    /* Post grid tile-ını yenilə */
-    const tileDom = document.querySelector(`[data-post-id="${curPost.id}"]`);
-    if (tileDom) {
-      const stats = tileDom.querySelectorAll('.post-tile-stat');
-      if (stats[1]) {
-        stats[1].innerHTML = `<i class="fa-solid fa-comment"></i> ${curPost.commentsCount}`;
+    const inp = document.getElementById('modalCommentInput');
+    if (!inp || !inp.value.trim()) return;
+    const content = inp.value.trim();
+    inp.value = '';
+    inp.disabled = true;
+    try {
+      await cApi.addComment(curPost.id, { content });
+      await loadComments(curPost.id);
+      curPost.commentsCount = (curPost.commentsCount||0) + 1;
+      const commentCountEl = document.querySelector('.post-modal-actions .fa-comment')?.parentElement;
+      if (commentCountEl) commentCountEl.innerHTML = `<i class="fa-regular fa-comment" style="margin-right:4px"></i>${curPost.commentsCount} şərh`;
+      const tile = postsData.find(p => p.id === curPost.id);
+      if (tile) tile.commentsCount = curPost.commentsCount;
+      const tileDom = document.querySelector(`[data-post-id="${curPost.id}"]`);
+      if (tileDom) {
+        const stats = tileDom.querySelectorAll('.post-tile-stat');
+        if (stats[1]) stats[1].innerHTML = `<i class="fa-solid fa-comment"></i> ${curPost.commentsCount}`;
       }
-    }
-  } catch(e) {
-    inp.value = content;
-    const actionArea = document.querySelector('.post-modal-actions');
-    if (actionArea) {
-      const errEl = document.createElement('p');
-      errEl.style.cssText = 'font-size:.75rem;color:var(--danger);margin-bottom:8px';
-      errEl.textContent = 'Şərh xətası: ' + (e.message||'Yenidən cəhd edin');
-      actionArea.prepend(errEl);
-      setTimeout(() => errEl.remove(), 3000);
-    }
-  } finally {
-    inp.disabled = false;
-    inp.focus();
+    } catch(e) {
+      inp.value = content;
+      const actionArea = document.querySelector('.post-modal-actions');
+      if (actionArea) {
+        const errEl = document.createElement('p');
+        errEl.style.cssText = 'font-size:.75rem;color:var(--danger);margin-bottom:8px';
+        errEl.textContent = 'Şərh xətası: ' + (e.message||'Yenidən cəhd edin');
+        actionArea.prepend(errEl);
+        setTimeout(() => errEl.remove(), 3000);
+      }
+    } finally { inp.disabled = false; inp.focus(); }
   }
-}
 
   document.getElementById('postModal').addEventListener('click', function(e) {
     if (e.target === this) closeModal('postModal');
@@ -711,8 +669,6 @@
       window.location.href = '../auth/login.html?redirect=' + encodeURIComponent(location.href);
       return;
     }
-
-    /* Formu sıfırla */
     starVal = 0;
     document.querySelectorAll('.star-pick').forEach(b => b.classList.remove('on'));
     document.getElementById('reviewComment').value = '';
@@ -720,7 +676,6 @@
     document.getElementById('reviewSubmitBtn').disabled = true;
     document.getElementById('apptSelectWrap').innerHTML = '';
 
-    /* Bu providerlə tamamlanmış görüşləri yüklə */
     const appts     = await cApi.getMy('past').catch(() => []);
     const completed = Array.isArray(appts)
       ? appts.filter(a => a.status === 'Completed' && a.providerId === id)
@@ -728,9 +683,7 @@
 
     if (!completed.length) {
       const al = document.getElementById('reviewAlert');
-      al.innerHTML = `
-        <i class="fa-solid fa-circle-info"></i>
-        <span>Rəy yazmaq üçün bu mütəxəssislə tamamlanmış görüşünüz olmalıdır.</span>`;
+      al.innerHTML = `<i class="fa-solid fa-circle-info"></i><span>Rəy yazmaq üçün bu mütəxəssislə tamamlanmış görüşünüz olmalıdır.</span>`;
       al.classList.remove('hidden');
       al.className = 'alert alert-warning';
       document.getElementById('reviewFormBody').classList.add('hidden');
@@ -741,13 +694,10 @@
           <label><i class="fa-solid fa-calendar-check" style="color:var(--accent);margin-right:6px"></i>Görüş seçin</label>
           <select id="apptSelect">
             ${completed.map(a => `
-              <option value="${a.id}">
-                ${a.serviceName} — ${formatDate(a.startDateTime)} ${formatTime(a.startDateTime)}
-              </option>`).join('')}
+              <option value="${a.id}">${a.serviceName} — ${formatDate(a.startDateTime)} ${formatTime(a.startDateTime)}</option>`).join('')}
           </select>
         </div>`;
     }
-
     openModal('reviewModal');
   }
 
@@ -763,10 +713,7 @@
     if (!starVal) return;
     const apptSelect    = document.getElementById('apptSelect');
     const appointmentId = apptSelect?.value;
-    if (!appointmentId) {
-      showAlert('#reviewAlert', 'Görüş seçin.');
-      return;
-    }
+    if (!appointmentId) { showAlert('#reviewAlert', 'Görüş seçin.'); return; }
 
     const btn = document.getElementById('reviewSubmitBtn');
     btn.disabled = true;
@@ -780,21 +727,18 @@
         comment:       document.getElementById('reviewComment').value.trim() || undefined,
       });
       closeModal('reviewModal');
-      /* Rəyləri yenilə */
       reviewsData = await cApi.getReviews(id).catch(() => reviewsData);
       renderTab('reviews');
-      /* Aktiv tab-ı reviews-a keçir */
       document.querySelectorAll('.prov-tab').forEach(b => {
-        const isRev = b.textContent.includes('Rəy');
-        b.classList.toggle('active', isRev);
+        b.classList.toggle('active', b.textContent.includes('Rəy'));
       });
     } catch(e) {
-      showAlert('#reviewAlert', e.message || 'Rəy göndərilmədi. Tamamlanmış görüşünüz olmalıdır.');
+      showAlert('#reviewAlert', e.message || 'Rəy göndərilmədi.');
     } finally {
       btn.disabled = false;
       btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Rəyi göndər';
     }
   }
 </script>
-  </body>
+</body>
 </html>

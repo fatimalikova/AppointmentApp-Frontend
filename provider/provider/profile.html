@@ -23,6 +23,61 @@
     }
     .social-input-wrap input { padding-left:130px; }
     .social-input-wrap.short input { padding-left:112px; }
+
+    /* ── Cover + Avatar overlap ── */
+    .cover-avatar-wrap {
+      position:relative;
+      margin-bottom:70px;
+    }
+    .cover-upload-zone {
+      height:180px;border-radius:var(--r-md);
+      overflow:hidden;background:linear-gradient(135deg,#082627,#0f2b2b,#1a4040);
+      display:flex;align-items:center;justify-content:center;
+      border:1.5px dashed var(--border);cursor:pointer;
+      background-size:cover;background-position:center;
+      transition:border-color .18s ease;
+      position:relative;
+    }
+    .cover-upload-zone:hover { border-color:var(--accent); }
+    .cover-upload-empty {
+      text-align:center;color:rgba(255,255,255,.6);
+      pointer-events:none;
+    }
+    .cover-upload-empty i { font-size:1.6rem;display:block;margin-bottom:6px; }
+    .cover-upload-empty span { font-size:var(--fs-xs); }
+
+    .profile-avatar-overlap {
+      position:absolute;
+      bottom:-60px;
+      left:50%;
+      transform:translateX(-50%);
+      cursor:pointer;
+      z-index:5;
+    }
+    .avatar-circle {
+      width:120px;height:120px;border-radius:50%;
+      background:var(--accent-soft);color:var(--accent-dark);
+      display:flex;align-items:center;justify-content:center;
+      font-size:var(--fs-2xl);font-weight:700;
+      border:4px solid #fff;
+      box-shadow:0 6px 20px rgba(0,0,0,.15);
+      overflow:hidden;
+      transition:transform .18s ease;
+    }
+    .profile-avatar-overlap:hover .avatar-circle { transform:scale(1.03); }
+    .avatar-camera-badge {
+      position:absolute;bottom:6px;right:6px;
+      width:32px;height:32px;background:var(--accent);
+      border-radius:50%;display:flex;align-items:center;justify-content:center;
+      border:2px solid #fff;color:#fff;font-size:.7rem;
+    }
+
+    .profile-name-block {
+      text-align:center;margin-bottom:var(--sp-6);
+    }
+    .profile-name-block .name-actions {
+      display:flex;gap:8px;justify-content:center;margin-top:8px;flex-wrap:wrap;
+    }
   </style>
 </head>
 <body>
@@ -53,42 +108,44 @@
 
       <form id="profileForm">
 
-        <!-- ══ KART 1: Avatar + Əsas ══ -->
+        <!-- ══ KART 1: Cover + Avatar + Əsas ══ -->
         <div class="card" style="margin-bottom:var(--sp-4)">
 
-          <!-- Avatar -->
-          <div style="display:flex;align-items:center;gap:var(--sp-5);
-                      padding:var(--sp-5);background:var(--surface-soft);
-                      border-radius:var(--r-md);margin-bottom:var(--sp-6)">
-            <div style="position:relative;width:88px;height:88px;flex-shrink:0">
-              <div id="avatarEl"
-                style="width:88px;height:88px;border-radius:50%;
-                       background:var(--accent-soft);color:var(--accent-dark);
-                       display:flex;align-items:center;justify-content:center;
-                       font-size:var(--fs-2xl);font-weight:700;
-                       border:3px solid var(--accent-light);overflow:hidden">?</div>
-              <label for="photoFile"
-                style="position:absolute;bottom:0;right:0;
-                       width:28px;height:28px;background:var(--accent);
-                       border-radius:50%;display:flex;align-items:center;
-                       justify-content:center;cursor:pointer;border:2px solid #fff"
-                title="Şəkil seç">
-                <i class="fa-solid fa-camera" style="color:#fff;font-size:.65rem"></i>
-              </label>
+          <!-- Cover + Avatar overlap -->
+          <div class="cover-avatar-wrap">
+            <div id="coverPreviewWrap" class="cover-upload-zone" onclick="document.getElementById('coverFile').click()">
+              <div class="cover-upload-empty" id="coverEmptyState">
+                <i class="fa-solid fa-image"></i>
+                <span>Örtük şəkli əlavə etmək üçün klikləyin</span>
+              </div>
             </div>
-            <div style="flex:1;min-width:0">
-              <b id="avatarName" style="font-size:var(--fs-lg);display:block;margin-bottom:3px">—</b>
-              <span id="avatarCat" style="font-size:var(--fs-sm);color:var(--ink-soft)"></span>
-              <div id="uploadStatus" style="font-size:var(--fs-xs);color:var(--ink-soft);margin-top:4px"></div>
-              <button type="button" id="removePhotoBtn" class="btn btn-danger btn-xs hidden"
-                onclick="removePhoto()" style="margin-top:var(--sp-2)">
-                <i class="fa-solid fa-trash"></i> Şəkli sil
-              </button>
+
+            <div class="profile-avatar-overlap" onclick="document.getElementById('photoFile').click()">
+              <div id="avatarEl" class="avatar-circle">?</div>
+              <div class="avatar-camera-badge">
+                <i class="fa-solid fa-camera"></i>
+              </div>
             </div>
           </div>
 
-          <input type="file" id="photoFile" accept="image/*" style="display:none"
-            onchange="handlePhotoSelect(this)">
+          <input type="file" id="coverFile" accept="image/*" style="display:none" onchange="handleCoverSelect(this)">
+          <input type="file" id="photoFile" accept="image/*" style="display:none" onchange="handlePhotoSelect(this)">
+
+          <!-- Ad + kateqoriya + status mesajları -->
+          <div class="profile-name-block">
+            <b id="avatarName" style="font-size:var(--fs-lg);display:block;margin-bottom:3px">—</b>
+            <span id="avatarCat" style="font-size:var(--fs-sm);color:var(--ink-soft)"></span>
+            <div id="uploadStatus" style="font-size:var(--fs-xs);color:var(--ink-soft);margin-top:6px"></div>
+            <div id="coverUploadStatus" style="font-size:var(--fs-xs);color:var(--ink-soft);margin-top:2px"></div>
+            <div class="name-actions">
+              <button type="button" id="removePhotoBtn" class="btn btn-danger btn-xs hidden" onclick="removePhoto()">
+                <i class="fa-solid fa-trash"></i> Profil şəklini sil
+              </button>
+              <button type="button" id="removeCoverBtn" class="btn btn-danger btn-xs hidden" onclick="removeCover()">
+                <i class="fa-solid fa-trash"></i> Örtük şəklini sil
+              </button>
+            </div>
+          </div>
 
           <!-- Biznes adı + Kateqoriya -->
           <div class="profile-section-label">
@@ -202,6 +259,7 @@
 <script>
   let isNew = false;
   let uploadedImageUrl = '';
+  let uploadedCoverUrl = '';
 
   /* ── Kateqoriya ── */
   function handleCategoryChange() {
@@ -233,7 +291,6 @@
 
   function setSocialValue(id, prefix, fullUrl) {
     if (!fullUrl) { document.getElementById(id).value = ''; return; }
-    // "instagram.com/hesab" və ya "https://instagram.com/hesab" → "hesab"
     document.getElementById(id).value = fullUrl
       .replace(/^https?:\/\/(www\.)?/, '')
       .replace(prefix.replace(/^https?:\/\/(www\.)?/, ''), '');
@@ -268,7 +325,53 @@
   document.getElementById('instagramUrl').addEventListener('input', updateSocialPreview);
   document.getElementById('facebookUrl').addEventListener('input', updateSocialPreview);
 
-  /* ── Şəkil seç ── */
+  /* ── Örtük (cover) şəkli seç ── */
+  async function handleCoverSelect(input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      showAlert('#alertBox', 'Şəkil 5MB-dan böyük ola bilməz.');
+      return;
+    }
+    const statusEl = document.getElementById('coverUploadStatus');
+    statusEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Yüklənir...';
+
+    const reader = new FileReader();
+    reader.onload = e => {
+      const zone = document.getElementById('coverPreviewWrap');
+      zone.style.backgroundImage = `url('${e.target.result}')`;
+      document.getElementById('coverEmptyState').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+
+    try {
+      const fd = new FormData();
+      fd.append('image', file);
+      const res  = await fetch('https://api.imgbb.com/1/upload?key=cfb112e9e8b779f0c69925b074355c2c',
+        { method:'POST', body:fd });
+      const data = await res.json();
+      if (data.success) {
+        uploadedCoverUrl = data.data.url;
+        statusEl.innerHTML = '<i class="fa-solid fa-circle-check" style="color:var(--success)"></i> Örtük şəkli yükləndi';
+        document.getElementById('removeCoverBtn').classList.remove('hidden');
+      } else throw new Error();
+    } catch {
+      uploadedCoverUrl = '';
+      statusEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="color:var(--warning)"></i> Yükləmə uğursuz';
+    }
+  }
+
+  function removeCover() {
+    uploadedCoverUrl = '';
+    const zone = document.getElementById('coverPreviewWrap');
+    zone.style.backgroundImage = 'none';
+    document.getElementById('coverEmptyState').style.display = 'block';
+    document.getElementById('removeCoverBtn').classList.add('hidden');
+    document.getElementById('coverUploadStatus').innerHTML =
+      '<i class="fa-solid fa-circle-info" style="color:var(--ink-soft)"></i> Örtük şəkli silinəcək — formu saxlayın';
+  }
+
+  /* ── Şəkil seç (avatar) ── */
   async function handlePhotoSelect(input) {
     const file = input.files[0];
     if (!file) return;
@@ -354,6 +457,20 @@
       document.getElementById('avatarCat').textContent  = p.category     || '';
       document.getElementById('uploadStatus').innerHTML = '';
 
+      /* Cover */
+      uploadedCoverUrl = p.coverImageUrl || '';
+      const coverZone  = document.getElementById('coverPreviewWrap');
+      if (p.coverImageUrl) {
+        coverZone.style.backgroundImage = `url('${p.coverImageUrl}')`;
+        document.getElementById('coverEmptyState').style.display = 'none';
+        document.getElementById('removeCoverBtn').classList.remove('hidden');
+      } else {
+        coverZone.style.backgroundImage = 'none';
+        document.getElementById('coverEmptyState').style.display = 'block';
+        document.getElementById('removeCoverBtn').classList.add('hidden');
+      }
+      document.getElementById('coverUploadStatus').innerHTML = '';
+
       /* Status banner */
       const cfg = {
         Pending:  { bg:'var(--warning-soft)', border:'var(--warning)', icon:'fa-clock',        color:'var(--warning)', text:'Profiliniz admin tərəfindən nəzərdən keçirilir.' },
@@ -386,17 +503,18 @@
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saxlanılır...';
 
     const dto = {
-      businessName: document.getElementById('businessName').value,
-      category:     getCategoryValue(),
-      description:  document.getElementById('description').value,
-      address:      document.getElementById('address').value,
-      latitude:     40.4093,
-      longitude:    49.8671,
-      imageUrl:     uploadedImageUrl || undefined,
-      phoneNumber:  document.getElementById('phoneNumber').value.trim()  || undefined,
-      contactEmail: document.getElementById('contactEmail').value.trim() || undefined,
-      instagramUrl: getSocialValue('instagramUrl', 'https://instagram.com/'),
-      facebookUrl:  getSocialValue('facebookUrl',  'https://facebook.com/'),
+      businessName:  document.getElementById('businessName').value,
+      category:      getCategoryValue(),
+      description:   document.getElementById('description').value,
+      address:       document.getElementById('address').value,
+      latitude:      40.4093,
+      longitude:     49.8671,
+      imageUrl:      uploadedImageUrl || undefined,
+      coverImageUrl: uploadedCoverUrl || undefined,
+      phoneNumber:   document.getElementById('phoneNumber').value.trim()  || undefined,
+      contactEmail:  document.getElementById('contactEmail').value.trim() || undefined,
+      instagramUrl:  getSocialValue('instagramUrl', 'https://instagram.com/'),
+      facebookUrl:   getSocialValue('facebookUrl',  'https://facebook.com/'),
     };
 
     try {

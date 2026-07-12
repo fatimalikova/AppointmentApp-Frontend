@@ -80,11 +80,16 @@
           </div>
           <div class="field-row">
             <div class="field">
-              <label><i class="fa-solid fa-manat-sign"
-                  style="color:var(--accent);margin-right:6px"></i>Qiymət
-                (AZN)</label>
+              <label>
+                <i class="fa-solid fa-manat-sign"
+                  style="color:var(--accent);margin-right:6px"></i>
+                Qiymət (AZN)
+                <span
+                  style="color:var(--ink-soft);font-weight:400;font-size:.7rem">—
+                  boş buraxsanız pulsuz sayılır</span>
+              </label>
               <input type="number" id="svcPrice" min="0" step="0.5"
-                placeholder="50">
+                placeholder="0 (pulsuz)">
             </div>
             <div class="field">
               <label><i class="fa-solid fa-hourglass-half"
@@ -164,7 +169,9 @@
       <tr>
         <td><strong>${s.name}</strong>${s.description ? `<div style="font-size:var(--fs-xs);color:var(--ink-soft);margin-top:2px">${s.description}</div>` : ''}</td>
         <td><i class="fa-regular fa-clock" style="margin-right:4px;color:var(--ink-soft)"></i>${s.durationMinutes} dəq</td>
-        <td style="font-weight:700;color:var(--accent-dark)">${formatPrice(s.price)}</td>
+        <td>${s.price > 0
+  ? `<span style="font-weight:700;color:var(--accent-dark)">${formatPrice(s.price)}</span>`
+  : `<span class="badge badge-success"><i class="fa-solid fa-gift"></i> Pulsuz</span>`}</td>
         <td>${s.isActive
           ? '<span class="badge badge-success"><i class="fa-solid fa-circle-check"></i> Aktiv</span>'
           : s.deactivatedByAdmin
@@ -232,32 +239,34 @@
 }
 
   async function saveService() {
-    const btn = document.getElementById('saveBtn');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saxlanılır...';
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saxlanılır...';
 
-    const id = document.getElementById('editId').value;
-    const dto = {
-      name:            document.getElementById('svcName').value,
-      description:     document.getElementById('svcDesc').value,
-      price:           parseFloat(document.getElementById('svcPrice').value),
-      durationMinutes: parseInt(document.getElementById('svcDuration').value),
-      isActive:        document.getElementById('svcActive').value === 'true',
-    };
+  const id = document.getElementById('editId').value;
+  const priceVal = document.getElementById('svcPrice').value;
 
-    try {
-      if (id) await pApi.updateService(id, dto);
-      else    await pApi.createService(dto);
-      closeModal('svcModal');
-      showAlert('#alertBox', 'Xidmət uğurla saxlandı!', 'success');
-      loadServices();
-    } catch(err) {
-      showAlert('#modalAlert', err.message);
-    } finally {
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Saxla';
-    }
+  const dto = {
+    name:            document.getElementById('svcName').value,
+    description:     document.getElementById('svcDesc').value,
+    price:           priceVal === '' ? 0 : parseFloat(priceVal), // boşdursa 0
+    durationMinutes: parseInt(document.getElementById('svcDuration').value),
+    isActive:        document.getElementById('svcActive').value === 'true',
+  };
+
+  try {
+    if (id) await pApi.updateService(id, dto);
+    else    await pApi.createService(dto);
+    closeModal('svcModal');
+    showAlert('#alertBox', 'Xidmət uğurla saxlandı!', 'success');
+    loadServices();
+  } catch(err) {
+    showAlert('#modalAlert', err.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Saxla';
   }
+}
 
   function openDelete(id) {
     document.getElementById('delId').value = id;

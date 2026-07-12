@@ -2,110 +2,337 @@
 <html lang="az">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Dashboard — Appointment System</title>
+  <title>Profilim — Appointment System</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="../css/client.css">
+  <script src="https://js.stripe.com/v3/"></script>
   <style>
-    .dash-hero{
-      background:linear-gradient(135deg,var(--primary-dark),var(--primary));
-      border-radius:var(--r-xl);padding:var(--sp-8);
-      display:flex;align-items:center;justify-content:space-between;
-      gap:var(--sp-6);margin-bottom:var(--sp-6);
-    }
-    .dash-hero h1{color:#fff;font-size:var(--fs-2xl);margin-bottom:var(--sp-2)}
-    .dash-hero p{color:rgba(255,255,255,.6);margin-bottom:var(--sp-5)}
-    .stat-card-dash{
-      background:var(--surface);border:1px solid var(--border);
-      border-radius:var(--r-md);padding:var(--sp-5);
-      display:flex;align-items:center;gap:var(--sp-4);
-    }
-    .stat-icon-dash{
-      width:52px;height:52px;border-radius:var(--r-md);
-      display:flex;align-items:center;justify-content:center;
-      font-size:1.3rem;flex-shrink:0;
-    }
+    .profile-hero{background:linear-gradient(135deg,#082627 0%,#0f2b2b 55%,#1a4040 100%);padding:48px 0 80px;position:relative;overflow:hidden}
+    .profile-hero::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle,rgba(201,145,47,.06) 1px,transparent 1px);background-size:28px 28px}
+    .profile-hero::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:48px;background:var(--surface-warm);border-radius:40px 40px 0 0}
+    .hero-orb{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none}
+    .hero-orb-1{width:360px;height:360px;background:radial-gradient(circle,rgba(201,145,47,.12),transparent 70%);top:-80px;right:-60px}
+    .hero-orb-2{width:240px;height:240px;background:radial-gradient(circle,rgba(15,75,80,.3),transparent 70%);bottom:0;left:-40px}
+
+    .profile-card-wrap{position:relative;z-index:10;margin-top:-56px}
+    .profile-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;box-shadow:0 8px 40px rgba(8,38,39,.1),0 0 0 1px rgba(201,145,47,.06);overflow:hidden}
+    .profile-card-inner{display:flex;align-items:flex-end;gap:var(--sp-5);padding:var(--sp-5) var(--sp-6);position:relative}
+    .profile-avatar-wrap{position:relative;flex-shrink:0}
+    .profile-avatar{width:96px;height:96px;border-radius:50%;border:4px solid var(--surface);box-shadow:0 4px 20px rgba(8,38,39,.15);background:linear-gradient(135deg,var(--accent-soft),var(--surface-soft));color:var(--accent-dark);display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-size:var(--fs-2xl);font-weight:700;overflow:hidden;cursor:pointer;transition:transform .2s ease}
+    .profile-avatar:hover{transform:scale(1.04)}
+    .profile-avatar img{width:100%;height:100%;object-fit:cover}
+    .profile-avatar-edit{position:absolute;bottom:2px;right:2px;width:28px;height:28px;border-radius:50%;background:var(--accent);border:2px solid var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-size:.65rem}
+    .profile-info{flex:1;min-width:0}
+    .profile-name{font-family:var(--font-head);font-size:var(--fs-xl);font-weight:700;color:var(--ink);margin-bottom:3px}
+    .profile-username{font-size:var(--fs-sm);color:var(--ink-soft);display:flex;align-items:center;gap:6px}
+    .profile-username i{color:var(--accent);font-size:.75rem}
+    .profile-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:var(--r-full);background:var(--success-soft);color:var(--success);font-size:var(--fs-xs);font-weight:700;margin-top:8px}
+    .profile-actions{display:flex;gap:var(--sp-2);flex-shrink:0;align-self:center}
+
+    .profile-stats{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--border)}
+    .profile-stat{text-align:center;padding:var(--sp-4) var(--sp-3);position:relative}
+    .profile-stat::after{content:'';position:absolute;right:0;top:20%;bottom:20%;width:1px;background:var(--border)}
+    .profile-stat:last-child::after{display:none}
+    .profile-stat-num{font-family:var(--font-head);font-size:var(--fs-xl);font-weight:700;color:var(--primary);line-height:1;margin-bottom:4px}
+    .profile-stat-lbl{font-size:var(--fs-xs);color:var(--ink-soft)}
+
+    .sec-label{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp-4)}
+    .sec-label h2{font-size:var(--fs-md);font-weight:700;display:flex;align-items:center;gap:8px}
+    .sec-label h2 i{color:var(--accent)}
+
+    .info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden}
+    .info-row{display:flex;align-items:center;padding:14px var(--sp-5);border-bottom:1px solid var(--border);gap:var(--sp-4)}
+    .info-row:last-child{border-bottom:none}
+    .info-row-icon{width:36px;height:36px;border-radius:var(--r-sm);flex-shrink:0;background:var(--accent-xsoft);display:flex;align-items:center;justify-content:center;color:var(--accent-dark);font-size:.85rem}
+    .info-row-label{font-size:var(--fs-xs);color:var(--ink-soft);margin-bottom:2px}
+    .info-row-value{font-size:var(--fs-sm);font-weight:600;color:var(--ink)}
+    .info-row-edit{margin-left:auto;flex-shrink:0;font-size:var(--fs-xs);color:var(--accent-dark);font-weight:600;background:none;border:none;cursor:pointer;text-decoration:underline}
+
+    .appt-item{display:flex;align-items:center;gap:var(--sp-3);padding:var(--sp-4);border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;text-decoration:none}
+    .appt-item:last-child{border-bottom:none}
+    .appt-item:hover{background:var(--surface-soft)}
+    .appt-date-box{width:48px;text-align:center;flex-shrink:0;background:var(--primary);border-radius:var(--r-sm);padding:6px 0}
+    .appt-date-box b{display:block;font-family:var(--font-head);font-size:var(--fs-lg);color:var(--accent-light);line-height:1}
+    .appt-date-box small{font-size:.6rem;text-transform:uppercase;color:rgba(255,255,255,.5);letter-spacing:.06em}
+    .appt-ico{width:40px;height:40px;border-radius:var(--r-sm);flex-shrink:0;background:var(--accent-xsoft);color:var(--accent-dark);display:flex;align-items:center;justify-content:center;font-size:.95rem}
+    .appt-info{flex:1;min-width:0}
+    .appt-info b{display:block;font-size:var(--fs-sm);margin-bottom:2px}
+    .appt-info span{font-size:var(--fs-xs);color:var(--ink-soft)}
+
+    .pay-card-visual{border-radius:18px;padding:24px;background:linear-gradient(135deg,#0f2b2b 0%,#1a4040 60%,#082627 100%);position:relative;overflow:hidden;margin-bottom:var(--sp-4);box-shadow:0 12px 36px rgba(8,38,39,.25);min-height:168px}
+    .pay-card-visual::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:rgba(201,145,47,.1)}
+    .pay-card-visual::after{content:'';position:absolute;bottom:-30px;left:30px;width:120px;height:120px;border-radius:50%;background:rgba(15,75,80,.2)}
+    .pay-card-chip{width:36px;height:28px;border-radius:5px;background:linear-gradient(135deg,#c9912f,#dba84a);margin-bottom:20px;position:relative;z-index:1}
+    .pay-card-num{font-size:1.05rem;font-weight:700;letter-spacing:4px;color:#fff;margin-bottom:14px;position:relative;z-index:1}
+    .pay-card-footer{display:flex;justify-content:space-between;align-items:flex-end;position:relative;z-index:1}
+    .pay-card-lbl{color:rgba(255,255,255,.55);font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:3px}
+    .pay-card-val{color:#fff;font-size:.85rem;font-weight:600}
+    .pay-card-brand{position:absolute;top:20px;right:20px;font-size:2.4rem;z-index:1}
+    .pay-empty-card{border:2px dashed var(--border);border-radius:18px;padding:44px 24px;text-align:center;cursor:pointer;transition:all .2s ease;margin-bottom:var(--sp-4)}
+    .pay-empty-card:hover{border-color:var(--accent);background:var(--accent-xsoft)}
+    .pay-empty-card i{font-size:2.2rem;color:var(--border-strong);display:block;margin-bottom:12px}
+
+    .stripe-card-box{border:1.5px solid var(--border);border-radius:var(--r-sm);padding:12px var(--sp-4);background:var(--surface);transition:border-color .18s}
+    .stripe-card-box:focus-within{border-color:var(--primary);box-shadow:0 0 0 3px rgba(15,43,43,.06)}
+    #stripe-errors{color:var(--danger);font-size:var(--fs-xs);margin-top:6px;display:flex;align-items:center;gap:5px}
+    #stripe-errors:empty{display:none}
+    .stripe-logos{display:flex;gap:var(--sp-3);align-items:center;margin-bottom:var(--sp-4)}
+    .stripe-secure{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:var(--fs-xs);color:var(--ink-soft);padding:var(--sp-3) var(--sp-4);background:var(--surface-soft);border-radius:var(--r-sm);margin:var(--sp-4) 0}
+    .stripe-secure .fa-stripe{color:#6772E5;font-size:1.1rem}
+    .stripe-secure .fa-shield-check{color:var(--success)}
+
+    .pay-processing{display:flex;flex-direction:column;align-items:center;padding:var(--sp-8) 0;text-align:center}
+    .pay-spin{width:52px;height:52px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--accent);animation:spin .8s linear infinite;margin-bottom:var(--sp-3)}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    .avatar-upload-zone{width:96px;height:96px;border-radius:50%;border:2px dashed var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;overflow:hidden;margin:0 auto var(--sp-4)}
+    .avatar-upload-zone:hover{border-color:var(--accent);background:var(--accent-xsoft)}
+    .avatar-upload-zone img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+
+    .dash-grid{display:grid;grid-template-columns:1fr 360px;gap:var(--sp-6);align-items:start}
+
+    @media(max-width:960px){.dash-grid{grid-template-columns:1fr}.profile-card-inner{flex-wrap:wrap}.profile-actions{width:100%;justify-content:flex-end}}
+    @media(max-width:600px){.profile-stats{grid-template-columns:repeat(3,1fr)}}
   </style>
 </head>
 <body>
 <div id="navbar"></div>
 
-<section class="section-sm">
-  <div class="container">
-
-    <div class="dash-hero">
-      <div>
-        <h1 id="heroTitle">Salam!</h1>
-        <p id="heroSub">Görüşlərinizi asanlıqla idarə edin</p>
-        <a href="booking.html" class="btn btn-primary">
-          <i class="fa-solid fa-calendar-plus"></i> Yeni görüş yarat
-        </a>
-      </div>
+<div class="profile-hero">
+  <div class="hero-orb hero-orb-1"></div>
+  <div class="hero-orb hero-orb-2"></div>
+  <div class="container" style="position:relative;z-index:1">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+      <i class="fa-solid fa-user-circle" style="color:rgba(201,145,47,.7);font-size:1rem"></i>
+      <span style="font-size:.78rem;color:rgba(255,255,255,.45);font-weight:600;text-transform:uppercase;letter-spacing:.08em">Şəxsi kabinet</span>
     </div>
+    <h1 style="font-family:var(--font-head);font-size:clamp(1.6rem,3vw,2.2rem);color:#fff;margin-bottom:6px">Profilim</h1>
+    <p style="color:rgba(255,255,255,.45);font-size:var(--fs-sm)">Hesabınızı idarə edin</p>
+  </div>
+</div>
 
-    <!-- Stats -->
-    <div class="grid-4" style="margin-bottom:var(--sp-6)">
-      <div class="stat-card-dash">
-        <div class="stat-icon-dash" style="background:var(--accent-xsoft);color:var(--accent-dark)">
-          <i class="fa-solid fa-calendar-day"></i>
-        </div>
-        <div>
-          <div style="font-family:var(--font-head);font-size:var(--fs-xl);font-weight:700;line-height:1" id="statUpcoming">—</div>
-          <div style="font-size:var(--fs-xs);color:var(--ink-soft);margin-top:3px">Gələcək görüşlər</div>
-        </div>
-      </div>
-      <div class="stat-card-dash">
-        <div class="stat-icon-dash" style="background:var(--success-soft);color:var(--success)">
-          <i class="fa-solid fa-circle-check"></i>
-        </div>
-        <div>
-          <div style="font-family:var(--font-head);font-size:var(--fs-xl);font-weight:700;line-height:1" id="statDone">—</div>
-          <div style="font-size:var(--fs-xs);color:var(--ink-soft);margin-top:3px">Tamamlanmış</div>
-        </div>
-      </div>
-      <div class="stat-card-dash">
-        <div class="stat-icon-dash" style="background:var(--info-soft);color:var(--info)">
-          <i class="fa-solid fa-list"></i>
-        </div>
-        <div>
-          <div style="font-family:var(--font-head);font-size:var(--fs-xl);font-weight:700;line-height:1" id="statAll">—</div>
-          <div style="font-size:var(--fs-xs);color:var(--ink-soft);margin-top:3px">Ümumi görüşlər</div>
-        </div>
-      </div>
-      <div class="stat-card-dash">
-        <div class="stat-icon-dash" style="background:var(--accent-xsoft);color:var(--accent-dark)">
-          <i class="fa-solid fa-user"></i>
-        </div>
-        <div>
-          <div style="font-size:var(--fs-sm);font-weight:700;line-height:1;margin-top:2px" id="statRole">—</div>
-          <div style="font-size:var(--fs-xs);color:var(--ink-soft);margin-top:3px">Hesab tipi</div>
-        </div>
-      </div>
-    </div>
+<div class="container" style="padding-bottom:var(--sp-12)">
 
-    <!-- Two cols -->
-    <div class="grid-2">
-      <div class="card">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp-4)">
-          <h2 style="font-size:var(--fs-md)">Yaxın görüşlər</h2>
-          <a href="appointments.html" style="font-size:var(--fs-sm);color:var(--accent-dark);font-weight:600">Hamısına bax →</a>
+  <div class="profile-card-wrap" style="margin-bottom:var(--sp-6)">
+    <div class="profile-card">
+      <div class="profile-card-inner">
+        <div class="profile-avatar-wrap">
+          <div class="profile-avatar" id="heroAvatar" onclick="openEditModal()">?</div>
+          <div class="profile-avatar-edit" onclick="openEditModal()">
+            <i class="fa-solid fa-camera"></i>
+          </div>
         </div>
-        <div id="upcomingList"><div class="spinner-wrap"><div class="spinner"></div></div></div>
+        <div class="profile-info">
+          <div class="profile-name" id="heroName">—</div>
+          <div class="profile-username">
+            <i class="fa-solid fa-at"></i>
+            <span id="heroUsername">—</span>
+          </div>
+          <div class="profile-badge">
+            <i class="fa-solid fa-circle-check"></i> Aktiv hesab
+          </div>
+        </div>
+        <div class="profile-actions">
+          <button class="btn btn-outline btn-sm" onclick="openEditModal()">
+            <i class="fa-solid fa-pen"></i> Redaktə et
+          </button>
+          <a href="booking.html" class="btn btn-primary btn-sm">
+            <i class="fa-solid fa-calendar-plus"></i> Yeni rezervasiya
+          </a>
+        </div>
       </div>
-
-      <div class="card">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp-4)">
-          <h2 style="font-size:var(--fs-md)">Populyar xidmətlər</h2>
-          <a href="booking.html" style="font-size:var(--fs-sm);color:var(--accent-dark);font-weight:600">Hamısına bax →</a>
+      <div class="profile-stats">
+        <div class="profile-stat">
+          <div class="profile-stat-num" id="statUpcoming">—</div>
+          <div class="profile-stat-lbl">Gələcək görüş</div>
         </div>
-        <div class="grid-2" id="popularServices">
-          <div class="spinner-wrap" style="grid-column:1/-1"><div class="spinner"></div></div>
+        <div class="profile-stat">
+          <div class="profile-stat-num" id="statCompleted">—</div>
+          <div class="profile-stat-lbl">Tamamlanmış</div>
+        </div>
+        <div class="profile-stat">
+          <div class="profile-stat-num" id="statReviews">—</div>
+          <div class="profile-stat-lbl">Rəy yazıldı</div>
         </div>
       </div>
     </div>
   </div>
-</section>
+
+  <div class="alert hidden" id="pageAlert" style="margin-bottom:var(--sp-4)"></div>
+
+  <div class="dash-grid">
+
+    <!-- LEFT -->
+    <div style="display:flex;flex-direction:column;gap:var(--sp-5)">
+
+      <div>
+        <div class="sec-label">
+          <h2><i class="fa-solid fa-circle-user"></i>Hesab məlumatları</h2>
+        </div>
+        <div class="info-card">
+          <div class="info-row">
+            <div class="info-row-icon"><i class="fa-solid fa-user"></i></div>
+            <div style="flex:1;min-width:0">
+              <div class="info-row-label">Ad Soyad</div>
+              <div class="info-row-value" id="infoName">—</div>
+            </div>
+            <button class="info-row-edit" onclick="openEditModal()">Dəyiş</button>
+          </div>
+          <div class="info-row">
+            <div class="info-row-icon"><i class="fa-solid fa-at"></i></div>
+            <div style="flex:1;min-width:0">
+              <div class="info-row-label">İstifadəçi adı</div>
+              <div class="info-row-value" id="infoUsername">—</div>
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-row-icon"><i class="fa-solid fa-envelope"></i></div>
+            <div style="flex:1;min-width:0">
+              <div class="info-row-label">Email</div>
+              <div class="info-row-value" id="infoEmail">—</div>
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-row-icon"><i class="fa-solid fa-calendar"></i></div>
+            <div style="flex:1;min-width:0">
+              <div class="info-row-label">Qeydiyyat tarixi</div>
+              <div class="info-row-value" id="infoDate">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="sec-label">
+          <h2><i class="fa-solid fa-calendar-check"></i>Yaxın görüşlər</h2>
+          <a href="appointments.html" style="font-size:var(--fs-sm);color:var(--accent-dark);font-weight:600">
+            Hamısı <i class="fa-solid fa-arrow-right" style="font-size:.7rem"></i>
+          </a>
+        </div>
+        <div class="info-card" id="upcomingList">
+          <div class="spinner-wrap"><div class="spinner"></div></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT -->
+    <div>
+      <div class="sec-label">
+        <h2><i class="fa-solid fa-credit-card"></i>Ödəniş kartı</h2>
+      </div>
+
+      <div id="cardVisualWrap"></div>
+
+      <div class="info-card" id="cardFormWrap" style="padding:var(--sp-5)">
+        <div id="cardFormTitle" style="font-size:var(--fs-sm);font-weight:700;margin-bottom:var(--sp-4);color:var(--ink)">
+          <i class="fa-solid fa-plus" style="color:var(--accent);margin-right:6px"></i>Kart əlavə edin
+        </div>
+
+        <div id="cardProcessing" class="hidden">
+          <div class="pay-processing">
+            <div class="pay-spin"></div>
+            <p style="font-size:var(--fs-sm);color:var(--ink-soft)">Kart yoxlanılır...</p>
+          </div>
+        </div>
+
+        <div id="cardFormContent">
+          <div class="alert alert-error hidden" id="cardAlert"></div>
+
+          <div class="stripe-logos">
+            <i class="fa-brands fa-cc-visa"       style="color:#1434CB;font-size:2rem"></i>
+            <i class="fa-brands fa-cc-mastercard" style="color:#EB001B;font-size:2rem"></i>
+            <i class="fa-brands fa-cc-amex"       style="color:#006FCF;font-size:2rem"></i>
+            <span style="font-size:var(--fs-xs);color:var(--ink-soft)">qəbul olunanlar</span>
+          </div>
+
+          <div class="field">
+            <label><i class="fa-solid fa-credit-card" style="color:var(--accent);margin-right:6px"></i>Kart məlumatları</label>
+            <div class="stripe-card-box">
+              <div id="stripe-card-element"></div>
+            </div>
+            <div id="stripe-errors"></div>
+          </div>
+
+          <div class="stripe-secure">
+            <i class="fa-brands fa-stripe"></i>
+            <span>Stripe ilə şifrələnmiş</span>
+            <i class="fa-solid fa-shield-check" style="margin-left:6px"></i>
+            <span>Kart məlumatlarınız bizə ötürülmür</span>
+          </div>
+
+          <button class="btn btn-primary btn-block" id="saveCardBtn" onclick="saveStripeCard()">
+            <i class="fa-solid fa-lock"></i> Kartı təhlükəsiz saxla
+          </button>
+        </div>
+      </div>
+
+      <div style="text-align:center;margin-top:var(--sp-3);opacity:.4">
+        <i class="fa-brands fa-stripe" style="font-size:2rem;color:var(--ink)"></i>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div class="overlay hidden" id="editModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3><i class="fa-solid fa-pen" style="color:var(--accent);margin-right:8px"></i>Profili redaktə et</h3>
+      <button class="btn-icon" onclick="closeModal('editModal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="alert hidden" id="editAlert"></div>
+      <div style="text-align:center;margin-bottom:var(--sp-5)">
+        <div class="avatar-upload-zone" onclick="document.getElementById('avatarFile').click()" id="editAvatarZone">
+          <i class="fa-solid fa-camera" style="font-size:1.5rem;color:var(--border-strong)"></i>
+          <span style="font-size:var(--fs-xs);color:var(--ink-soft);margin-top:4px">Şəkil seç</span>
+        </div>
+        <div id="uploadStatusEdit" style="font-size:var(--fs-xs);color:var(--ink-soft)"></div>
+        <input type="file" id="avatarFile" accept="image/*" style="display:none" onchange="handleAvatarUpload(this)">
+        <input type="hidden" id="newImageUrl">
+      </div>
+      <div class="field">
+        <label><i class="fa-solid fa-user" style="color:var(--accent);margin-right:6px"></i>Ad Soyad</label>
+        <input type="text" id="editName" placeholder="Adınız Soyadınız">
+      </div>
+      <div class="field">
+        <label><i class="fa-solid fa-at" style="color:var(--accent);margin-right:6px"></i>İstifadəçi adı</label>
+        <input type="text" id="editUsername" placeholder="username">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('editModal')">Ləğv et</button>
+      <button class="btn btn-primary" id="editSaveBtn" onclick="saveProfile()">
+        <i class="fa-solid fa-floppy-disk"></i> Saxla
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Card Confirm Modal -->
+<div class="overlay hidden" id="deleteCardModal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-head">
+      <h3><i class="fa-solid fa-trash" style="color:var(--danger);margin-right:8px"></i>Kartı sil</h3>
+      <button class="btn-icon" onclick="closeModal('deleteCardModal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:var(--fs-sm);color:var(--ink-soft);line-height:1.6">
+        Kartı silmək istədiyinizə əminsiniz? Bu əməliyyatı geri qaytara bilməyəcəksiniz.
+      </p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('deleteCardModal')">Ləğv et</button>
+      <button class="btn btn-danger" onclick="confirmRemoveCard()">
+        <i class="fa-solid fa-trash"></i> Bəli, sil
+      </button>
+    </div>
+  </div>
+</div>
 
 <div id="footer"></div>
 
@@ -114,69 +341,354 @@
 <script>
   requireAuth();
 
+  /* ── Stripe ── */
+  const STRIPE_PK = 'pk_test_51TrwYHPyObHpPv8AhvofvlzmSgVgyh504Ia7njklDZnS5CeXgOfqOHi6pmxrMvZokf8CjW0JpQdKKBdJr7uANMSs00Ir3V3oO4';
+  const stripe    = Stripe(STRIPE_PK);
+  const elements  = stripe.elements({
+    fonts:[{cssSrc:'https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap'}]
+  });
+  let cardEl  = null;
+  let profile = null;
+
+  function mountStripeCard() {
+    if (cardEl) return;
+    cardEl = elements.create('card', {
+      style:{
+        base:{fontFamily:"'Inter',sans-serif",fontSize:'15px',color:'#1a1208','::placeholder':{color:'#b8a898'},iconColor:'#c9912f'},
+        invalid:{color:'#b5271d',iconColor:'#b5271d'}
+      },
+      hidePostalCode:true,
+    });
+    cardEl.mount('#stripe-card-element');
+    cardEl.on('change', e => {
+      const el = document.getElementById('stripe-errors');
+      el.innerHTML = e.error ? `<i class="fa-solid fa-circle-exclamation"></i> ${e.error.message}` : '';
+    });
+  }
+
+  /* ════ INIT ════ */
   (async () => {
-    const profile = await cApi.profile().catch(()=>null);
-    if (profile) {
-      const first = profile.fullName?.split(' ')[0] || '';
-      document.getElementById('heroTitle').textContent = `Salam, ${first}!`;
-      document.getElementById('statRole').textContent  = profile.roles?.[0] || 'Client';
+    profile = await cApi.profile().catch(() => null);
+    if (!profile) return;
+
+    const ava = document.getElementById('heroAvatar');
+    if (profile.imageUrl) {
+      ava.innerHTML = `<img src="${profile.imageUrl}" alt="${profile.fullName}">`;
+    } else {
+      ava.textContent = profile.fullName?.[0]?.toUpperCase() || '?';
     }
 
-    const [upcoming, past, all, catalog] = await Promise.all([
+    document.getElementById('heroName').textContent     = profile.fullName || '—';
+    document.getElementById('heroUsername').textContent = profile.userName || '—';
+
+    document.getElementById('infoName').textContent     = profile.fullName || '—';
+    document.getElementById('infoUsername').textContent = profile.userName || '—';
+
+    const email = profile.email || profile.Email || '—';
+    document.getElementById('infoEmail').textContent = email;
+
+    const created = profile.createdAt || profile.CreatedAt || profile.created_at;
+    document.getElementById('infoDate').textContent = created
+      ? formatDate(created, {day:'numeric', month:'long', year:'numeric'})
+      : '—';
+
+    const [upcoming, past] = await Promise.all([
       cApi.getMy('upcoming').catch(()=>[]),
       cApi.getMy('past').catch(()=>[]),
-      cApi.getMy().catch(()=>[]),
-      cApi.getCatalog().catch(()=>[]),
     ]);
+    const upArr   = Array.isArray(upcoming) ? upcoming : [];
+    const pastArr = Array.isArray(past)     ? past     : [];
+    const done    = pastArr.filter(a => a.status === 'Completed');
 
-    document.getElementById('statUpcoming').textContent = upcoming.length;
-    document.getElementById('statDone').textContent     = (Array.isArray(past)?past:[]).filter(a=>a.status==='Completed').length;
-    document.getElementById('statAll').textContent      = all.length;
+    document.getElementById('statUpcoming').textContent  = upArr.length;
+    document.getElementById('statCompleted').textContent = done.length;
 
-    if (upcoming[0]) {
-      document.getElementById('heroSub').textContent =
-        `Növbəti görüşünüz: ${formatDate(upcoming[0].startDateTime)} ${formatTime(upcoming[0].startDateTime)}`;
+    const reviewCount = profile.reviewsWrittenCount
+      ?? (profile.ReviewsWrittenCount)
+      ?? done.length;
+    document.getElementById('statReviews').textContent = reviewCount;
+
+    renderUpcoming(upArr.slice(0,4));
+    renderCardVisual();
+    mountStripeCard();
+
+    if (new URLSearchParams(location.search).get('addCard') === '1') {
+      document.getElementById('cardFormWrap')?.scrollIntoView({behavior:'smooth'});
     }
-
-    // Upcoming list
-    const ul = document.getElementById('upcomingList');
-    const upArr = Array.isArray(upcoming) ? upcoming : [];
-    if (!upArr.length) {
-      ul.innerHTML = `<div class="empty" style="padding:var(--sp-6) 0">
-        <i class="fa-regular fa-calendar"></i>
-        <h3>Görüş yoxdur</h3>
-        <p>İlk rezervasiyanızı edin</p>
-        <a href="booking.html" class="btn btn-primary btn-sm">Rezervasiya et</a>
-      </div>`;
-    } else {
-      ul.innerHTML = upArr.slice(0,4).map(a => `
-        <a href="appointment-detail.html?id=${a.id}" class="appt-card" style="display:flex;margin-bottom:var(--sp-3)">
-          <div class="appt-date-box">
-            <b>${new Date(a.startDateTime).getDate()}</b>
-            <small>${formatDate(a.startDateTime,{month:'short'})}</small>
-          </div>
-          <div class="appt-icon-box" style="margin:0 var(--sp-3)">
-            <i class="fa-solid fa-calendar-check"></i>
-          </div>
-          <div class="appt-info">
-            <b>${a.serviceName}</b>
-            <span>${a.providerBusinessName} · ${formatTime(a.startDateTime)}</span>
-          </div>
-          ${statusBadge(a.status)}
-        </a>`).join('');
-    }
-
-    // Popular services
-    const ps = document.getElementById('popularServices');
-    const catArr = Array.isArray(catalog) ? catalog : [];
-    if (!catArr.length) { ps.innerHTML = ''; return; }
-    ps.innerHTML = catArr.slice(0,4).map(c => `
-      <div class="card-sm" style="text-align:center">
-        <i class="fa-solid fa-briefcase-medical" style="font-size:1.5rem;color:var(--accent-dark);margin-bottom:var(--sp-2);display:block"></i>
-        <strong style="display:block;font-size:var(--fs-sm);margin-bottom:var(--sp-3)">${c.name}</strong>
-        <a href="booking.html" class="btn btn-outline btn-sm btn-block">Seç</a>
-      </div>`).join('');
   })();
+
+  /* ════ UPCOMING ════ */
+  function renderUpcoming(list) {
+    const el = document.getElementById('upcomingList');
+    if (!list.length) {
+      el.innerHTML = `<div class="empty" style="padding:var(--sp-6) 0">
+        <i class="fa-regular fa-calendar"></i>
+        <h3>Gözləyən görüş yoxdur</h3>
+        <p>Yeni rezervasiya edin</p>
+        <a href="booking.html" class="btn btn-primary btn-sm" style="margin-top:12px">
+          <i class="fa-solid fa-calendar-plus"></i> Rezervasiya et
+        </a>
+      </div>`;
+      return;
+    }
+    el.innerHTML = list.map(a => `
+      <a href="appointment-detail.html?id=${a.id}" class="appt-item">
+        <div class="appt-date-box">
+          <b>${new Date(a.startDateTime).getDate()}</b>
+          <small>${formatDate(a.startDateTime,{month:'short'})}</small>
+        </div>
+        <div class="appt-ico"><i class="fa-solid fa-calendar-check"></i></div>
+        <div class="appt-info">
+          <b>${a.serviceName}</b>
+          <span>
+            <i class="fa-solid fa-building" style="color:var(--accent);margin-right:3px"></i>${a.providerBusinessName}
+            &nbsp;·&nbsp;
+            <i class="fa-regular fa-clock" style="color:var(--accent);margin-right:3px"></i>${formatTime(a.startDateTime)}
+          </span>
+        </div>
+        ${statusBadge(a.status)}
+      </a>`).join('');
+  }
+
+  /* ════ CARD VISUAL ════ */
+  function renderCardVisual() {
+    const saved  = JSON.parse(localStorage.getItem('stripeCard') || 'null');
+    const wrap   = document.getElementById('cardVisualWrap');
+    const ftitle = document.getElementById('cardFormTitle');
+
+    if (!saved) {
+      wrap.innerHTML = `
+        <div class="pay-empty-card">
+          <i class="fa-solid fa-credit-card"></i>
+          <p style="font-size:var(--fs-sm);font-weight:600;color:var(--ink);margin-bottom:4px">Kart əlavə edilməyib</p>
+          <p style="font-size:var(--fs-xs);color:var(--ink-soft)">Rezervasiya ödənişləri üçün Stripe vasitəsilə kart əlavə edin</p>
+        </div>`;
+      ftitle.innerHTML = '<i class="fa-solid fa-plus" style="color:var(--accent);margin-right:6px"></i>Kart əlavə edin';
+      return;
+    }
+
+    let brandHtml = '<i class="fa-solid fa-credit-card" style="color:rgba(255,255,255,.4);font-size:2.4rem"></i>';
+    if      (saved.brand==='visa')       brandHtml = '<i class="fa-brands fa-cc-visa" style="color:#fff;font-size:2.4rem"></i>';
+    else if (saved.brand==='mastercard') brandHtml = '<i class="fa-brands fa-cc-mastercard" style="color:#fff;font-size:2.4rem"></i>';
+    else if (saved.brand==='amex')       brandHtml = '<i class="fa-brands fa-cc-amex" style="color:#fff;font-size:2.4rem"></i>';
+
+    wrap.innerHTML = `
+      <div class="pay-card-visual">
+        <span class="pay-card-brand">${brandHtml}</span>
+        <div class="pay-card-chip"></div>
+        <div class="pay-card-num">•••• •••• •••• ${saved.last4}</div>
+        <div class="pay-card-footer">
+          <div>
+            <span class="pay-card-lbl">Son tarix</span>
+            <span class="pay-card-val">${saved.expMonth}/${String(saved.expYear).slice(-2)}</span>
+          </div>
+          <div style="text-align:right">
+            <span class="pay-card-lbl">Kart tipi</span>
+            <span class="pay-card-val" style="text-transform:capitalize">${saved.brand}</span>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-danger btn-sm btn-block" onclick="removeCard()" style="margin-bottom:var(--sp-4)">
+        <i class="fa-solid fa-trash"></i> Kartı sil
+      </button>`;
+
+    ftitle.innerHTML = '<i class="fa-solid fa-pen" style="color:var(--accent);margin-right:6px"></i>Kartı dəyişdir';
+  }
+
+  /* ════ STRIPE SAVE ════ */
+  async function saveStripeCard() {
+    const btn     = document.getElementById('saveCardBtn');
+    const alertEl = document.getElementById('cardAlert');
+    alertEl.classList.add('hidden');
+
+    btn.disabled = true;
+    document.getElementById('cardFormContent').classList.add('hidden');
+    document.getElementById('cardProcessing').classList.remove('hidden');
+
+    try {
+      const { access } = Token.get();
+
+      const siRes  = await fetch('http://localhost:5291/api/Payment/setup-intent', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+access},
+      });
+      const siText = await siRes.text();
+      if (!siText) throw new Error('Backend boş cavab qaytardı');
+      const siData = JSON.parse(siText);
+      if (!siData.success) throw new Error(siData.errors?.[0] || 'SetupIntent xətası');
+
+      const { clientSecret } = siData.data;
+
+      const { error, setupIntent } = await stripe.confirmCardSetup(clientSecret, {
+        payment_method: { card: cardEl }
+      });
+      if (error) throw new Error(error.message);
+
+      const pmId   = typeof setupIntent.payment_method === 'string'
+        ? setupIntent.payment_method
+        : setupIntent.payment_method?.id;
+
+      const pmRes  = await fetch(`http://localhost:5291/api/Payment/method/${pmId}`, {
+        headers:{'Authorization':'Bearer '+access}
+      });
+      const pmText = await pmRes.text();
+      if (!pmText) throw new Error('Kart detalları alınmadı');
+      const pmData = JSON.parse(pmText);
+
+      const cardInfo = pmData.success ? pmData.data : { last4:'••••', brand:'card', expMonth:'--', expYear:'----' };
+
+      localStorage.setItem('stripeCard', JSON.stringify({
+        pmId,
+        last4:    cardInfo.last4,
+        brand:    cardInfo.brand,
+        expMonth: cardInfo.expMonth,
+        expYear:  cardInfo.expYear,
+      }));
+
+      document.getElementById('cardProcessing').classList.add('hidden');
+      document.getElementById('cardFormContent').classList.remove('hidden');
+      btn.disabled = false;
+
+      renderCardVisual();
+      showAlert('#pageAlert', 'Kart uğurla əlavə edildi!', 'success');
+      window.scrollTo({top:0,behavior:'smooth'});
+
+    } catch(err) {
+      document.getElementById('cardProcessing').classList.add('hidden');
+      document.getElementById('cardFormContent').classList.remove('hidden');
+      btn.disabled = false;
+      alertEl.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i><span>${err.message}</span>`;
+      alertEl.className = 'alert alert-error';
+    }
+  }
+
+  /* ════ REMOVE CARD (modal ilə) ════ */
+  function removeCard() {
+    openModal('deleteCardModal');
+  }
+
+  function confirmRemoveCard() {
+    localStorage.removeItem('stripeCard');
+    if (cardEl) cardEl.clear();
+    renderCardVisual();
+    closeModal('deleteCardModal');
+    showAlert('#pageAlert', 'Kart silindi.', 'success');
+  }
+
+  /* ════ EDIT PROFILE ════ */
+  function openEditModal() {
+    if (!profile) return;
+    document.getElementById('editName').value     = profile.fullName || '';
+    document.getElementById('editUsername').value = profile.userName || '';
+    document.getElementById('newImageUrl').value  = profile.imageUrl || '';
+    document.getElementById('editAlert').classList.add('hidden');
+    document.getElementById('uploadStatusEdit').textContent = '';
+
+    const zone = document.getElementById('editAvatarZone');
+    if (profile.imageUrl) {
+      zone.innerHTML = `<img src="${profile.imageUrl}" alt="${profile.fullName}">`;
+    } else {
+      zone.innerHTML = `
+        <i class="fa-solid fa-camera" style="font-size:1.5rem;color:var(--border-strong)"></i>
+        <span style="font-size:var(--fs-xs);color:var(--ink-soft);margin-top:4px">Şəkil seç</span>`;
+    }
+    openModal('editModal');
+  }
+
+  async function handleAvatarUpload(input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (file.size > 5*1024*1024) { showAlert('#editAlert','Şəkil 5MB-dan böyük ola bilməz.'); return; }
+
+    const st = document.getElementById('uploadStatusEdit');
+    st.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Yüklənir...';
+
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('editAvatarZone').innerHTML = `<img src="${e.target.result}" alt="preview">`;
+    };
+    reader.readAsDataURL(file);
+
+    try {
+      const fd = new FormData();
+      fd.append('image', file);
+      const res  = await fetch('https://api.imgbb.com/1/upload?key=cfb112e9e8b779f0c69925b074355c2c',{method:'POST',body:fd});
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById('newImageUrl').value = data.data.url;
+        st.innerHTML = '<i class="fa-solid fa-circle-check" style="color:var(--success)"></i> Yükləndi';
+      } else throw new Error();
+    } catch {
+      st.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="color:var(--warning)"></i> Uğursuz';
+    }
+  }
+
+  async function saveProfile() {
+    const btn = document.getElementById('editSaveBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+    document.getElementById('editAlert').classList.add('hidden');
+
+    const newName     = document.getElementById('editName').value.trim();
+    const newUsername = document.getElementById('editUsername').value.trim();
+    const newImage    = document.getElementById('newImageUrl').value || null;
+
+    if (!newName) {
+      showAlert('#editAlert','Ad Soyad boş ola bilməz.');
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Saxla';
+      return;
+    }
+
+    try {
+      const { access } = Token.get();
+      const dto = { fullName: newName, userName: newUsername };
+      if (newImage) dto.imageUrl = newImage;
+
+      const res = await fetch('http://localhost:5291/api/account/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + access,
+        },
+        body: JSON.stringify(dto),
+      });
+
+      const text = await res.text();
+
+      if (res.ok) {
+        profile.fullName = newName;
+        profile.userName = newUsername;
+        if (newImage) profile.imageUrl = newImage;
+
+        document.getElementById('heroName').textContent     = newName;
+        document.getElementById('heroUsername').textContent = newUsername;
+        document.getElementById('infoName').textContent     = newName;
+        document.getElementById('infoUsername').textContent = newUsername;
+
+        const ava = document.getElementById('heroAvatar');
+        if (newImage) ava.innerHTML = `<img src="${newImage}" alt="${newName}">`;
+        else ava.textContent = newName[0]?.toUpperCase() || '?';
+
+        closeModal('editModal');
+        showAlert('#pageAlert', 'Profil uğurla yeniləndi!', 'success');
+      } else {
+        let errMsg = 'Xəta baş verdi';
+        if (text) {
+          try {
+            const errData = JSON.parse(text);
+            errMsg = errData.errors?.[0] || errData.Errors?.[0] || errMsg;
+          } catch {}
+        }
+        showAlert('#editAlert', errMsg);
+      }
+    } catch(e) {
+      showAlert('#editAlert', e.message || 'Server ilə əlaqə qurulmadı');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Saxla';
+    }
+  }
 </script>
 </body>
 </html>

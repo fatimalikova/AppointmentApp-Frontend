@@ -1,15 +1,19 @@
 <!DOCTYPE html>
 <html lang="az">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Appointment System — Ana Səhifə</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-  <link rel="stylesheet" href="../css/client.css">
-  <style>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Appointment System — Ana Səhifə</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet">
+    <link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/client.css">
+    <style>
     /* ══ FIX 1: Slider fullscreen ══ */
     #heroCarousel {
       height: calc(100vh - var(--nav-h));
@@ -409,12 +413,13 @@
     }
     .mockup-profile-head { padding:0 20px 16px; }
     .mockup-prov-avatar {
-      width:56px; height:56px; border-radius:50%;
-      border:3px solid #fff; background:var(--accent-soft);
-      color:var(--accent-dark); display:flex; align-items:center; justify-content:center;
-      font-family:'Playfair Display',serif; font-size:1.2rem; font-weight:700;
-      margin-top:-28px; margin-bottom:10px; overflow:hidden;
-    }
+  width:56px; height:56px; border-radius:50%;
+  border:3px solid #fff; background:var(--accent-soft);
+  color:var(--accent-dark); display:flex; align-items:center; justify-content:center;
+  font-family:'Playfair Display',serif; font-size:1.2rem; font-weight:700;
+  margin-top:-28px; margin-bottom:10px; overflow:hidden;
+  position:relative; z-index:1;   
+}
     .mockup-prov-avatar img { width:100%; height:100%; object-fit:cover; }
     .mockup-prov-name { font-size:.95rem; font-weight:700; color:var(--ink); margin-bottom:3px; }
     .mockup-prov-cat { font-size:.72rem; color:var(--ink-soft); }
@@ -695,429 +700,522 @@
       .cta-btns { flex-direction:column; }
     }
   </style>
-</head>
-<body>
+  </head>
+  <body>
 
-<div id="navbar"></div>
+    <div id="navbar"></div>
 
-<!-- ══════════════════════════════════
+    <!-- ══════════════════════════════════
      FIX 1: HERO SLIDER — Fullscreen
 ══════════════════════════════════ -->
-<div id="heroCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5500">
-  <div class="carousel-indicators" id="carouselIndicators"></div>
-  <div class="carousel-inner" id="carouselInner">
-    <!-- Default fallback -->
-    <div class="carousel-item active">
-      <div class="hero-fallback">
-        <div class="hero-fallback-grid"></div>
-        <div class="slide-content">
-          <div class="slide-inner">
-            <div class="slide-eyebrow">
-              <i class="fa-solid fa-circle" style="font-size:.45rem"></i>
-              Azərbaycanın real-time rezervasiya platforması
-            </div>
-            <h1 class="slide-title">
-              Görüşünüzü<br>
-              <em>asanlıqla</em> planlaşdırın
-            </h1>
-            <p class="slide-desc">
-              Klinikadan salona, repetitordan konsultana — hər xidmət üçün real-time rezervasiya. Anında təsdiq, avtomatik xatırlatma.
-            </p>
-            <div class="slide-actions">
-              <a href="providers.html" class="slide-btn-prim">
-                <i class="fa-solid fa-calendar-plus"></i> Rezervasiya et
-              </a>
-              <a href="providers.html" class="slide-btn-ghost">
-                <i class="fa-solid fa-magnifying-glass"></i> Mütəxəssis axtar
-              </a>
+    <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel"
+      data-bs-interval="5500">
+      <div class="carousel-indicators" id="carouselIndicators"></div>
+      <div class="carousel-inner" id="carouselInner">
+        <!-- Default fallback -->
+        <div class="carousel-item active">
+          <div class="hero-fallback">
+            <div class="hero-fallback-grid"></div>
+            <div class="slide-content">
+              <div class="slide-inner">
+                <div class="slide-eyebrow">
+                  <i class="fa-solid fa-circle" style="font-size:.45rem"></i>
+                  Azərbaycanın real-time rezervasiya platforması
+                </div>
+                <h1 class="slide-title">
+                  Görüşünüzü<br>
+                  <em>asanlıqla</em> planlaşdırın
+                </h1>
+                <p class="slide-desc">
+                  Klinikadan salona, repetitordan konsultana — hər xidmət üçün
+                  real-time rezervasiya. Anında təsdiq, avtomatik xatırlatma.
+                </p>
+                <div class="slide-actions">
+                  <a href="providers.html" class="slide-btn-prim">
+                    <i class="fa-solid fa-calendar-plus"></i> Rezervasiya et
+                  </a>
+                  <a href="providers.html" class="slide-btn-ghost">
+                    <i class="fa-solid fa-magnifying-glass"></i> Mütəxəssis
+                    axtar
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
+      <button class="carousel-control-prev" type="button"
+        data-bs-target="#heroCarousel" data-bs-slide="prev">
+        <div class="c-ctrl"><i class="fa-solid fa-chevron-left"></i></div>
+      </button>
+      <button class="carousel-control-next" type="button"
+        data-bs-target="#heroCarousel" data-bs-slide="next">
+        <div class="c-ctrl"><i class="fa-solid fa-chevron-right"></i></div>
+      </button>
     </div>
-  </div>
-  <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
-    <div class="c-ctrl"><i class="fa-solid fa-chevron-left"></i></div>
-  </button>
-  <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
-    <div class="c-ctrl"><i class="fa-solid fa-chevron-right"></i></div>
-  </button>
-</div>
 
-<!-- ══════════════════════════════════
+    <!-- ══════════════════════════════════
      FIX 2: STATS BAR — Real data
 ══════════════════════════════════ -->
-<div class="stats-bar">
-  <div class="container">
-    <div class="stats-inner">
-      <div class="stat-cell">
-        <div class="stat-num" id="statProviders">—</div>
-        <div class="stat-label">Aktiv mütəxəssis</div>
-        <div class="stat-sub">Təsdiqlənmiş profil</div>
-      </div>
-      <div class="stat-cell">
-        <div class="stat-num" id="statReviews">—</div>
-        <div class="stat-label">Müştəri rəyi</div>
-        <div class="stat-sub">Həqiqi rəylər</div>
-      </div>
-      <div class="stat-cell">
-        <div class="stat-num" id="statRating">—</div>
-        <div class="stat-label">Ortalama reytinq</div>
-        <div class="stat-sub">Platformada</div>
-      </div>
-      <div class="stat-cell">
-        <div class="stat-num">7/24</div>
-        <div class="stat-label">Onlayn rezervasiya</div>
-        <div class="stat-sub">Daima açıq</div>
+    <div class="stats-bar">
+      <div class="container">
+        <div class="stats-inner">
+          <div class="stat-cell">
+            <div class="stat-num" id="statProviders">—</div>
+            <div class="stat-label">Aktiv mütəxəssis</div>
+            <div class="stat-sub">Təsdiqlənmiş profil</div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-num" id="statReviews">—</div>
+            <div class="stat-label">Müştəri rəyi</div>
+            <div class="stat-sub">Həqiqi rəylər</div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-num" id="statRating">—</div>
+            <div class="stat-label">Ortalama reytinq</div>
+            <div class="stat-sub">Platformada</div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-num">7/24</div>
+            <div class="stat-label">Onlayn rezervasiya</div>
+            <div class="stat-sub">Daima açıq</div>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</div>
 
-<!-- ══════════════════════════════════
+    <!-- ══════════════════════════════════
      CATEGORIES
 ══════════════════════════════════ -->
-<section class="section">
-  <div class="container">
-    <div class="sh center">
-      <div class="sh-tag"><i class="fa-solid fa-grid-2"></i> Xidmət növləri</div>
-      <h2 class="sh-title">Hər ehtiyac üçün <em>mütəxəssis</em></h2>
-      <p class="sh-sub">8 kateqoriya üzrə sertifikatlı mütəxəssislər platformamızda qeydiyyatdadır</p>
-    </div>
-    <div class="cat-grid" id="catGrid">
-      <div class="spinner-wrap" style="grid-column:1/-1"><div class="spinner"></div></div>
-    </div>
-  </div>
-</section>
+    <section class="section">
+      <div class="container">
+        <div class="sh center">
+          <div class="sh-tag"><i class="fa-solid fa-grid-2"></i> Xidmət
+            növləri</div>
+          <h2 class="sh-title">Hər ehtiyac üçün <em>mütəxəssis</em></h2>
+          <p class="sh-sub">8 kateqoriya üzrə sertifikatlı mütəxəssislər
+            platformamızda qeydiyyatdadır</p>
+        </div>
+        <div class="cat-grid" id="catGrid">
+          <div class="spinner-wrap" style="grid-column:1/-1"><div
+              class="spinner"></div></div>
+        </div>
+      </div>
+    </section>
 
-<!-- ══════════════════════════════════
+    <!-- ══════════════════════════════════
      HOW IT WORKS
 ══════════════════════════════════ -->
-<div class="how-section">
-  <div class="container">
-    <div class="sh center" style="margin-bottom:var(--sp-10)">
-      <div class="sh-tag" style="background:rgba(201,145,47,.12);color:rgba(201,145,47,.9)">
-        <i class="fa-solid fa-list-check"></i> Necə işləyir?
+    <div class="how-section">
+      <div class="container">
+        <div class="sh center" style="margin-bottom:var(--sp-10)">
+          <div class="sh-tag"
+            style="background:rgba(201,145,47,.12);color:rgba(201,145,47,.9)">
+            <i class="fa-solid fa-list-check"></i> Necə işləyir?
+          </div>
+          <h2 class="sh-title" style="color:#fff">3 addımda
+            <em>rezervasiya</em></h2>
+          <p class="sh-sub"
+            style="color:rgba(255,255,255,.44);margin:0 auto">Görüş təyin etmək
+            heç vaxt bu qədər asan olmamışdı</p>
+        </div>
+        <div class="how-grid">
+          <div class="how-card">
+            <div class="how-num-wrap">
+              <div class="how-num">1</div>
+              <div class="how-icon-badge"><i
+                  class="fa-solid fa-magnifying-glass"></i></div>
+            </div>
+            <h3>Mütəxəssis tapın</h3>
+            <p>Kateqoriya, reytinq və ünvana görə filtr tətbiq edərək sizə ən
+              uyğun mütəxəssisi seçin. Profil, portfoilo və rəylərə baxın.</p>
+          </div>
+          <div class="how-card">
+            <div class="how-num-wrap">
+              <div class="how-num">2</div>
+              <div class="how-icon-badge"><i
+                  class="fa-solid fa-calendar"></i></div>
+            </div>
+            <h3>Vaxt seçin</h3>
+            <p>Real-time mövcud slotlardan özünüzə uyğun tarixi və saatı seçin.
+              Yalnız həqiqətən boş olan vaxtlar göstərilir.</p>
+          </div>
+          <div class="how-card">
+            <div class="how-num-wrap">
+              <div class="how-num">3</div>
+              <div class="how-icon-badge"><i
+                  class="fa-solid fa-check"></i></div>
+            </div>
+            <h3>Anında təsdiq</h3>
+            <p>Rezervasiyanız dərhal təsdiqlənir. Görüşdən əvvəl email
+              xatırlatması göndərilir — siz heç nəyi unutmursunuz.</p>
+          </div>
+        </div>
       </div>
-      <h2 class="sh-title" style="color:#fff">3 addımda <em>rezervasiya</em></h2>
-      <p class="sh-sub" style="color:rgba(255,255,255,.44);margin:0 auto">Görüş təyin etmək heç vaxt bu qədər asan olmamışdı</p>
     </div>
-    <div class="how-grid">
-      <div class="how-card">
-        <div class="how-num-wrap">
-          <div class="how-num">1</div>
-          <div class="how-icon-badge"><i class="fa-solid fa-magnifying-glass"></i></div>
-        </div>
-        <h3>Mütəxəssis tapın</h3>
-        <p>Kateqoriya, reytinq və ünvana görə filtr tətbiq edərək sizə ən uyğun mütəxəssisi seçin. Profil, portfoilo və rəylərə baxın.</p>
-      </div>
-      <div class="how-card">
-        <div class="how-num-wrap">
-          <div class="how-num">2</div>
-          <div class="how-icon-badge"><i class="fa-solid fa-calendar"></i></div>
-        </div>
-        <h3>Vaxt seçin</h3>
-        <p>Real-time mövcud slotlardan özünüzə uyğun tarixi və saatı seçin. Yalnız həqiqətən boş olan vaxtlar göstərilir.</p>
-      </div>
-      <div class="how-card">
-        <div class="how-num-wrap">
-          <div class="how-num">3</div>
-          <div class="how-icon-badge"><i class="fa-solid fa-check"></i></div>
-        </div>
-        <h3>Anında təsdiq</h3>
-        <p>Rezervasiyanız dərhal təsdiqlənir. Görüşdən əvvəl email xatırlatması göndərilir — siz heç nəyi unutmursunuz.</p>
-      </div>
-    </div>
-  </div>
-</div>
 
-<!-- ══════════════════════════════════
+    <!-- ══════════════════════════════════
      FEATURED PROVIDERS
 ══════════════════════════════════ -->
-<section class="section">
-  <div class="container">
-    <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:var(--sp-8);flex-wrap:wrap;gap:var(--sp-4)">
-      <div class="sh" style="margin-bottom:0">
-        <div class="sh-tag"><i class="fa-solid fa-star"></i> Seçilmiş</div>
-        <h2 class="sh-title" style="margin-bottom:0">Tövsiyə olunan <em>mütəxəssislər</em></h2>
+    <section class="section">
+      <div class="container">
+        <div
+          style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:var(--sp-8);flex-wrap:wrap;gap:var(--sp-4)">
+          <div class="sh" style="margin-bottom:0">
+            <div class="sh-tag"><i class="fa-solid fa-star"></i> Seçilmiş</div>
+            <h2 class="sh-title" style="margin-bottom:0">Tövsiyə olunan
+              <em>mütəxəssislər</em></h2>
+          </div>
+          <a href="providers.html" class="btn btn-outline btn-sm">
+            Hamısına bax <i class="fa-solid fa-arrow-right"></i>
+          </a>
+        </div>
+        <div class="prov-grid" id="provGrid">
+          <div class="spinner-wrap" style="grid-column:1/-1"><div
+              class="spinner"></div></div>
+        </div>
       </div>
-      <a href="providers.html" class="btn btn-outline btn-sm">
-        Hamısına bax <i class="fa-solid fa-arrow-right"></i>
-      </a>
-    </div>
-    <div class="prov-grid" id="provGrid">
-      <div class="spinner-wrap" style="grid-column:1/-1"><div class="spinner"></div></div>
-    </div>
-  </div>
-</section>
+    </section>
 
-<!-- ══════════════════════════════════
+    <!-- ══════════════════════════════════
      FIX 3: FEATURE SPLIT — CSS Mockups
 ══════════════════════════════════ -->
-<section class="section" style="background:var(--surface)">
-  <div class="container">
+    <section class="section" style="background:var(--surface)">
+      <div class="container">
 
-    <!-- Feature 1: Real-time -->
-    <div class="feat-split" style="margin-bottom:var(--sp-12)">
-      <div class="feat-text">
-        <div class="sh-tag"><i class="fa-solid fa-bolt"></i> Real-time</div>
-        <h2 class="sh-title">Anında mövcudluq, <em>sıfır gözləmə</em></h2>
-        <p style="color:var(--ink-soft);line-height:1.7;margin-bottom:0">
-          Mütəxəssisin iş cədvəlini real-time izləyin. Yalnız həqiqətən boş olan slotları görürsünüz.
-        </p>
-        <div class="feat-list">
-          <div class="feat-item">
-            <div class="feat-item-icon"><i class="fa-solid fa-clock"></i></div>
-            <div>
-              <h4>Canlı slot sistemi</h4>
-              <p>Başqa müştəri rezervasiya edəndə həmin slot dərhal bağlanır</p>
+        <!-- Feature 1: Real-time -->
+        <div class="feat-split" style="margin-bottom:var(--sp-12)">
+          <div class="feat-text">
+            <div class="sh-tag"><i class="fa-solid fa-bolt"></i> Real-time</div>
+            <h2 class="sh-title">Anında mövcudluq, <em>sıfır gözləmə</em></h2>
+            <p style="color:var(--ink-soft);line-height:1.7;margin-bottom:0">
+              Mütəxəssisin iş cədvəlini real-time izləyin. Yalnız həqiqətən boş
+              olan slotları görürsünüz.
+            </p>
+            <div class="feat-list">
+              <div class="feat-item">
+                <div class="feat-item-icon"><i
+                    class="fa-solid fa-clock"></i></div>
+                <div>
+                  <h4>Canlı slot sistemi</h4>
+                  <p>Başqa müştəri rezervasiya edəndə həmin slot dərhal
+                    bağlanır</p>
+                </div>
+              </div>
+              <div class="feat-item">
+                <div class="feat-item-icon"><i
+                    class="fa-solid fa-bell"></i></div>
+                <div>
+                  <h4>Avtomatik xatırlatma</h4>
+                  <p>Görüşdən əvvəl email ilə xatırlatma — heç nəyi
+                    unutmursunuz</p>
+                </div>
+              </div>
+              <div class="feat-item">
+                <div class="feat-item-icon"><i
+                    class="fa-solid fa-rotate"></i></div>
+                <div>
+                  <h4>Bir klikdə yenidən planlaşdır</h4>
+                  <p>Lazım gəldikdə görüşü ləğv et və ya vaxtını dəyiş</p>
+                </div>
+              </div>
+            </div>
+            <div style="margin-top:var(--sp-6)">
+              <a href="providers.html" class="btn btn-primary">
+                <i class="fa-solid fa-calendar-plus"></i> İndi rezervasiya et
+              </a>
             </div>
           </div>
-          <div class="feat-item">
-            <div class="feat-item-icon"><i class="fa-solid fa-bell"></i></div>
-            <div>
-              <h4>Avtomatik xatırlatma</h4>
-              <p>Görüşdən əvvəl email ilə xatırlatma — heç nəyi unutmursunuz</p>
+          <!-- Calendar UI Mockup -->
+          <div class="feat-mock"
+            style="position:relative;padding:20px 20px 20px 0">
+            <div class="mockup-cal">
+              <div class="mockup-cal-head">
+                <div>
+                  <span><i class="fa-solid fa-calendar"
+                      style="color:var(--accent-light);margin-right:6px"></i>Mövcud
+                    Slotlar</span>
+                  <br>
+                  <small>Yanvar 2026</small>
+                </div>
+                <span
+                  style="background:rgba(201,145,47,.15);color:var(--accent-light);padding:4px 10px;border-radius:8px;font-size:.72rem;font-weight:600">Stomatoloq</span>
+              </div>
+              <div class="mockup-cal-day">
+                <div class="mockup-day-chip mdc-normal">
+                  <b>5</b><small>Çər</small>
+                </div>
+                <div class="mockup-day-chip mdc-normal">
+                  <b>6</b><small>C.a</small>
+                </div>
+                <div class="mockup-day-chip mdc-active">
+                  <b>7</b><small>C</small>
+                  <div class="mdc-dot"></div>
+                </div>
+                <div class="mockup-day-chip mdc-normal">
+                  <b>8</b><small>Ş</small>
+                </div>
+                <div class="mockup-day-chip mdc-normal" style="opacity:.5">
+                  <b>9</b><small>B</small>
+                </div>
+              </div>
+              <div class="mockup-cal-slots">
+                <div class="mockup-slots-label">Səhər slotları</div>
+                <div class="mockup-slots-row">
+                  <span class="mslot mslot-free">09:00</span>
+                  <span class="mslot mslot-taken">10:00</span>
+                  <span class="mslot mslot-sel">11:00 ✓</span>
+                  <span class="mslot mslot-free">12:00</span>
+                </div>
+                <div class="mockup-slots-label" style="margin-top:10px">Günorta
+                  slotları</div>
+                <div class="mockup-slots-row">
+                  <span class="mslot mslot-free">14:00</span>
+                  <span class="mslot mslot-free">15:00</span>
+                  <span class="mslot mslot-taken">16:00</span>
+                </div>
+              </div>
+              <div class="mockup-cal-foot">
+                <div class="mockup-confirm-badge">
+                  <i class="fa-solid fa-circle-check"></i>
+                  11:00 seçildi — Dr. Əliyev
+                </div>
+              </div>
             </div>
-          </div>
-          <div class="feat-item">
-            <div class="feat-item-icon"><i class="fa-solid fa-rotate"></i></div>
-            <div>
-              <h4>Bir klikdə yenidən planlaşdır</h4>
-              <p>Lazım gəldikdə görüşü ləğv et və ya vaxtını dəyiş</p>
+            <!-- Float notification -->
+            <div class="mockup-float-notif">
+              <div class="mockup-float-notif-icon"
+                style="background:var(--success-soft);color:var(--success)">
+                <i class="fa-solid fa-bell"></i>
+              </div>
+              <div>
+                <strong style="font-size:.78rem;display:block">Xatırlatma
+                  göndərildi!</strong>
+                <span style="font-size:.7rem;color:var(--ink-soft)">Görüşünüz 1
+                  saat sonra</span>
+              </div>
             </div>
           </div>
         </div>
-        <div style="margin-top:var(--sp-6)">
-          <a href="providers.html" class="btn btn-primary">
-            <i class="fa-solid fa-calendar-plus"></i> İndi rezervasiya et
-          </a>
-        </div>
-      </div>
-      <!-- Calendar UI Mockup -->
-      <div class="feat-mock" style="position:relative;padding:20px 20px 20px 0">
-        <div class="mockup-cal">
-          <div class="mockup-cal-head">
-            <div>
-              <span><i class="fa-solid fa-calendar" style="color:var(--accent-light);margin-right:6px"></i>Mövcud Slotlar</span>
-              <br>
-              <small>Yanvar 2026</small>
-            </div>
-            <span style="background:rgba(201,145,47,.15);color:var(--accent-light);padding:4px 10px;border-radius:8px;font-size:.72rem;font-weight:600">Stomatoloq</span>
-          </div>
-          <div class="mockup-cal-day">
-            <div class="mockup-day-chip mdc-normal">
-              <b>5</b><small>Çər</small>
-            </div>
-            <div class="mockup-day-chip mdc-normal">
-              <b>6</b><small>C.a</small>
-            </div>
-            <div class="mockup-day-chip mdc-active">
-              <b>7</b><small>C</small>
-              <div class="mdc-dot"></div>
-            </div>
-            <div class="mockup-day-chip mdc-normal">
-              <b>8</b><small>Ş</small>
-            </div>
-            <div class="mockup-day-chip mdc-normal" style="opacity:.5">
-              <b>9</b><small>B</small>
-            </div>
-          </div>
-          <div class="mockup-cal-slots">
-            <div class="mockup-slots-label">Səhər slotları</div>
-            <div class="mockup-slots-row">
-              <span class="mslot mslot-free">09:00</span>
-              <span class="mslot mslot-taken">10:00</span>
-              <span class="mslot mslot-sel">11:00 ✓</span>
-              <span class="mslot mslot-free">12:00</span>
-            </div>
-            <div class="mockup-slots-label" style="margin-top:10px">Günorta slotları</div>
-            <div class="mockup-slots-row">
-              <span class="mslot mslot-free">14:00</span>
-              <span class="mslot mslot-free">15:00</span>
-              <span class="mslot mslot-taken">16:00</span>
-            </div>
-          </div>
-          <div class="mockup-cal-foot">
-            <div class="mockup-confirm-badge">
-              <i class="fa-solid fa-circle-check"></i>
-              11:00 seçildi — Dr. Əliyev
-            </div>
-          </div>
-        </div>
-        <!-- Float notification -->
-        <div class="mockup-float-notif">
-          <div class="mockup-float-notif-icon" style="background:var(--success-soft);color:var(--success)">
-            <i class="fa-solid fa-bell"></i>
-          </div>
-          <div>
-            <strong style="font-size:.78rem;display:block">Xatırlatma göndərildi!</strong>
-            <span style="font-size:.7rem;color:var(--ink-soft)">Görüşünüz 1 saat sonra</span>
-          </div>
-        </div>
-      </div>
-    </div>
 
-    <!-- Feature 2: Social -->
-    <div class="feat-split rev">
-      <!-- Profile UI Mockup -->
-      <div class="feat-mock" style="position:relative;padding:20px 0 20px 20px">
-        <div class="mockup-profile" id="mockupProfile">
-          <div class="mockup-profile-cover"></div>
-          <div class="mockup-profile-head">
-            <div class="mockup-prov-avatar" id="mockupAvatar">N</div>
-            <div class="mockup-prov-name" id="mockupName">Nilan Beauty Studio</div>
-            <div class="mockup-prov-cat" id="mockupCat">Gözəllik salonu · Bakı</div>
+        <!-- Feature 2: Social -->
+        <div class="feat-split rev">
+          <!-- Profile UI Mockup -->
+          <div class="feat-mock"
+            style="position:relative;padding:20px 0 20px 20px">
+            <div class="mockup-profile" id="mockupProfile">
+              <div class="mockup-profile-cover"></div>
+              <div class="mockup-profile-head">
+                <div class="mockup-prov-avatar" id="mockupAvatar">N</div>
+                <div class="mockup-prov-name" id="mockupName">Nilan Beauty
+                  Studio</div>
+                <div class="mockup-prov-cat" id="mockupCat">Gözəllik salonu ·
+                  Bakı</div>
+              </div>
+              <div class="mockup-prov-stats">
+                <div class="mockup-stat"><b
+                    id="mockupPosts">0</b><small>post</small></div>
+                <div class="mockup-stat"><b
+                    id="mockupFollowers">0</b><small>izləyici</small></div>
+                <div class="mockup-stat"><b id="mockupRating">★
+                    0</b><small>reytinq</small></div>
+              </div>
+              <div class="mockup-posts-grid" id="mockupPostsGrid">
+                <!-- JS ilə doldurulacaq -->
+                <div class="mockup-post-thumb"><div
+                    class="mockup-post-placeholder"
+                    style="background:linear-gradient(135deg,#0f2b2b,#1a4040)"><i
+                      class="fa-solid fa-image"
+                      style="color:rgba(201,145,47,.3)"></i></div></div>
+                <div class="mockup-post-thumb"><div
+                    class="mockup-post-placeholder"
+                    style="background:linear-gradient(135deg,#1a4040,#0a3535)"><i
+                      class="fa-solid fa-image"
+                      style="color:rgba(201,145,47,.3)"></i></div></div>
+                <div class="mockup-post-thumb"><div
+                    class="mockup-post-placeholder"
+                    style="background:linear-gradient(135deg,#082627,#0f2b2b)"><i
+                      class="fa-solid fa-image"
+                      style="color:rgba(201,145,47,.3)"></i></div></div>
+                <div class="mockup-post-thumb"><div
+                    class="mockup-post-placeholder"
+                    style="background:linear-gradient(135deg,#0a1f1f,#0a3535)"><i
+                      class="fa-solid fa-image"
+                      style="color:rgba(201,145,47,.3)"></i></div></div>
+                <div class="mockup-post-thumb"><div
+                    class="mockup-post-placeholder"
+                    style="background:linear-gradient(135deg,#0f2b2b,#082627)"><i
+                      class="fa-solid fa-image"
+                      style="color:rgba(201,145,47,.3)"></i></div></div>
+                <div class="mockup-post-thumb"><div
+                    class="mockup-post-placeholder"
+                    style="background:linear-gradient(135deg,#1a4040,#082627)"><i
+                      class="fa-solid fa-image"
+                      style="color:rgba(201,145,47,.3)"></i></div></div>
+              </div>
+              <div class="mockup-profile-btns">
+                <div class="mockup-btn-follow"><i class="fa-solid fa-heart"
+                    style="margin-right:5px;color:var(--danger)"></i>İzlə</div>
+                <div class="mockup-btn-book"><i
+                    class="fa-solid fa-calendar-plus"
+                    style="margin-right:5px"></i>Rezervasiya</div>
+              </div>
+            </div>
+            <!-- Float stat -->
+            <div class="mockup-float-stat">
+              <div class="mockup-float-stat-icon"
+                style="background:var(--danger-soft);color:var(--danger)">
+                <i class="fa-solid fa-heart"></i>
+              </div>
+              <div>
+                <strong style="font-size:.78rem;display:block"
+                  id="mockupFloatFollowers">0 izləyici</strong>
+                <span style="font-size:.7rem;color:var(--ink-soft)">Bu həftə
+                  +12</span>
+              </div>
+            </div>
           </div>
-          <div class="mockup-prov-stats">
-            <div class="mockup-stat"><b id="mockupPosts">0</b><small>post</small></div>
-            <div class="mockup-stat"><b id="mockupFollowers">0</b><small>izləyici</small></div>
-            <div class="mockup-stat"><b id="mockupRating">★ 0</b><small>reytinq</small></div>
-          </div>
-          <div class="mockup-posts-grid" id="mockupPostsGrid">
-            <!-- JS ilə doldurulacaq -->
-            <div class="mockup-post-thumb"><div class="mockup-post-placeholder" style="background:linear-gradient(135deg,#0f2b2b,#1a4040)"><i class="fa-solid fa-image" style="color:rgba(201,145,47,.3)"></i></div></div>
-            <div class="mockup-post-thumb"><div class="mockup-post-placeholder" style="background:linear-gradient(135deg,#1a4040,#0a3535)"><i class="fa-solid fa-image" style="color:rgba(201,145,47,.3)"></i></div></div>
-            <div class="mockup-post-thumb"><div class="mockup-post-placeholder" style="background:linear-gradient(135deg,#082627,#0f2b2b)"><i class="fa-solid fa-image" style="color:rgba(201,145,47,.3)"></i></div></div>
-            <div class="mockup-post-thumb"><div class="mockup-post-placeholder" style="background:linear-gradient(135deg,#0a1f1f,#0a3535)"><i class="fa-solid fa-image" style="color:rgba(201,145,47,.3)"></i></div></div>
-            <div class="mockup-post-thumb"><div class="mockup-post-placeholder" style="background:linear-gradient(135deg,#0f2b2b,#082627)"><i class="fa-solid fa-image" style="color:rgba(201,145,47,.3)"></i></div></div>
-            <div class="mockup-post-thumb"><div class="mockup-post-placeholder" style="background:linear-gradient(135deg,#1a4040,#082627)"><i class="fa-solid fa-image" style="color:rgba(201,145,47,.3)"></i></div></div>
-          </div>
-          <div class="mockup-profile-btns">
-            <div class="mockup-btn-follow"><i class="fa-solid fa-heart" style="margin-right:5px;color:var(--danger)"></i>İzlə</div>
-            <div class="mockup-btn-book"><i class="fa-solid fa-calendar-plus" style="margin-right:5px"></i>Rezervasiya</div>
-          </div>
-        </div>
-        <!-- Float stat -->
-        <div class="mockup-float-stat">
-          <div class="mockup-float-stat-icon" style="background:var(--danger-soft);color:var(--danger)">
-            <i class="fa-solid fa-heart"></i>
-          </div>
-          <div>
-            <strong style="font-size:.78rem;display:block" id="mockupFloatFollowers">0 izləyici</strong>
-            <span style="font-size:.7rem;color:var(--ink-soft)">Bu həftə +12</span>
+          <div class="feat-text">
+            <div class="sh-tag"><i class="fa-solid fa-heart"></i> Sosial</div>
+            <h2 class="sh-title">Mütəxəssisləri <em>kəşf edin</em></h2>
+            <p style="color:var(--ink-soft);line-height:1.7;margin-bottom:0">
+              Yalnız rezervasiya deyil — mütəxəssislərin işlərini görün,
+              rəylərini oxuyun, izləyin. Seçiminizi məlumatlı biçimdə edin.
+            </p>
+            <div class="feat-list">
+              <div class="feat-item">
+                <div class="feat-item-icon"><i
+                    class="fa-solid fa-images"></i></div>
+                <div>
+                  <h4>İş nümunələri portfolio</h4>
+                  <p>Mütəxəssislərin öz paylaşdığı real işlər — reklam yox,
+                    həqiqət</p>
+                </div>
+              </div>
+              <div class="feat-item">
+                <div class="feat-item-icon"><i
+                    class="fa-solid fa-star"></i></div>
+                <div>
+                  <h4>Doğrulanmış rəylər</h4>
+                  <p>Yalnız görüşü tamamlayan müştərilər rəy buraxa bilər</p>
+                </div>
+              </div>
+              <div class="feat-item">
+                <div class="feat-item-icon"><i
+                    class="fa-solid fa-user-plus"></i></div>
+                <div>
+                  <h4>İzlə, yeniliklərə xəbərdar ol</h4>
+                  <p>Sevdiyiniz mütəxəssisləri izləyin, yeni postlarını
+                    qaçırmayın</p>
+                </div>
+              </div>
+            </div>
+            <div style="margin-top:var(--sp-6)">
+              <a href="providers.html" class="btn btn-outline">
+                <i class="fa-solid fa-building"></i> Mütəxəssislərə bax
+              </a>
+            </div>
           </div>
         </div>
       </div>
-      <div class="feat-text">
-        <div class="sh-tag"><i class="fa-solid fa-heart"></i> Sosial</div>
-        <h2 class="sh-title">Mütəxəssisləri <em>kəşf edin</em></h2>
-        <p style="color:var(--ink-soft);line-height:1.7;margin-bottom:0">
-          Yalnız rezervasiya deyil — mütəxəssislərin işlərini görün, rəylərini oxuyun, izləyin. Seçiminizi məlumatlı biçimdə edin.
-        </p>
-        <div class="feat-list">
-          <div class="feat-item">
-            <div class="feat-item-icon"><i class="fa-solid fa-images"></i></div>
-            <div>
-              <h4>İş nümunələri portfolio</h4>
-              <p>Mütəxəssislərin öz paylaşdığı real işlər — reklam yox, həqiqət</p>
-            </div>
-          </div>
-          <div class="feat-item">
-            <div class="feat-item-icon"><i class="fa-solid fa-star"></i></div>
-            <div>
-              <h4>Doğrulanmış rəylər</h4>
-              <p>Yalnız görüşü tamamlayan müştərilər rəy buraxa bilər</p>
-            </div>
-          </div>
-          <div class="feat-item">
-            <div class="feat-item-icon"><i class="fa-solid fa-user-plus"></i></div>
-            <div>
-              <h4>İzlə, yeniliklərə xəbərdar ol</h4>
-              <p>Sevdiyiniz mütəxəssisləri izləyin, yeni postlarını qaçırmayın</p>
-            </div>
-          </div>
-        </div>
-        <div style="margin-top:var(--sp-6)">
-          <a href="providers.html" class="btn btn-outline">
-            <i class="fa-solid fa-building"></i> Mütəxəssislərə bax
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+    </section>
 
-<!-- ══════════════════════════════════
+    <!-- ══════════════════════════════════
      POSTS FEED — FIX 5: Modal
 ══════════════════════════════════ -->
-<section class="section">
-  <div class="container">
-    <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:var(--sp-8);flex-wrap:wrap;gap:var(--sp-4)">
-      <div class="sh" style="margin-bottom:0">
-        <div class="sh-tag"><i class="fa-solid fa-images"></i> Portfoilio</div>
-        <h2 class="sh-title" style="margin-bottom:0">Mütəxəssislərdən <em>son işlər</em></h2>
+    <section class="section">
+      <div class="container">
+        <div
+          style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:var(--sp-8);flex-wrap:wrap;gap:var(--sp-4)">
+          <div class="sh" style="margin-bottom:0">
+            <div class="sh-tag"><i class="fa-solid fa-images"></i>
+              Portfoilio</div>
+            <h2 class="sh-title" style="margin-bottom:0">Mütəxəssislərdən
+              <em>son işlər</em></h2>
+          </div>
+          <a href="providers.html" class="btn btn-outline btn-sm">
+            Bütün mütəxəssislər <i class="fa-solid fa-arrow-right"></i>
+          </a>
+        </div>
+        <div class="posts-grid" id="postsFeed">
+          <div class="spinner-wrap" style="grid-column:1/-1"><div
+              class="spinner"></div></div>
+        </div>
       </div>
-      <a href="providers.html" class="btn btn-outline btn-sm">
-        Bütün mütəxəssislər <i class="fa-solid fa-arrow-right"></i>
-      </a>
-    </div>
-    <div class="posts-grid" id="postsFeed">
-      <div class="spinner-wrap" style="grid-column:1/-1"><div class="spinner"></div></div>
-    </div>
-  </div>
-</section>
+    </section>
 
-<!-- ══════════════════════════════════
+    <!-- ══════════════════════════════════
      FIX 4: TESTIMONIALS — Real data
 ══════════════════════════════════ -->
-<section class="section" style="background:var(--surface)">
-  <div class="container">
-    <div class="sh center">
-      <div class="sh-tag"><i class="fa-solid fa-quote-left"></i> Müştəri rəyləri</div>
-      <h2 class="sh-title">Onlar <em>danışır</em></h2>
-      <p class="sh-sub">Platformamızdan istifadə edən müştərilərin rəyləri</p>
-    </div>
-    <div class="testi-grid" id="testiGrid">
-      <div class="spinner-wrap" style="grid-column:1/-1"><div class="spinner"></div></div>
-    </div>
-  </div>
-</section>
+    <section class="section" style="background:var(--surface)">
+      <div class="container">
+        <div class="sh center">
+          <div class="sh-tag"><i class="fa-solid fa-quote-left"></i> Müştəri
+            rəyləri</div>
+          <h2 class="sh-title">Onlar <em>danışır</em></h2>
+          <p class="sh-sub">Platformamızdan istifadə edən müştərilərin
+            rəyləri</p>
+        </div>
+        <div class="testi-grid" id="testiGrid">
+          <div class="spinner-wrap" style="grid-column:1/-1"><div
+              class="spinner"></div></div>
+        </div>
+      </div>
+    </section>
 
-<!-- ══════════════════════════════════
+    <!-- ══════════════════════════════════
      CTA BAND
 ══════════════════════════════════ -->
-<div class="cta-band">
-  <div class="container">
-    <div class="cta-inner">
-      <div class="cta-tag"><i class="fa-solid fa-rocket"></i> İndi başlayın</div>
-      <h2 class="cta-title">Vaxtınızı daha <em>ağıllı</em> idarə edin</h2>
-      <p class="cta-sub">2 dəqiqəlik pulsuz qeydiyyat. Heç bir kart lazım deyil.</p>
-      <div class="cta-btns">
-        <a href="../auth/register.html" class="cta-btn-p">
-          <i class="fa-solid fa-user-plus"></i> Pulsuz hesab yarat
-        </a>
-        <a href="providers.html" class="cta-btn-g">
-          <i class="fa-solid fa-magnifying-glass"></i> Mütəxəssis axtar
-        </a>
-      </div>
-      <div class="cta-trust">
-        <div class="cta-trust-i"><i class="fa-solid fa-shield-check"></i><span>Təhlükəsiz rezervasiya</span></div>
-        <div class="cta-trust-i"><i class="fa-solid fa-lock"></i><span>Məlumat qoruması</span></div>
-        <div class="cta-trust-i"><i class="fa-solid fa-headset"></i><span>7/24 dəstək</span></div>
-        <div class="cta-trust-i"><i class="fa-solid fa-star"></i><span id="ctaRating">— reytinq</span></div>
+    <div class="cta-band">
+      <div class="container">
+        <div class="cta-inner">
+          <div class="cta-tag"><i class="fa-solid fa-rocket"></i> İndi
+            başlayın</div>
+          <h2 class="cta-title">Vaxtınızı daha <em>ağıllı</em> idarə edin</h2>
+          <p class="cta-sub">2 dəqiqəlik pulsuz qeydiyyat. Heç bir kart lazım
+            deyil.</p>
+          <div class="cta-btns">
+            <a href="../auth/register.html" class="cta-btn-p">
+              <i class="fa-solid fa-user-plus"></i> Pulsuz hesab yarat
+            </a>
+            <a href="providers.html" class="cta-btn-g">
+              <i class="fa-solid fa-magnifying-glass"></i> Mütəxəssis axtar
+            </a>
+          </div>
+          <div class="cta-trust">
+            <div class="cta-trust-i"><i
+                class="fa-solid fa-shield-check"></i><span>Təhlükəsiz
+                rezervasiya</span></div>
+            <div class="cta-trust-i"><i
+                class="fa-solid fa-lock"></i><span>Məlumat qoruması</span></div>
+            <div class="cta-trust-i"><i
+                class="fa-solid fa-headset"></i><span>7/24 dəstək</span></div>
+            <div class="cta-trust-i"><i class="fa-solid fa-star"></i><span
+                id="ctaRating">— reytinq</span></div>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</div>
 
-<div id="footer"></div>
+    <div id="footer"></div>
 
-<!-- ══════════════════════════════════
+    <!-- ══════════════════════════════════
      FIX 5: POST MODAL
 ══════════════════════════════════ -->
-<div class="overlay hidden" id="postModal">
-  <div class="modal" style="max-width:900px;padding:0;overflow:hidden;background:var(--surface)">
-    <div class="post-modal-grid" id="postModalGrid">
-      <!-- JS ilə doldurulacaq -->
+    <div class="overlay hidden" id="postModal">
+      <div class="modal"
+        style="max-width:900px;padding:0;overflow:hidden;background:var(--surface)">
+        <div class="post-modal-grid" id="postModalGrid">
+          <!-- JS ilə doldurulacaq -->
+        </div>
+      </div>
     </div>
-  </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="../js/client-api.js"></script>
-<script src="../js/layout.js"></script>
-<script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/client-api.js"></script>
+    <script src="../js/layout.js"></script>
+    <script>
 /* ── Overlay click to close ── */
 document.getElementById('postModal').addEventListener('click', function(e) {
   if (e.target === this) closeModal('postModal');
@@ -1402,7 +1500,7 @@ async function submitPostComment() {
   } else {
     grid.innerHTML = featured.map(p => `
       <a href="provider-detail.html?id=${p.id}" class="prov-card">
-        <div class="prov-card-cover"></div>
+        <div class="prov-card-cover" ${p.coverImageUrl ? `style="background-image:url('${p.coverImageUrl}');background-size:cover;background-position:center"` : ''}></div>
         <div class="prov-card-body">
           <div class="prov-avatar">
             ${p.imageUrl ? `<img src="${p.imageUrl}" alt="${p.businessName}">` : p.businessName[0]}
@@ -1545,5 +1643,5 @@ async function submitPostComment() {
 
 })();
 </script>
-</body>
+  </body>
 </html>

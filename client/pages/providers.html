@@ -197,7 +197,7 @@
 
     grid.innerHTML = filtered.map(p => `
       <a href="provider-detail.html?id=${p.id}" class="provider-card card-hover" style="display:block">
-        <div class="provider-card-cover"></div>
+        <div class="provider-card-cover" ${p.coverImageUrl ? `style="background-image:url('${p.coverImageUrl}');background-size:cover;background-position:center"` : ''}></div>
         <div class="provider-card-body">
           <div class="provider-card-avatar">
             ${p.imageUrl ? `<img src="${p.imageUrl}" alt="${p.businessName}">` : p.businessName[0]}
