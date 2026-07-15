@@ -1,9 +1,15 @@
 const BASE = 'http://localhost:5291/api';
 
+// const Token = {
+//     get: () => ({ access: localStorage.getItem('accessToken'), refresh: localStorage.getItem('refreshToken') }),
+//     set: (a, r) => { localStorage.setItem('accessToken', a); localStorage.setItem('refreshToken', r) },
+//     clear: () => { localStorage.removeItem('accessToken'); localStorage.removeItem('refreshToken') },
+// };
+
 const Token = {
-    get: () => ({ access: localStorage.getItem('accessToken'), refresh: localStorage.getItem('refreshToken') }),
-    set: (a, r) => { localStorage.setItem('accessToken', a); localStorage.setItem('refreshToken', r) },
-    clear: () => { localStorage.removeItem('accessToken'); localStorage.removeItem('refreshToken') },
+    get: () => ({ access: localStorage.getItem('client_accessToken'), refresh: localStorage.getItem('client_refreshToken') }),
+    set: (a, r) => { localStorage.setItem('client_accessToken', a); localStorage.setItem('client_refreshToken', r) },
+    clear: () => { localStorage.removeItem('client_accessToken'); localStorage.removeItem('client_refreshToken') },
 };
 
 async function apiFetch(path, opts = {}) {

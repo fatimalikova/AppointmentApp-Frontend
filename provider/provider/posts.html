@@ -22,7 +22,9 @@
       background:var(--surface-soft);color:var(--ink-soft);
       display:flex;align-items:center;justify-content:center;
       font-size:var(--fs-xs);font-weight:700;flex-shrink:0;
+      overflow:hidden;
     }
+    .comment-avatar img{width:100%;height:100%;object-fit:cover}
     .comment-body{flex:1;min-width:0}
     .comment-body b{font-size:var(--fs-sm);display:block;margin-bottom:2px}
     .comment-body p{font-size:var(--fs-sm);color:var(--ink-soft)}
@@ -333,10 +335,13 @@
 
     cl.innerHTML = comments.map(c => {
   const isOwn = c.userFullName === myProviderName;
+  const avatarHtml = c.userImageUrl
+    ? `<img src="${c.userImageUrl}" alt="${c.userFullName}">`
+    : (c.userFullName?.[0]?.toUpperCase() || '?');
   return `
   <div class="comment-item" id="comment-${c.id}">
     <div class="comment-avatar" style="background:var(--accent-soft);color:var(--accent-dark);font-family:var(--font-head)">
-      ${c.userFullName?.[0]?.toUpperCase() || '?'}
+      ${avatarHtml}
     </div>
     <div class="comment-body">
       <b>${c.userFullName}</b>

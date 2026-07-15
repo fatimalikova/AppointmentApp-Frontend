@@ -223,14 +223,10 @@
     .cat-tile:hover .cat-tile-icon { transform:scale(1.1); }
     .cat-tile-name { font-size:.9rem; font-weight:700; color:var(--ink); margin-bottom:4px; }
     .cat-tile-count { font-size:.72rem; color:var(--ink-soft); }
-    .ci-1{background:#e8f5ee;color:#2d6a4f}
-    .ci-2{background:#fdf3e0;color:#a8741f}
-    .ci-3{background:#e3f0fa;color:#1e5f8e}
-    .ci-4{background:#fdecea;color:#b5271d}
-    .ci-5{background:#f0e8fa;color:#7b2d6a}
-    .ci-6{background:#e8f5ee;color:#2d6a4f}
-    .ci-7{background:#fdf4db;color:#9a6b10}
-    .ci-8{background:#f3ede0;color:#6b5c3e}
+    .ci-1,.ci-2,.ci-3,.ci-4,.ci-5,.ci-6,.ci-7,.ci-8{
+  background:var(--accent-soft);
+  color:var(--accent-dark);
+}
 
     /* ══ How it works ══ */
     .how-section { background:var(--primary-dark); padding:var(--sp-12) 0; }
@@ -405,6 +401,8 @@
       height:80px;
       background:linear-gradient(135deg,#082627,#0f2b2b,#1a4040);
       position:relative;
+      background-size:cover;
+      background-position:center;
     }
     .mockup-profile-cover::after {
       content:''; position:absolute; inset:0; opacity:.12;
@@ -1004,7 +1002,7 @@
           <div class="feat-mock"
             style="position:relative;padding:20px 0 20px 20px">
             <div class="mockup-profile" id="mockupProfile">
-              <div class="mockup-profile-cover"></div>
+              <div class="mockup-profile-cover" id="mockupCover"></div>
               <div class="mockup-profile-head">
                 <div class="mockup-prov-avatar" id="mockupAvatar">N</div>
                 <div class="mockup-prov-name" id="mockupName">Nilan Beauty
@@ -1070,8 +1068,7 @@
               <div>
                 <strong style="font-size:.78rem;display:block"
                   id="mockupFloatFollowers">0 izləyici</strong>
-                <span style="font-size:.7rem;color:var(--ink-soft)">Bu həftə
-                  +12</span>
+                <span style="font-size:.7rem;color:var(--ink-soft)">Sizi izləyən müştərilər</span>
               </div>
             </div>
           </div>
@@ -1529,6 +1526,14 @@ async function submitPostComment() {
     document.getElementById('mockupFollowers').textContent = fp.followersCount||0;
     document.getElementById('mockupPosts').textContent = fp.postCount||0;
     document.getElementById('mockupFloatFollowers').textContent = (fp.followersCount||0)+' izləyici';
+
+    const coverEl = document.getElementById('mockupCover');
+    if (fp.coverImageUrl) {
+      coverEl.style.backgroundImage = `url('${fp.coverImageUrl}')`;
+      coverEl.style.backgroundSize = 'cover';
+      coverEl.style.backgroundPosition = 'center';
+    }
+
     if (fp.imageUrl) {
       document.getElementById('mockupAvatar').innerHTML = `<img src="${fp.imageUrl}" alt="${fp.businessName}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
     } else {
@@ -1627,18 +1632,22 @@ async function submitPostComment() {
       </div>`).join('');
   } else {
     testiGrid.innerHTML = realReviews.slice(0,3).map(r => `
-      <div class="testi-card">
-        <div class="testi-quote">"</div>
-        <div class="testi-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
-        <p class="testi-text">${r.comment}</p>
-        <div class="testi-author">
-          <div class="testi-ava">${r.clientFullName?.[0]?.toUpperCase()||'?'}</div>
-          <div>
-            <b>${r.clientFullName}</b>
-            <span>${r.providerName} · ${r.providerCat}</span>
-          </div>
-        </div>
-      </div>`).join('');
+  <div class="testi-card">
+    <div class="testi-quote">"</div>
+    <div class="testi-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
+    <p class="testi-text">${r.comment}</p>
+    <div class="testi-author">
+      <div class="testi-ava" style="overflow:hidden;padding:0">
+        ${r.clientImageUrl
+          ? `<img src="${r.clientImageUrl}" alt="${r.clientFullName}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`
+          : r.clientFullName?.[0]?.toUpperCase()||'?'}
+      </div>
+      <div>
+        <b>${r.clientFullName}</b>
+        <span>${r.providerName} · ${r.providerCat}</span>
+      </div>
+    </div>
+  </div>`).join('');
   }
 
 })();

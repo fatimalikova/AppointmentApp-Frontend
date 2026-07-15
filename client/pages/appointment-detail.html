@@ -13,6 +13,22 @@
     .detail-field b{font-size:var(--fs-sm)}
     .star-btn{font-size:1.8rem;background:none;border:none;cursor:pointer;color:var(--border-strong);padding:0;transition:color .15s ease}
     .star-btn.filled,.star-btn:hover{color:var(--accent)}
+
+    /* ── Mini calendar (reschedule) ── */
+    .rcal{border:1px solid var(--border);border-radius:var(--r-md);overflow:hidden;max-width:320px}
+    .rcal-head{display:flex;align-items:center;justify-content:space-between;padding:var(--sp-3) var(--sp-4);background:var(--surface-soft);border-bottom:1px solid var(--border);font-weight:600;font-size:var(--fs-sm)}
+    .rcal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;padding:var(--sp-3)}
+    .rcal-dh{font-size:var(--fs-xs);color:var(--ink-soft);text-align:center;padding:var(--sp-2) 0;font-weight:600}
+    .rcal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:var(--fs-sm);cursor:pointer;background:none;border:none;font-family:var(--font-body);transition:background .15s}
+    .rcal-day:hover:not(:disabled){background:var(--surface-soft)}
+    .rcal-day:disabled{color:var(--border-strong);cursor:not-allowed}
+    .rcal-day.today{border:2px solid var(--accent)}
+    .rcal-day.sel{background:var(--accent);color:#fff;font-weight:700}
+    .rslot-lbl{font-size:var(--fs-xs);font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);margin:var(--sp-4) 0 var(--sp-2)}
+    .rslot-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-2)}
+    .rslot{padding:8px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--surface);font-size:var(--fs-sm);font-weight:600;cursor:pointer;text-align:center;font-family:var(--font-body);transition:all .18s}
+    .rslot:hover{border-color:var(--accent-light);background:var(--accent-xsoft)}
+    .rslot.selected{background:var(--accent);color:#fff;border-color:var(--accent)}
   </style>
 </head>
 <body>
@@ -33,6 +49,27 @@
 
 <div id="footer"></div>
 
+<!-- Cancel Confirm Modal -->
+<div class="overlay hidden" id="cancelModal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-head">
+      <h3><i class="fa-solid fa-circle-xmark" style="color:var(--danger);margin-right:8px"></i>Görüşü ləğv et</h3>
+      <button class="btn-icon" onclick="closeModal('cancelModal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:var(--fs-sm);color:var(--ink-soft);line-height:1.6">
+        Bu görüşü ləğv etmək istədiyinizə əminsiniz? Bu əməliyyatı geri qaytara bilməyəcəksiniz.
+      </p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('cancelModal')">Vaz keç</button>
+      <button class="btn btn-danger" onclick="confirmCancel()">
+        <i class="fa-solid fa-circle-xmark"></i> Bəli, ləğv et
+      </button>
+    </div>
+  </div>
+</div>
+
 <script src="../js/client-api.js"></script>
 <script src="../js/layout.js"></script>
 <script>
@@ -42,6 +79,14 @@
 
   let appt = null;
   let starRating = 0;
+
+  /* ── Reschedule state ── */
+  let rY = new Date().getFullYear();
+  let rM = new Date().getMonth();
+  let rDate = null;
+  let rSlot = null;
+  const MONTHS = ['Yanvar','Fevral','Mart','Aprel','May','İyun','İyul','Avqust','Sentyabr','Oktyabr','Noyabr','Dekabr'];
+  const DAYS   = ['B.e','Ç.a','Ç','C.a','C','Ş','B'];
 
   async function load() {
     appt = await cApi.getById(id).catch(()=>null);
@@ -93,17 +138,22 @@
             <i class="fa-solid fa-rotate"></i> Yenidən planlaşdır
           </button>` : ''}
           ${canCancel ? `
-          <button class="btn btn-danger btn-sm" onclick="doCancel()">
+          <button class="btn btn-danger btn-sm" onclick="openCancelModal()">
             <i class="fa-solid fa-circle-xmark"></i> Ləğv et
           </button>` : ''}
         </div>
 
         <div id="reschedBox" class="hidden" style="margin-top:var(--sp-4);padding:var(--sp-4);background:var(--surface-soft);border-radius:var(--r-md);border:1px solid var(--border)">
-          <div class="field">
-            <label><i class="fa-solid fa-calendar"></i>Yeni tarix və saat</label>
-            <input type="datetime-local" id="newDateTime">
+          <div style="margin-bottom:var(--sp-2)">
+            <label style="font-size:var(--fs-sm);font-weight:600;display:flex;align-items:center;gap:6px;margin-bottom:var(--sp-3)">
+              <i class="fa-solid fa-calendar-days" style="color:var(--accent)"></i>Yeni tarix seçin
+            </label>
           </div>
-          <button class="btn btn-primary btn-sm" onclick="doReschedule()">
+          <div class="rcal" id="rcalEl"></div>
+          <div id="rslotWrap" class="hidden" style="margin-top:var(--sp-3)">
+            <div id="rslotEl"></div>
+          </div>
+          <button class="btn btn-primary btn-sm" id="reschedConfirmBtn" style="margin-top:var(--sp-4)" disabled onclick="doReschedule()">
             <i class="fa-solid fa-check"></i> Təsdiqlə
           </button>
         </div>` : ''}
@@ -127,29 +177,128 @@
       </div>` : ''}`;
   }
 
+  /* ══ RESCHEDULE ══ */
   function toggleResched() {
-    document.getElementById('reschedBox').classList.toggle('hidden');
+    const box = document.getElementById('reschedBox');
+    box.classList.toggle('hidden');
+    if (!box.classList.contains('hidden')) {
+      rDate = null; rSlot = null;
+      document.getElementById('reschedConfirmBtn').disabled = true;
+      rY = new Date().getFullYear();
+      rM = new Date().getMonth();
+      renderRCal();
+    }
   }
 
-  async function doCancel() {
-    if (!confirm('Bu görüşü ləğv etmək istədiyinizə əminsiniz?')) return;
-    try {
-      await cApi.cancel(id);
-      showMsg('Görüş ləğv edildi.', 'success');
-      await load();
-    } catch(err) { showMsg(err.message); }
+  function renderRCal() {
+    const today=new Date(); today.setHours(0,0,0,0);
+    const max=new Date(today); max.setDate(today.getDate()+60);
+    const first=new Date(rY,rM,1);
+    const off=(first.getDay()+6)%7;
+    const dim=new Date(rY,rM+1,0).getDate();
+    document.getElementById('rcalEl').innerHTML=`
+      <div class="rcal-head">
+        <button class="btn-icon" style="width:28px;height:28px" onclick="chRM(-1)">‹</button>
+        <span>${MONTHS[rM]} ${rY}</span>
+        <button class="btn-icon" style="width:28px;height:28px" onclick="chRM(1)">›</button>
+      </div>
+      <div class="rcal-grid">
+        ${DAYS.map(d=>`<div class="rcal-dh">${d}</div>`).join('')}
+        ${'<div></div>'.repeat(off)}
+        ${Array.from({length:dim},(_,i)=>{
+          const d=i+1,dt=new Date(rY,rM,d);
+          const dis=dt<today||dt>max;
+          const sel=rDate&&dt.toDateString()===rDate.toDateString();
+          const tod=dt.toDateString()===today.toDateString();
+          return `<button class="rcal-day${sel?' sel':''}${tod?' today':''}" ${dis?'disabled':''} onclick="pickRDay(${d})">${d}</button>`;
+        }).join('')}
+      </div>`;
+  }
+
+  function chRM(delta) {
+    rM+=delta;
+    if(rM<0){rM=11;rY--;}
+    if(rM>11){rM=0;rY++;}
+    renderRCal();
+  }
+
+  async function pickRDay(d) {
+    rDate = new Date(rY,rM,d);
+    rSlot = null;
+    document.getElementById('reschedConfirmBtn').disabled = true;
+    renderRCal();
+
+    const wrap = document.getElementById('rslotWrap');
+    wrap.classList.remove('hidden');
+    document.getElementById('rslotEl').innerHTML = '<div class="spinner-wrap"><div class="spinner"></div></div>';
+
+    const iso = rDate.toLocaleDateString('en-CA');
+    const slots = await cApi.getSlots(appt.providerId, appt.serviceId, iso).catch(()=>[]);
+    renderRSlots(Array.isArray(slots) ? slots : []);
+  }
+
+  function renderRSlots(slots) {
+    const el = document.getElementById('rslotEl');
+    if (!slots.length) {
+      el.innerHTML = `<div style="text-align:center;padding:var(--sp-4) 0">
+        <i class="fa-regular fa-calendar-xmark" style="font-size:1.6rem;color:var(--border-strong);display:block;margin-bottom:10px"></i>
+        <p style="font-size:var(--fs-sm);color:var(--ink-soft)">Bu tarixdə boş vaxt yoxdur. Başqa tarix seçin.</p>
+      </div>`;
+      return;
+    }
+    const grps={};
+    slots.forEach(s=>{const h=parseInt(s.startTime);const g=h<12?'Səhər':h<17?'Günorta':'Axşam';(grps[g]=grps[g]||[]).push(s);});
+    el.innerHTML=Object.entries(grps).map(([g,items])=>`
+      <div class="rslot-lbl">${g}</div>
+      <div class="rslot-grid">${items.map(s=>`
+        <button class="rslot" data-s="${s.startTime}" onclick="pickRSlot(this)">${trimTime(s.startTime)}</button>`).join('')}
+      </div>`).join('');
+  }
+
+  function pickRSlot(el) {
+    document.querySelectorAll('.rslot').forEach(b=>b.classList.remove('selected'));
+    el.classList.add('selected');
+    rSlot = el.dataset.s;
+    document.getElementById('reschedConfirmBtn').disabled = false;
   }
 
   async function doReschedule() {
-    const v = document.getElementById('newDateTime').value;
-    if (!v) return;
+    if (!rDate || !rSlot) return;
+    const btn = document.getElementById('reschedConfirmBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Göndərilir...';
+
     try {
-      await cApi.reschedule(id, { newStartDateTime: new Date(v).toISOString() });
+      const dateStr = rDate.toLocaleDateString('en-CA');
+      const timeStr = rSlot.slice(0,5);
+      await cApi.reschedule(id, { newStartDateTime: `${dateStr}T${timeStr}:00` });
       showMsg('Görüş yenidən planlaşdırıldı!', 'success');
       await load();
-    } catch(err) { showMsg(err.message); }
+    } catch(err) {
+      showMsg(err.message || 'Yenidən planlaşdırma uğursuz oldu.');
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-check"></i> Təsdiqlə';
+    }
   }
 
+  /* ══ CANCEL (modal ilə) ══ */
+  function openCancelModal() {
+    openModal('cancelModal');
+  }
+
+  async function confirmCancel() {
+    try {
+      await cApi.cancel(id);
+      closeModal('cancelModal');
+      showMsg('Görüş ləğv edildi.', 'success');
+      await load();
+    } catch(err) {
+      closeModal('cancelModal');
+      showMsg(err.message || 'Ləğv etmə uğursuz oldu.');
+    }
+  }
+
+  /* ══ REVIEW ══ */
   function setStar(n) {
     starRating = n;
     document.querySelectorAll('.star-btn').forEach(b => {
@@ -172,7 +321,7 @@
           <i class="fa-solid fa-check-circle" style="color:var(--success);font-size:2rem;margin-bottom:var(--sp-3);display:block"></i>
           <p>Rəyiniz üçün təşəkkürlər!</p>
         </div>`;
-    } catch(err) { showMsg(err.message); }
+    } catch(err) { showMsg(err.message || 'Rəy göndərilmədi.'); }
   }
 
   function showMsg(msg, type='error') {

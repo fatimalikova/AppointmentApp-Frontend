@@ -7,9 +7,9 @@
     } catch { Token.clear(); }
   }
 
-  const path     = window.location.pathname.split('/').pop();
+  const path = window.location.pathname.split('/').pop();
   const isLoggedIn = !!profile;
-  const initials = profile?.fullName?.split(' ').map(p=>p[0]).slice(0,2).join('').toUpperCase() || '';
+  const initials = profile?.fullName?.split(' ').map(p => p[0]).slice(0, 2).join('').toUpperCase() || '';
 
   /* ── NAVBAR ── */
   const nb = document.getElementById('navbar');
@@ -24,11 +24,11 @@
     </a>
 
     <div class="nav-links">
-      <a href="../pages/home.html"          class="nav-link ${path==='home.html'?'active':''}">Ana səhifə</a>
-      <a href="../pages/providers.html"     class="nav-link ${path==='providers.html'?'active':''}">Mütəxəssislər</a>
+      <a href="../pages/home.html"          class="nav-link ${path === 'home.html' ? 'active' : ''}">Ana səhifə</a>
+      <a href="../pages/providers.html"     class="nav-link ${path === 'providers.html' ? 'active' : ''}">Mütəxəssislər</a>
       ${isLoggedIn ? `
-      <a href="../pages/booking.html"       class="nav-link ${path==='booking.html'?'active':''}">Rezervasiya</a>
-      <a href="../pages/appointments.html"  class="nav-link ${path==='appointments.html'?'active':''}">Görüşlərim</a>
+      <a href="../pages/booking.html"       class="nav-link ${path === 'booking.html' ? 'active' : ''}">Rezervasiya</a>
+      <a href="../pages/appointments.html"  class="nav-link ${path === 'appointments.html' ? 'active' : ''}">Görüşlərim</a>
       ` : ''}
     </div>
 
@@ -57,13 +57,17 @@
 
         <div class="user-menu">
           <button class="user-btn" id="userBtn">
-            <div class="user-avatar">${initials}</div>
+            <div class="user-avatar" style="overflow:hidden;padding:0">
+  ${profile.imageUrl
+        ? `<img src="${profile.imageUrl}" alt="${profile.fullName}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`
+        : initials}
+</div>
             <span>${profile.fullName.split(' ')[0]}</span>
             <i class="fa-solid fa-chevron-down" style="font-size:.65rem;color:var(--ink-soft)"></i>
           </button>
           <div class="user-dropdown hidden" id="userDropdown">
-            <div style="padding:8px 12px;font-size:var(--fs-xs);color:var(--ink-soft);border-bottom:1px solid var(--border);margin-bottom:4px">${profile.email||''}</div>
-            <a href="../pages/dashboard.html"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+            <div style="padding:8px 12px;font-size:var(--fs-xs);color:var(--ink-soft);border-bottom:1px solid var(--border);margin-bottom:4px">${profile.email || ''}</div>
+            <a href="../pages/dashboard.html"><i class="fa-solid fa-gauge"></i> Profile</a>
             <a href="../pages/appointments.html"><i class="fa-solid fa-calendar-check"></i> Görüşlərim</a>
             <a href="../pages/notifications.html"><i class="fa-solid fa-bell"></i> Bildirişlər</a>
             <hr class="dropdown-sep">
@@ -160,8 +164,8 @@ async function loadNotifications() {
       list.innerHTML = '<div style="padding:16px;text-align:center;font-size:var(--fs-sm);color:var(--ink-soft)">Bildiriş yoxdur</div>';
       return;
     }
-    list.innerHTML = arr.slice(0,8).map(n => `
-      <div style="display:flex;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);${!n.isRead?'background:var(--accent-xsoft)':''}">
+    list.innerHTML = arr.slice(0, 8).map(n => `
+      <div style="display:flex;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);${!n.isRead ? 'background:var(--accent-xsoft)' : ''}">
         <div style="flex:1;min-width:0">
           <strong style="display:block;font-size:var(--fs-sm)">${n.title}</strong>
           <span style="font-size:var(--fs-xs);color:var(--ink-soft)">${n.message}</span>
@@ -178,11 +182,11 @@ async function markAllRead() {
     await cApi.markAllRead();
     document.getElementById('notifDot')?.classList.add('hidden');
     loadNotifications();
-  } catch {}
+  } catch { }
 }
 
 async function doLogout() {
-  try { await cApi.logout(); } catch {}
+  try { await cApi.logout(); } catch { }
   Token.clear();
   window.location.href = '../pages/home.html';
 }

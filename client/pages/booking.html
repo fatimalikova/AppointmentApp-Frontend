@@ -1,15 +1,18 @@
 <!DOCTYPE html>
 <html lang="az">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Rezervasiya — Appointment System</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="../css/client.css">
-  <script src="https://js.stripe.com/v3/"></script>
-  <style>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Rezervasiya — Appointment System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet">
+    <link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/client.css">
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
     .wiz{display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:var(--sp-5) var(--sp-6);margin-bottom:var(--sp-6)}
     .wiz-step{display:flex;align-items:center;gap:var(--sp-3)}
     .wiz-circle{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:var(--fs-sm);font-weight:700;background:var(--surface-soft);color:var(--ink-soft);border:2px solid var(--border);transition:all .22s ease}
@@ -109,302 +112,379 @@
     @media(max-width:900px){.book-layout{grid-template-columns:1fr}.book-aside{position:static}}
     @media(max-width:600px){.prov-grid{grid-template-columns:1fr}.slot-grid{grid-template-columns:repeat(3,1fr)}}
   </style>
-</head>
-<body>
-<div id="navbar"></div>
+  </head>
+  <body>
+    <div id="navbar"></div>
 
-<section class="section-sm">
-  <div class="container">
+    <section class="section-sm">
+      <div class="container">
 
-    <div style="display:flex;align-items:center;gap:8px;font-size:var(--fs-sm);color:var(--ink-soft);margin-bottom:var(--sp-4)">
-      <a href="home.html" style="color:var(--ink-soft)">Ana səhifə</a>
-      <i class="fa-solid fa-chevron-right" style="font-size:.6rem"></i>
-      <span>Rezervasiya</span>
-    </div>
+        <div
+          style="display:flex;align-items:center;gap:8px;font-size:var(--fs-sm);color:var(--ink-soft);margin-bottom:var(--sp-4)">
+          <a href="home.html" style="color:var(--ink-soft)">Ana səhifə</a>
+          <i class="fa-solid fa-chevron-right" style="font-size:.6rem"></i>
+          <span>Rezervasiya</span>
+        </div>
 
-    <h1 style="font-size:var(--fs-2xl);margin-bottom:var(--sp-2)">Rezervasiya et</h1>
-    <p style="color:var(--ink-soft);margin-bottom:var(--sp-6)">Mütəxəssis, xidmət və vaxt seçərək görüş təyin edin</p>
+        <h1
+          style="font-size:var(--fs-2xl);margin-bottom:var(--sp-2)">Rezervasiya
+          et</h1>
+        <p style="color:var(--ink-soft);margin-bottom:var(--sp-6)">Mütəxəssis,
+          xidmət və vaxt seçərək görüş təyin edin</p>
 
-    <!-- Wizard — step 4 dinamik göstərilir -->
-    <div class="wiz">
-      <div class="wiz-step active" id="wi1">
-        <div class="wiz-circle" id="wc1">1</div>
-        <div class="wiz-label"><span>Addım 1</span><b>Mütəxəssis</b></div>
-      </div>
-      <div class="wiz-line" id="wl1"></div>
-      <div class="wiz-step" id="wi2">
-        <div class="wiz-circle" id="wc2">2</div>
-        <div class="wiz-label"><span>Addım 2</span><b>Xidmət & Vaxt</b></div>
-      </div>
-      <div class="wiz-line" id="wl2"></div>
-      <div class="wiz-step" id="wi3">
-        <div class="wiz-circle" id="wc3">3</div>
-        <div class="wiz-label"><span>Addım 3</span><b>Təsdiq</b></div>
-      </div>
-      <!-- Step 4 yalnız ödənişli xidmətdə görünür -->
-      <div class="wiz-line hidden" id="wl3"></div>
-      <div class="wiz-step hidden" id="wi4">
-        <div class="wiz-circle" id="wc4">4</div>
-        <div class="wiz-label"><span>Addım 4</span><b>Ödəniş</b></div>
-      </div>
-    </div>
-
-    <div class="book-layout">
-
-      <div>
-
-        <!-- STEP 1 -->
-        <div id="step1">
-          <div class="scard">
-            <div class="scard-head">
-              <div class="scard-icon"><i class="fa-solid fa-user-doctor"></i></div>
-              <div><h2>Mütəxəssis seçin</h2><p>Rezervasiya etmək istədiyiniz mütəxəssisi tapın</p></div>
-            </div>
-            <div class="search-row">
-              <input type="text" id="provSearch" placeholder="Ad və ya kateqoriya axtar..." oninput="filterProvs()">
-            </div>
-            <div class="chip-row" id="catChips">
-              <button class="chip active" data-cat="" onclick="setCat(this,'')">Hamısı</button>
-            </div>
-            <div class="prov-grid" id="provGrid">
-              <div class="spinner-wrap" style="grid-column:1/-1"><div class="spinner"></div></div>
-            </div>
+        <!-- Wizard — step 4 dinamik göstərilir -->
+        <div class="wiz">
+          <div class="wiz-step active" id="wi1">
+            <div class="wiz-circle" id="wc1">1</div>
+            <div class="wiz-label"><span>Addım 1</span><b>Mütəxəssis</b></div>
           </div>
-          <div style="display:flex;justify-content:flex-end">
-            <button class="btn btn-primary" id="s1btn" disabled onclick="goStep2()">
-              Davam et <i class="fa-solid fa-arrow-right"></i>
-            </button>
+          <div class="wiz-line" id="wl1"></div>
+          <div class="wiz-step" id="wi2">
+            <div class="wiz-circle" id="wc2">2</div>
+            <div class="wiz-label"><span>Addım 2</span><b>Xidmət &
+                Vaxt</b></div>
+          </div>
+          <div class="wiz-line" id="wl2"></div>
+          <div class="wiz-step" id="wi3">
+            <div class="wiz-circle" id="wc3">3</div>
+            <div class="wiz-label"><span>Addım 3</span><b>Təsdiq</b></div>
+          </div>
+          <!-- Step 4 yalnız ödənişli xidmətdə görünür -->
+          <div class="wiz-line hidden" id="wl3"></div>
+          <div class="wiz-step hidden" id="wi4">
+            <div class="wiz-circle" id="wc4">4</div>
+            <div class="wiz-label"><span>Addım 4</span><b>Ödəniş</b></div>
           </div>
         </div>
 
-        <!-- STEP 2 -->
-        <div id="step2" class="hidden">
-          <div class="scard">
-            <div class="scard-head">
-              <div class="scard-icon"><i class="fa-solid fa-briefcase-medical"></i></div>
-              <div><h2>Xidmət seçin</h2><p id="s2provName" style="color:var(--accent-dark);font-weight:600"></p></div>
-            </div>
-            <div id="svcList" style="display:flex;flex-direction:column;gap:var(--sp-2)">
-              <div class="spinner-wrap"><div class="spinner"></div></div>
-            </div>
-          </div>
-          <div class="scard hidden" id="calCard">
-            <div class="scard-head">
-              <div class="scard-icon"><i class="fa-solid fa-calendar-days"></i></div>
-              <div><h2>Tarix seçin</h2><p>Uyğun tarixi seçin</p></div>
-            </div>
-            <div class="cal" id="calEl"></div>
-          </div>
-          <div class="scard hidden" id="slotCard">
-            <div class="scard-head">
-              <div class="scard-icon"><i class="fa-solid fa-clock"></i></div>
-              <div><h2>Saat seçin</h2><p>Boş vaxtlardan birini seçin</p></div>
-            </div>
-            <div id="slotEl"></div>
-          </div>
-          <div style="display:flex;justify-content:space-between;margin-top:var(--sp-2)">
-            <button class="btn btn-ghost" onclick="setStep(1)"><i class="fa-solid fa-arrow-left"></i> Geri</button>
-            <button class="btn btn-primary" id="s2btn" disabled onclick="goStep3()">
-              Davam et <i class="fa-solid fa-arrow-right"></i>
-            </button>
-          </div>
-        </div>
+        <div class="book-layout">
 
-        <!-- STEP 3 -->
-        <div id="step3" class="hidden">
-          <div class="scard">
-            <div class="scard-head">
-              <div class="scard-icon"><i class="fa-solid fa-circle-check"></i></div>
-              <div><h2>Rezervasiyanı yoxlayın</h2><p id="s3subtitle">Məlumatları yoxlayın</p></div>
-            </div>
-            <div id="confirmGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4);margin-bottom:var(--sp-5)"></div>
-            <div class="field">
-              <label><i class="fa-solid fa-comment" style="color:var(--accent);margin-right:6px"></i>Qeyd (istəyə görə)</label>
-              <textarea id="bookNotes" placeholder="Mütəxəssisə qeyd bildirin..." rows="2"></textarea>
-            </div>
-          </div>
-          <div style="display:flex;justify-content:space-between">
-            <button class="btn btn-ghost" onclick="setStep(2)"><i class="fa-solid fa-arrow-left"></i> Geri</button>
-            <button class="btn btn-primary btn-lg" id="s3nextBtn">
-              <i class="fa-solid fa-credit-card"></i> Ödənişə keç
-            </button>
-          </div>
-        </div>
+          <div>
 
-        <!-- STEP 4: Payment -->
-        <div id="step4" class="hidden">
-          <div class="scard">
-            <div class="scard-head">
-              <div class="scard-icon"><i class="fa-solid fa-lock"></i></div>
-              <div><h2>Təhlükəsiz ödəniş</h2><p>Stripe ilə şifrələnmiş ödəniş</p></div>
-            </div>
-
-            <!-- Processing -->
-            <div id="payProcessing" class="hidden">
-              <div class="processing">
-                <div class="processing-spin"></div>
-                <h3 style="font-size:var(--fs-lg);margin-bottom:8px">Ödəniş emal edilir...</h3>
-                <p style="font-size:var(--fs-sm);color:var(--ink-soft)">Zəhmət olmasa gözləyin</p>
+            <!-- STEP 1 -->
+            <div id="step1">
+              <div class="scard">
+                <div class="scard-head">
+                  <div class="scard-icon"><i
+                      class="fa-solid fa-user-doctor"></i></div>
+                  <div><h2>Mütəxəssis seçin</h2><p>Rezervasiya etmək istədiyiniz
+                      mütəxəssisi tapın</p></div>
+                </div>
+                <div class="search-row">
+                  <input type="text" id="provSearch"
+                    placeholder="Ad və ya kateqoriya axtar..."
+                    oninput="filterProvs()">
+                </div>
+                <div class="chip-row" id="catChips">
+                  <button class="chip active" data-cat
+                    onclick="setCat(this,'')">Hamısı</button>
+                </div>
+                <div class="prov-grid" id="provGrid">
+                  <div class="spinner-wrap" style="grid-column:1/-1"><div
+                      class="spinner"></div></div>
+                </div>
+              </div>
+              <div style="display:flex;justify-content:flex-end">
+                <button class="btn btn-primary" id="s1btn" disabled
+                  onclick="goStep2()">
+                  Davam et <i class="fa-solid fa-arrow-right"></i>
+                </button>
               </div>
             </div>
 
-            <!-- Payment content -->
-            <div id="payContent">
-              <div class="alert alert-error hidden" id="payAlert"></div>
-
-              <!-- Order summary -->
-              <div class="pay-order-box">
-                <div>
-                  <strong style="display:block;font-size:var(--fs-sm)" id="payOrderSvc">—</strong>
-                  <span style="font-size:var(--fs-xs);color:var(--ink-soft)" id="payOrderProv">—</span>
+            <!-- STEP 2 -->
+            <div id="step2" class="hidden">
+              <div class="scard">
+                <div class="scard-head">
+                  <div class="scard-icon"><i
+                      class="fa-solid fa-briefcase-medical"></i></div>
+                  <div><h2>Xidmət seçin</h2><p id="s2provName"
+                      style="color:var(--accent-dark);font-weight:600"></p></div>
                 </div>
-                <strong style="font-size:var(--fs-lg);color:var(--accent-dark);font-family:var(--font-head)" id="payOrderPrice">—</strong>
-              </div>
-
-              <!-- NO CARD saved -->
-              <div id="payNoCard" class="hidden">
-                <div class="no-card-box">
-                  <i class="fa-solid fa-credit-card" style="font-size:2rem;color:var(--warning);display:block;margin-bottom:12px"></i>
-                  <h3 style="font-size:var(--fs-md);margin-bottom:8px;color:var(--ink)">Ödəniş kartı yoxdur</h3>
-                  <p style="font-size:var(--fs-sm);color:var(--ink-soft);margin-bottom:var(--sp-4)">
-                    Ödəniş etmək üçün əvvəlcə profilinizə kart əlavə edin.
-                  </p>
-                  <a href="dashboard.html?addCard=1" class="btn btn-primary">
-                    <i class="fa-solid fa-plus"></i> Profilə keç — kart əlavə et
-                  </a>
+                <div id="svcList"
+                  style="display:flex;flex-direction:column;gap:var(--sp-2)">
+                  <div class="spinner-wrap"><div class="spinner"></div></div>
                 </div>
               </div>
-
-              <!-- SAVED card -->
-              <div id="paySavedCard" class="hidden">
-                <div class="saved-card-box">
-                  <span id="savedCardIcon" style="font-size:2.2rem"></span>
-                  <div style="flex:1">
-                    <strong style="display:block;font-size:var(--fs-sm)" id="savedCardNum">—</strong>
-                    <span style="font-size:var(--fs-xs);color:var(--ink-soft)" id="savedCardMeta">—</span>
-                  </div>
-                  <a href="dashboard.html?addCard=1" style="font-size:var(--fs-xs);color:var(--accent-dark);font-weight:600;text-decoration:underline">
-                    Dəyiş
-                  </a>
+              <div class="scard hidden" id="calCard">
+                <div class="scard-head">
+                  <div class="scard-icon"><i
+                      class="fa-solid fa-calendar-days"></i></div>
+                  <div><h2>Tarix seçin</h2><p>Uyğun tarixi seçin</p></div>
                 </div>
-
-                <div class="stripe-logos">
-                  <i class="fa-brands fa-cc-visa"       style="color:#1434CB;font-size:2rem"></i>
-                  <i class="fa-brands fa-cc-mastercard" style="color:#EB001B;font-size:2rem"></i>
-                  <i class="fa-brands fa-cc-amex"       style="color:#006FCF;font-size:2rem"></i>
-                </div>
-
-                <div class="stripe-secure">
-                  <i class="fa-brands fa-stripe" style="color:#6772E5;font-size:1.1rem"></i>
-                  <span>Stripe ilə şifrələnmiş</span>
-                  <i class="fa-solid fa-shield-check" style="margin-left:8px"></i>
-                  <span>256-bit SSL</span>
-                </div>
+                <div class="cal" id="calEl"></div>
               </div>
-
-              <!-- NEW card (Stripe element) — yalnız saved card yoxdursa -->
-              <div id="payNewCard" class="hidden">
-                <div class="stripe-logos">
-                  <i class="fa-brands fa-cc-visa"       style="color:#1434CB;font-size:2rem"></i>
-                  <i class="fa-brands fa-cc-mastercard" style="color:#EB001B;font-size:2rem"></i>
-                  <i class="fa-brands fa-cc-amex"       style="color:#006FCF;font-size:2rem"></i>
+              <div class="scard hidden" id="slotCard">
+                <div class="scard-head">
+                  <div class="scard-icon"><i
+                      class="fa-solid fa-clock"></i></div>
+                  <div><h2>Saat seçin</h2><p>Boş vaxtlardan birini
+                      seçin</p></div>
                 </div>
+                <div id="slotEl"></div>
+              </div>
+              <div
+                style="display:flex;justify-content:space-between;margin-top:var(--sp-2)">
+                <button class="btn btn-ghost" onclick="setStep(1)"><i
+                    class="fa-solid fa-arrow-left"></i> Geri</button>
+                <button class="btn btn-primary" id="s2btn" disabled
+                  onclick="goStep3()">
+                  Davam et <i class="fa-solid fa-arrow-right"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- STEP 3 -->
+            <div id="step3" class="hidden">
+              <div class="scard">
+                <div class="scard-head">
+                  <div class="scard-icon"><i
+                      class="fa-solid fa-circle-check"></i></div>
+                  <div><h2>Rezervasiyanı yoxlayın</h2><p
+                      id="s3subtitle">Məlumatları yoxlayın</p></div>
+                </div>
+                <div id="confirmGrid"
+                  style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4);margin-bottom:var(--sp-5)"></div>
                 <div class="field">
-                  <label><i class="fa-solid fa-credit-card" style="color:var(--accent);margin-right:6px"></i>Kart məlumatları</label>
-                  <div class="stripe-wrap">
-                    <div id="stripe-card-element"></div>
+                  <label><i class="fa-solid fa-comment"
+                      style="color:var(--accent);margin-right:6px"></i>Qeyd
+                    (istəyə görə)</label>
+                  <textarea id="bookNotes"
+                    placeholder="Mütəxəssisə qeyd bildirin..."
+                    rows="2"></textarea>
+                </div>
+              </div>
+              <div style="display:flex;justify-content:space-between">
+                <button class="btn btn-ghost" onclick="setStep(2)"><i
+                    class="fa-solid fa-arrow-left"></i> Geri</button>
+                <button class="btn btn-primary btn-lg" id="s3nextBtn">
+                  <i class="fa-solid fa-credit-card"></i> Ödənişə keç
+                </button>
+              </div>
+            </div>
+
+            <!-- STEP 4: Payment -->
+            <div id="step4" class="hidden">
+              <div class="scard">
+                <div class="scard-head">
+                  <div class="scard-icon"><i class="fa-solid fa-lock"></i></div>
+                  <div><h2>Təhlükəsiz ödəniş</h2><p>Stripe ilə şifrələnmiş
+                      ödəniş</p></div>
+                </div>
+
+                <!-- Processing -->
+                <div id="payProcessing" class="hidden">
+                  <div class="processing">
+                    <div class="processing-spin"></div>
+                    <h3 style="font-size:var(--fs-lg);margin-bottom:8px">Ödəniş
+                      emal edilir...</h3>
+                    <p
+                      style="font-size:var(--fs-sm);color:var(--ink-soft)">Zəhmət
+                      olmasa gözləyin</p>
                   </div>
-                  <div id="stripe-card-errors"></div>
                 </div>
-                <div class="stripe-secure">
-                  <i class="fa-brands fa-stripe" style="color:#6772E5;font-size:1.1rem"></i>
-                  <span>Stripe ilə emal edilir</span>
-                  <i class="fa-solid fa-shield-check" style="margin-left:8px"></i>
-                  <span>256-bit SSL</span>
+
+                <!-- Payment content -->
+                <div id="payContent">
+                  <div class="alert alert-error hidden" id="payAlert"></div>
+
+                  <!-- Order summary -->
+                  <div class="pay-order-box">
+                    <div>
+                      <strong style="display:block;font-size:var(--fs-sm)"
+                        id="payOrderSvc">—</strong>
+                      <span style="font-size:var(--fs-xs);color:var(--ink-soft)"
+                        id="payOrderProv">—</span>
+                    </div>
+                    <strong
+                      style="font-size:var(--fs-lg);color:var(--accent-dark);font-family:var(--font-head)"
+                      id="payOrderPrice">—</strong>
+                  </div>
+
+                  <!-- NO CARD saved -->
+                  <div id="payNoCard" class="hidden">
+                    <div class="no-card-box">
+                      <i class="fa-solid fa-credit-card"
+                        style="font-size:2rem;color:var(--warning);display:block;margin-bottom:12px"></i>
+                      <h3
+                        style="font-size:var(--fs-md);margin-bottom:8px;color:var(--ink)">Ödəniş
+                        kartı yoxdur</h3>
+                      <p
+                        style="font-size:var(--fs-sm);color:var(--ink-soft);margin-bottom:var(--sp-4)">
+                        Ödəniş etmək üçün əvvəlcə profilinizə kart əlavə edin.
+                      </p>
+                      <a href="dashboard.html?addCard=1"
+                        class="btn btn-primary">
+                        <i class="fa-solid fa-plus"></i> Profilə keç — kart
+                        əlavə et
+                      </a>
+                    </div>
+                  </div>
+
+                  <!-- SAVED card -->
+                  <div id="paySavedCard" class="hidden">
+                    <div class="saved-card-box">
+                      <span id="savedCardIcon" style="font-size:2.2rem"></span>
+                      <div style="flex:1">
+                        <strong style="display:block;font-size:var(--fs-sm)"
+                          id="savedCardNum">—</strong>
+                        <span
+                          style="font-size:var(--fs-xs);color:var(--ink-soft)"
+                          id="savedCardMeta">—</span>
+                      </div>
+                      <a href="dashboard.html?addCard=1"
+                        style="font-size:var(--fs-xs);color:var(--accent-dark);font-weight:600;text-decoration:underline">
+                        Dəyiş
+                      </a>
+                    </div>
+
+                    <div class="stripe-logos">
+                      <i class="fa-brands fa-cc-visa"
+                        style="color:#1434CB;font-size:2rem"></i>
+                      <i class="fa-brands fa-cc-mastercard"
+                        style="color:#EB001B;font-size:2rem"></i>
+                      <i class="fa-brands fa-cc-amex"
+                        style="color:#006FCF;font-size:2rem"></i>
+                    </div>
+
+                    <div class="stripe-secure">
+                      <i class="fa-brands fa-stripe"
+                        style="color:#6772E5;font-size:1.1rem"></i>
+                      <span>Stripe ilə şifrələnmiş</span>
+                      <i class="fa-solid fa-shield-check"
+                        style="margin-left:8px"></i>
+                      <span>256-bit SSL</span>
+                    </div>
+                  </div>
+
+                  <!-- NEW card (Stripe element) — yalnız saved card yoxdursa -->
+                  <div id="payNewCard" class="hidden">
+                    <div class="stripe-logos">
+                      <i class="fa-brands fa-cc-visa"
+                        style="color:#1434CB;font-size:2rem"></i>
+                      <i class="fa-brands fa-cc-mastercard"
+                        style="color:#EB001B;font-size:2rem"></i>
+                      <i class="fa-brands fa-cc-amex"
+                        style="color:#006FCF;font-size:2rem"></i>
+                    </div>
+                    <div class="field">
+                      <label><i class="fa-solid fa-credit-card"
+                          style="color:var(--accent);margin-right:6px"></i>Kart
+                        məlumatları</label>
+                      <div class="stripe-wrap">
+                        <div id="stripe-card-element"></div>
+                      </div>
+                      <div id="stripe-card-errors"></div>
+                    </div>
+                    <div class="stripe-secure">
+                      <i class="fa-brands fa-stripe"
+                        style="color:#6772E5;font-size:1.1rem"></i>
+                      <span>Stripe ilə emal edilir</span>
+                      <i class="fa-solid fa-shield-check"
+                        style="margin-left:8px"></i>
+                      <span>256-bit SSL</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div style="display:flex;justify-content:space-between">
+                <button class="btn btn-ghost" id="payBackBtn"
+                  onclick="setStep(3)">
+                  <i class="fa-solid fa-arrow-left"></i> Geri
+                </button>
+                <button class="btn btn-primary btn-lg" id="payBtn"
+                  onclick="doPayment()" class="hidden">
+                  <i class="fa-solid fa-lock"></i> Ödə — <span
+                    id="payBtnAmt">—</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- SUCCESS -->
+            <div id="stepSuccess" class="hidden">
+              <div class="scard">
+                <div class="success-wrap">
+                  <div class="success-icon">
+                    <i class="fa-solid fa-calendar-check"
+                      style="color:var(--success);font-size:2.2rem"></i>
+                  </div>
+                  <h2 style="font-size:var(--fs-xl);margin-bottom:var(--sp-3)"
+                    id="successTitle">Rezervasiya tamamlandı!</h2>
+                  <p
+                    style="color:var(--ink-soft);margin-bottom:var(--sp-6);max-width:420px;margin-left:auto;margin-right:auto"
+                    id="successMsg"></p>
+                  <div
+                    style="display:flex;gap:var(--sp-3);justify-content:center;flex-wrap:wrap">
+                    <a href="appointments.html" class="btn btn-primary">
+                      <i class="fa-solid fa-calendar-check"></i> Görüşlərimə bax
+                    </a>
+                    <a href="home.html" class="btn btn-outline">
+                      <i class="fa-solid fa-house"></i> Ana səhifə
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
+
           </div>
 
-          <div style="display:flex;justify-content:space-between">
-            <button class="btn btn-ghost" id="payBackBtn" onclick="setStep(3)">
-              <i class="fa-solid fa-arrow-left"></i> Geri
-            </button>
-            <button class="btn btn-primary btn-lg" id="payBtn" onclick="doPayment()" class="hidden">
-              <i class="fa-solid fa-lock"></i> Ödə — <span id="payBtnAmt">—</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- SUCCESS -->
-        <div id="stepSuccess" class="hidden">
-          <div class="scard">
-            <div class="success-wrap">
-              <div class="success-icon">
-                <i class="fa-solid fa-calendar-check" style="color:var(--success);font-size:2.2rem"></i>
+          <!-- Summary -->
+          <div class="book-aside">
+            <h3
+              style="font-size:var(--fs-md);margin-bottom:var(--sp-4);display:flex;align-items:center;gap:8px">
+              <i class="fa-solid fa-receipt" style="color:var(--accent)"></i>
+              Xülasə
+            </h3>
+            <div class="sum-row"><span class="sum-lbl">Mütəxəssis</span><span
+                id="sumProv"
+                style="font-size:var(--fs-sm);color:var(--ink-soft);font-style:italic;text-align:right">Seçilməyib</span></div>
+            <div class="sum-row"><span class="sum-lbl">Xidmət</span><span
+                id="sumSvc"
+                style="font-size:var(--fs-sm);color:var(--ink-soft);font-style:italic;text-align:right">Seçilməyib</span></div>
+            <div class="sum-row"><span class="sum-lbl">Tarix</span><span
+                id="sumDate"
+                style="font-size:var(--fs-sm);color:var(--ink-soft);font-style:italic;text-align:right">Seçilməyib</span></div>
+            <div class="sum-row"><span class="sum-lbl">Saat</span><span
+                id="sumSlot"
+                style="font-size:var(--fs-sm);color:var(--ink-soft);font-style:italic;text-align:right">Seçilməyib</span></div>
+            <div class="sum-row"><span class="sum-lbl">Müddət</span><span
+                id="sumDur"
+                style="font-size:var(--fs-sm);color:var(--ink-soft);text-align:right">—</span></div>
+            <div class="sum-total">
+              <span style="font-weight:600">Ümumi</span>
+              <span id="sumPrice"
+                style="font-family:var(--font-head);font-size:var(--fs-lg);color:var(--accent-dark)">—</span>
+            </div>
+            <div
+              style="margin-top:var(--sp-4);padding:var(--sp-4);background:var(--accent-xsoft);border:1px solid var(--accent-soft);border-radius:var(--r-md)">
+            </div>
+            <div style="margin-top:var(--sp-4)">
+              <div class="prog-bar">
+                <div class="prog-seg on" id="pg1"></div>
+                <div class="prog-seg" id="pg2"></div>
+                <div class="prog-seg" id="pg3"></div>
+                <div class="prog-seg hidden" id="pg4"></div>
               </div>
-              <h2 style="font-size:var(--fs-xl);margin-bottom:var(--sp-3)" id="successTitle">Rezervasiya tamamlandı!</h2>
-              <p style="color:var(--ink-soft);margin-bottom:var(--sp-6);max-width:420px;margin-left:auto;margin-right:auto" id="successMsg"></p>
-              <div style="display:flex;gap:var(--sp-3);justify-content:center;flex-wrap:wrap">
-                <a href="appointments.html" class="btn btn-primary">
-                  <i class="fa-solid fa-calendar-check"></i> Görüşlərimə bax
-                </a>
-                <a href="home.html" class="btn btn-outline">
-                  <i class="fa-solid fa-house"></i> Ana səhifə
-                </a>
-              </div>
+              <p
+                style="font-size:var(--fs-xs);color:var(--ink-soft);margin-top:6px"
+                id="pgLabel">Addım 1 / 3</p>
+            </div>
+            <div style="margin-top:var(--sp-5);text-align:center;opacity:.4">
+              <i class="fa-brands fa-stripe"
+                style="font-size:2rem;color:var(--ink)"></i>
             </div>
           </div>
-        </div>
 
-      </div>
-
-      <!-- Summary -->
-      <div class="book-aside">
-        <h3 style="font-size:var(--fs-md);margin-bottom:var(--sp-4);display:flex;align-items:center;gap:8px">
-          <i class="fa-solid fa-receipt" style="color:var(--accent)"></i> Xülasə
-        </h3>
-        <div class="sum-row"><span class="sum-lbl">Mütəxəssis</span><span id="sumProv" style="font-size:var(--fs-sm);color:var(--ink-soft);font-style:italic;text-align:right">Seçilməyib</span></div>
-        <div class="sum-row"><span class="sum-lbl">Xidmət</span><span id="sumSvc" style="font-size:var(--fs-sm);color:var(--ink-soft);font-style:italic;text-align:right">Seçilməyib</span></div>
-        <div class="sum-row"><span class="sum-lbl">Tarix</span><span id="sumDate" style="font-size:var(--fs-sm);color:var(--ink-soft);font-style:italic;text-align:right">Seçilməyib</span></div>
-        <div class="sum-row"><span class="sum-lbl">Saat</span><span id="sumSlot" style="font-size:var(--fs-sm);color:var(--ink-soft);font-style:italic;text-align:right">Seçilməyib</span></div>
-        <div class="sum-row"><span class="sum-lbl">Müddət</span><span id="sumDur" style="font-size:var(--fs-sm);color:var(--ink-soft);text-align:right">—</span></div>
-        <div class="sum-total">
-          <span style="font-weight:600">Ümumi</span>
-          <span id="sumPrice" style="font-family:var(--font-head);font-size:var(--fs-lg);color:var(--accent-dark)">—</span>
-        </div>
-        <div style="margin-top:var(--sp-4);padding:var(--sp-4);background:var(--accent-xsoft);border:1px solid var(--accent-soft);border-radius:var(--r-md)">
-          <div style="display:flex;gap:var(--sp-3);align-items:flex-start">
-            <i class="fa-solid fa-lock" style="color:var(--accent-dark);margin-top:2px;flex-shrink:0"></i>
-            <div>
-              <strong style="font-size:var(--fs-sm);display:block;margin-bottom:2px">Stripe ilə ödəniş</strong>
-              <span style="font-size:var(--fs-xs);color:var(--ink-soft)">Kart məlumatlarınız bizə ötürülmür</span>
-            </div>
-          </div>
-        </div>
-        <div style="margin-top:var(--sp-4)">
-          <div class="prog-bar">
-            <div class="prog-seg on" id="pg1"></div>
-            <div class="prog-seg" id="pg2"></div>
-            <div class="prog-seg" id="pg3"></div>
-            <div class="prog-seg hidden" id="pg4"></div>
-          </div>
-          <p style="font-size:var(--fs-xs);color:var(--ink-soft);margin-top:6px" id="pgLabel">Addım 1 / 3</p>
-        </div>
-        <div style="margin-top:var(--sp-5);text-align:center;opacity:.4">
-          <i class="fa-brands fa-stripe" style="font-size:2rem;color:var(--ink)"></i>
         </div>
       </div>
+    </section>
 
-    </div>
-  </div>
-</section>
+    <div id="footer"></div>
 
-<div id="footer"></div>
-
-<script src="../js/client-api.js"></script>
-<script src="../js/layout.js"></script>
-<script>
+    <script src="../js/client-api.js"></script>
+    <script src="../js/layout.js"></script>
+    <script>
   requireAuth();
 
   /* ── Stripe ── */
@@ -504,8 +584,6 @@
             ★ ${(p.averageRating||0).toFixed(1)} <span style="color:var(--ink-soft);font-weight:400">(${p.reviewCount||0})</span>
           </div>
         </div>
-        <i class="${S.provId===p.id?'fa-solid fa-circle-check':'fa-regular fa-circle'}"
-          style="font-size:1.2rem;color:${S.provId===p.id?'var(--accent)':'var(--border-strong)'}"></i>
       </div>`).join('');
   }
 
@@ -515,10 +593,7 @@
     document.getElementById('s1btn').disabled = false;
     updateSum();
     document.querySelectorAll('[id^="pc-"]').forEach(c => {
-      const it = c.id==='pc-'+id;
-      c.classList.toggle('selected',it);
-      const ic=c.querySelector('i');
-      if(ic){ic.className=it?'fa-solid fa-circle-check':'fa-regular fa-circle';ic.style.color=it?'var(--accent)':'var(--border-strong)';}
+      c.classList.toggle('selected', c.id==='pc-'+id);
     });
   }
 
@@ -894,5 +969,5 @@
 
   function esc(s) { return String(s).replace(/'/g,"&#39;").replace(/"/g,'&quot;'); }
 </script>
-</body>
+  </body>
 </html>

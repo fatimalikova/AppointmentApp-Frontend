@@ -435,11 +435,16 @@
     </div>
 
     <script>
+  // const BASE = 'http://localhost:5291/api';
+  // const Token = {
+  //   set: (a,r) => { localStorage.setItem('accessToken',a); localStorage.setItem('refreshToken',r) },
+  // };
+
   const BASE = 'http://localhost:5291/api';
   const Token = {
-    set: (a,r) => { localStorage.setItem('accessToken',a); localStorage.setItem('refreshToken',r) },
+    set: (a,r) => { localStorage.setItem('client_accessToken',a); localStorage.setItem('client_refreshToken',r) },
   };
-
+  
   /* Floating icons */
   const ICONS = ['fa-calendar-check','fa-clock','fa-star','fa-bell',
     'fa-heart','fa-user-check','fa-calendar-plus','fa-comment',

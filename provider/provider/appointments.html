@@ -7,6 +7,23 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="../css/provider.css">
+  <style>
+    /* ── Mini calendar (reschedule) ── */
+    .rcal{border:1px solid var(--border);border-radius:var(--r-md);overflow:hidden;max-width:320px}
+    .rcal-head{display:flex;align-items:center;justify-content:space-between;padding:var(--sp-3) var(--sp-4);background:var(--surface-soft);border-bottom:1px solid var(--border);font-weight:600;font-size:var(--fs-sm)}
+    .rcal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;padding:var(--sp-3)}
+    .rcal-dh{font-size:var(--fs-xs);color:var(--ink-soft);text-align:center;padding:var(--sp-2) 0;font-weight:600}
+    .rcal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:var(--fs-sm);cursor:pointer;background:none;border:none;font-family:inherit;transition:background .15s}
+    .rcal-day:hover:not(:disabled){background:var(--surface-soft)}
+    .rcal-day:disabled{color:var(--border-strong);cursor:not-allowed}
+    .rcal-day.today{border:2px solid var(--accent)}
+    .rcal-day.sel{background:var(--accent);color:#fff;font-weight:700}
+    .rslot-lbl{font-size:var(--fs-xs);font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);margin:var(--sp-4) 0 var(--sp-2)}
+    .rslot-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-2)}
+    .rslot{padding:8px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--surface);font-size:var(--fs-sm);font-weight:600;cursor:pointer;text-align:center;font-family:inherit;transition:all .18s}
+    .rslot:hover{border-color:var(--accent-light);background:var(--accent-xsoft)}
+    .rslot.selected{background:var(--accent);color:#fff;border-color:var(--accent)}
+  </style>
 </head>
 <body>
 <div class="shell">
@@ -64,16 +81,38 @@
     <div class="modal-body">
       <div class="alert hidden" id="reschedAlert"></div>
       <input type="hidden" id="reschedId">
-      <div class="field">
-        <label>Yeni tarix və saat</label>
-        <input type="datetime-local" id="reschedDt">
+
+      <label style="font-size:var(--fs-sm);font-weight:600;display:flex;align-items:center;gap:6px;margin-bottom:var(--sp-3)">
+        <i class="fa-solid fa-calendar-days" style="color:var(--accent)"></i>Yeni tarix seçin
+      </label>
+      <div class="rcal" id="rcalEl"></div>
+
+      <div id="rslotWrap" class="hidden" style="margin-top:var(--sp-3)">
+        <div id="rslotEl"></div>
       </div>
     </div>
     <div class="modal-foot">
       <button class="btn btn-ghost" onclick="closeModal('reschedModal')">Ləğv et</button>
-      <button class="btn btn-primary" onclick="doReschedule()">
+      <button class="btn btn-primary" id="reschedConfirmBtn" disabled onclick="doReschedule()">
         <i class="fa-solid fa-check"></i> Təsdiqlə
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- Generic confirm action modal (cancel / complete) -->
+<div class="overlay hidden" id="confirmActionModal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-head">
+      <h3 id="confirmActionTitle">Əməliyyatı təsdiqləyin</h3>
+      <button class="btn-icon" onclick="closeModal('confirmActionModal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <p id="confirmActionText" style="font-size:var(--fs-sm);color:var(--ink-soft);line-height:1.6"></p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('confirmActionModal')">Vaz keç</button>
+      <button class="btn" id="confirmActionBtn"></button>
     </div>
   </div>
 </div>
@@ -83,6 +122,18 @@
 <script>
   let allAppts = [];
   let currentFilter = '';
+
+  /* ── Reschedule state ── */
+  let rY = new Date().getFullYear();
+  let rM = new Date().getMonth();
+  let rDate = null;
+  let rSlot = null;
+  let rProviderId = null;
+  let rServiceId  = null;
+
+  /* ── Confirm action state ── */
+  let pendingActionId   = null;
+  let pendingActionType = null;
 
   async function loadAppts() {
     const today = new Date();
@@ -153,7 +204,7 @@
     if (a.status === 'Confirmed') {
       foot.innerHTML = `
         <button class="btn btn-ghost" onclick="closeModal('detailModal')">Bağla</button>
-        <button class="btn btn-outline" onclick="openResched('${a.id}')"><i class="fa-solid fa-rotate"></i> Yenilə</button>
+        <button class="btn btn-outline" onclick="openResched('${a.id}','${a.providerId}','${a.serviceId}')"><i class="fa-solid fa-rotate"></i> Yenilə</button>
         <button class="btn btn-danger" onclick="doCancel('${a.id}')"><i class="fa-solid fa-circle-xmark"></i> Ləğv et</button>
         <button class="btn btn-success" onclick="doComplete('${a.id}')"><i class="fa-solid fa-check"></i> Tamamla</button>`;
     } else {
@@ -162,43 +213,184 @@
     openModal('detailModal');
   }
 
-  function openResched(id) {
+  /* ══ RESCHEDULE — calendar + slot seçimi ══ */
+  function openResched(id, providerId, serviceId) {
     document.getElementById('reschedId').value = id;
+    rProviderId = providerId;
+    rServiceId  = serviceId;
+    rDate = null;
+    rSlot = null;
+    rY = new Date().getFullYear();
+    rM = new Date().getMonth();
+
+    document.getElementById('reschedConfirmBtn').disabled = true;
+    document.getElementById('reschedConfirmBtn').innerHTML = '<i class="fa-solid fa-check"></i> Təsdiqlə';
     document.getElementById('reschedAlert').classList.add('hidden');
+    document.getElementById('rslotWrap').classList.add('hidden');
+
     closeModal('detailModal');
     openModal('reschedModal');
+    renderRCal();
+  }
+
+  function renderRCal() {
+    const today=new Date(); today.setHours(0,0,0,0);
+    const max=new Date(today); max.setDate(today.getDate()+60);
+    const first=new Date(rY,rM,1);
+    const off=(first.getDay()+6)%7;
+    const dim=new Date(rY,rM+1,0).getDate();
+    document.getElementById('rcalEl').innerHTML=`
+      <div class="rcal-head">
+        <button class="btn-icon" style="width:28px;height:28px" onclick="chRM(-1)">‹</button>
+        <span>${MONTHS_AZ[rM]} ${rY}</span>
+        <button class="btn-icon" style="width:28px;height:28px" onclick="chRM(1)">›</button>
+      </div>
+      <div class="rcal-grid">
+        ${DAYS_SHORT.map(d=>`<div class="rcal-dh">${d}</div>`).join('')}
+        ${'<div></div>'.repeat(off)}
+        ${Array.from({length:dim},(_,i)=>{
+          const d=i+1,dt=new Date(rY,rM,d);
+          const dis=dt<today||dt>max;
+          const sel=rDate&&dt.toDateString()===rDate.toDateString();
+          const tod=dt.toDateString()===today.toDateString();
+          return `<button class="rcal-day${sel?' sel':''}${tod?' today':''}" ${dis?'disabled':''} onclick="pickRDay(${d})">${d}</button>`;
+        }).join('')}
+      </div>`;
+  }
+
+  function chRM(delta) {
+    rM+=delta;
+    if(rM<0){rM=11;rY--;}
+    if(rM>11){rM=0;rY++;}
+    renderRCal();
+  }
+
+  async function loadRSlots(providerId, serviceId, dateStr) {
+    try {
+      const { access } = Token.get();
+      const res  = await fetch(`http://localhost:5291/api/availability?providerId=${providerId}&serviceId=${serviceId}&date=${dateStr}`, {
+        headers: { 'Authorization': 'Bearer ' + access }
+      });
+      const data = await res.json();
+      return data.success ? data.data : [];
+    } catch { return []; }
+  }
+
+  async function pickRDay(d) {
+    rDate = new Date(rY,rM,d);
+    rSlot = null;
+    document.getElementById('reschedConfirmBtn').disabled = true;
+    renderRCal();
+
+    const wrap = document.getElementById('rslotWrap');
+    wrap.classList.remove('hidden');
+    document.getElementById('rslotEl').innerHTML = '<div class="spinner-wrap"><div class="spinner"></div></div>';
+
+    const iso   = rDate.toLocaleDateString('en-CA');
+    const slots = await loadRSlots(rProviderId, rServiceId, iso);
+    renderRSlots(Array.isArray(slots) ? slots : []);
+  }
+
+  function renderRSlots(slots) {
+    const el = document.getElementById('rslotEl');
+    if (!slots.length) {
+      el.innerHTML = `<div style="text-align:center;padding:var(--sp-4) 0">
+        <i class="fa-regular fa-calendar-xmark" style="font-size:1.6rem;color:var(--border-strong);display:block;margin-bottom:10px"></i>
+        <p style="font-size:var(--fs-sm);color:var(--ink-soft)">Bu tarixdə boş vaxt yoxdur. Başqa tarix seçin.</p>
+      </div>`;
+      return;
+    }
+    const grps={};
+    slots.forEach(s=>{const h=parseInt(s.startTime);const g=h<12?'Səhər':h<17?'Günorta':'Axşam';(grps[g]=grps[g]||[]).push(s);});
+    el.innerHTML=Object.entries(grps).map(([g,items])=>`
+      <div class="rslot-lbl">${g}</div>
+      <div class="rslot-grid">${items.map(s=>`
+        <button class="rslot" data-s="${s.startTime}" onclick="pickRSlot(this)">${trimTime(s.startTime)}</button>`).join('')}
+      </div>`).join('');
+  }
+
+  function pickRSlot(el) {
+    document.querySelectorAll('.rslot').forEach(b=>b.classList.remove('selected'));
+    el.classList.add('selected');
+    rSlot = el.dataset.s;
+    document.getElementById('reschedConfirmBtn').disabled = false;
   }
 
   async function doReschedule() {
-    const id = document.getElementById('reschedId').value;
-    const dt = document.getElementById('reschedDt').value;
-    if (!dt) return;
+    if (!rDate || !rSlot) return;
+    const id  = document.getElementById('reschedId').value;
+    const btn = document.getElementById('reschedConfirmBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Göndərilir...';
+
     try {
-      await pApi.rescheduleAppt(id, { newStartDateTime: new Date(dt).toISOString() });
+      const dateStr = rDate.toLocaleDateString('en-CA');
+      const timeStr = rSlot.slice(0,5);
+      await pApi.rescheduleAppt(id, { newStartDateTime: `${dateStr}T${timeStr}:00` });
       closeModal('reschedModal');
       showAlert('#alertBox', 'Rezervasiya yenidən planlaşdırıldı!', 'success');
       loadAppts();
-    } catch(err) { showAlert('#reschedAlert', err.message); }
+    } catch(err) {
+      showAlert('#reschedAlert', err.message || 'Yenidən planlaşdırma uğursuz oldu.');
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-check"></i> Təsdiqlə';
+    }
   }
 
-  async function doCancel(id) {
-    if (!confirm('Bu rezervasiyanı ləğv etmək istədiyinizə əminsiniz?')) return;
-    try {
-      await pApi.cancelAppt(id);
-      closeModal('detailModal');
-      showAlert('#alertBox', 'Rezervasiya ləğv edildi.', 'success');
-      loadAppts();
-    } catch(err) { showAlert('#alertBox', err.message); }
+  /* ══ CANCEL / COMPLETE — modal ilə təsdiq ══ */
+  function doCancel(id) {
+    pendingActionId   = id;
+    pendingActionType = 'cancel';
+    document.getElementById('confirmActionTitle').innerHTML =
+      '<i class="fa-solid fa-circle-xmark" style="color:var(--danger);margin-right:8px"></i>Rezervasiyanı ləğv et';
+    document.getElementById('confirmActionText').textContent =
+      'Bu rezervasiyanı ləğv etmək istədiyinizə əminsiniz?';
+    const btn = document.getElementById('confirmActionBtn');
+    btn.className = 'btn btn-danger';
+    btn.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Bəli, ləğv et';
+    btn.onclick = confirmPendingAction;
+    openModal('confirmActionModal');
   }
 
-  async function doComplete(id) {
-    if (!confirm('Bu görüşü tamamlamaq istədiyinizə əminsiniz?')) return;
+  function doComplete(id) {
+    pendingActionId   = id;
+    pendingActionType = 'complete';
+    document.getElementById('confirmActionTitle').innerHTML =
+      '<i class="fa-solid fa-check-circle" style="color:var(--success);margin-right:8px"></i>Görüşü tamamla';
+    document.getElementById('confirmActionText').textContent =
+      'Bu görüşü tamamlamaq istədiyinizə əminsiniz?';
+    const btn = document.getElementById('confirmActionBtn');
+    btn.className = 'btn btn-success';
+    btn.innerHTML = '<i class="fa-solid fa-check"></i> Bəli, tamamla';
+    btn.onclick = confirmPendingAction;
+    openModal('confirmActionModal');
+  }
+
+  async function confirmPendingAction() {
+    const id   = pendingActionId;
+    const type = pendingActionType;
+    const btn  = document.getElementById('confirmActionBtn');
+    btn.disabled = true;
+
     try {
-      await pApi.completeAppt(id);
-      closeModal('detailModal');
-      showAlert('#alertBox', 'Görüş tamamlandı!', 'success');
+      if (type === 'cancel') {
+        await pApi.cancelAppt(id);
+        closeModal('confirmActionModal');
+        closeModal('detailModal');
+        showAlert('#alertBox', 'Rezervasiya ləğv edildi.', 'success');
+      } else if (type === 'complete') {
+        await pApi.completeAppt(id);
+        closeModal('confirmActionModal');
+        closeModal('detailModal');
+        showAlert('#alertBox', 'Görüş tamamlandı!', 'success');
+      }
       loadAppts();
-    } catch(err) { showAlert('#alertBox', err.message); }
+    } catch(err) {
+      closeModal('confirmActionModal');
+      showAlert('#alertBox', err.message || 'Əməliyyat uğursuz oldu.');
+    } finally {
+      btn.disabled = false;
+    }
   }
 
   loadAppts();
