@@ -1,973 +1,1156 @@
 <!DOCTYPE html>
 <html lang="az">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Rezervasiya — Appointment System</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link
-      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap"
-      rel="stylesheet">
-    <link rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="../css/client.css">
-    <script src="https://js.stripe.com/v3/"></script>
-    <style>
-    .wiz{display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:var(--sp-5) var(--sp-6);margin-bottom:var(--sp-6)}
-    .wiz-step{display:flex;align-items:center;gap:var(--sp-3)}
-    .wiz-circle{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:var(--fs-sm);font-weight:700;background:var(--surface-soft);color:var(--ink-soft);border:2px solid var(--border);transition:all .22s ease}
-    .wiz-step.active .wiz-circle{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 4px 14px rgba(201,145,47,.35)}
-    .wiz-step.done   .wiz-circle{background:var(--primary);color:#fff;border-color:var(--primary)}
-    .wiz-label span{font-size:var(--fs-xs);color:var(--ink-soft)}
-    .wiz-label b{display:block;font-size:var(--fs-sm)}
-    .wiz-step.active .wiz-label b{color:var(--accent-dark)}
-    .wiz-step.done   .wiz-label b{color:var(--primary)}
-    .wiz-line{flex:1;height:2px;background:var(--border);margin:0 var(--sp-4);transition:background .22s ease}
-    .wiz-line.done{background:var(--primary)}
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Rezervasiya — Appointment System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/client.css">
+  <script src="https://js.stripe.com/v3/"></script>
+  <style>
+  .wiz{display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:var(--sp-5) var(--sp-6);margin-bottom:var(--sp-6)}
+  .wiz-step{display:flex;align-items:center;gap:var(--sp-3)}
+  .wiz-circle{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:var(--fs-sm);font-weight:700;background:var(--surface-soft);color:var(--ink-soft);border:2px solid var(--border);transition:all .22s ease}
+  .wiz-step.active .wiz-circle{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 4px 14px rgba(201,145,47,.35)}
+  .wiz-step.done   .wiz-circle{background:var(--primary);color:#fff;border-color:var(--primary)}
+  .wiz-label span{font-size:var(--fs-xs);color:var(--ink-soft)}
+  .wiz-label b{display:block;font-size:var(--fs-sm)}
+  .wiz-step.active .wiz-label b{color:var(--accent-dark)}
+  .wiz-step.done   .wiz-label b{color:var(--primary)}
+  .wiz-line{flex:1;height:2px;background:var(--border);margin:0 var(--sp-4);transition:background .22s ease}
+  .wiz-line.done{background:var(--primary)}
 
-    .book-layout{display:grid;grid-template-columns:1fr 300px;gap:var(--sp-6);align-items:start}
-    .book-aside{position:sticky;top:calc(var(--nav-h)+16px);background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:var(--sp-5)}
-    .sum-row{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border);font-size:var(--fs-sm)}
-    .sum-row:last-of-type{border-bottom:none}
-    .sum-lbl{font-size:var(--fs-xs);color:var(--ink-soft);flex-shrink:0;margin-right:8px}
-    .sum-total{display:flex;justify-content:space-between;margin-top:var(--sp-4);padding-top:var(--sp-4);border-top:2px solid var(--border-strong)}
+  .book-layout{display:grid;grid-template-columns:1fr 300px;gap:var(--sp-6);align-items:start}
+  .book-aside{position:sticky;top:calc(var(--nav-h)+16px);background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:var(--sp-5)}
+  .sum-row{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border);font-size:var(--fs-sm)}
+  .sum-row:last-of-type{border-bottom:none}
+  .sum-lbl{font-size:var(--fs-xs);color:var(--ink-soft);flex-shrink:0;margin-right:8px}
+  .sum-total{display:flex;justify-content:space-between;margin-top:var(--sp-4);padding-top:var(--sp-4);border-top:2px solid var(--border-strong)}
 
-    .scard{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:var(--sp-5);margin-bottom:var(--sp-4)}
-    .scard-head{display:flex;align-items:center;gap:var(--sp-3);margin-bottom:var(--sp-5)}
-    .scard-icon{width:40px;height:40px;border-radius:var(--r-sm);flex-shrink:0;background:var(--accent-soft);color:var(--accent-dark);display:flex;align-items:center;justify-content:center;font-size:1rem}
-    .scard-head h2{font-size:var(--fs-md);margin:0}
-    .scard-head p{font-size:var(--fs-xs);color:var(--ink-soft);margin:2px 0 0}
+  .scard{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:var(--sp-5);margin-bottom:var(--sp-4)}
+  .scard-head{display:flex;align-items:center;gap:var(--sp-3);margin-bottom:var(--sp-5)}
+  .scard-icon{width:40px;height:40px;border-radius:var(--r-sm);flex-shrink:0;background:var(--accent-soft);color:var(--accent-dark);display:flex;align-items:center;justify-content:center;font-size:1rem}
+  .scard-head h2{font-size:var(--fs-md);margin:0}
+  .scard-head p{font-size:var(--fs-xs);color:var(--ink-soft);margin:2px 0 0}
 
-    .prov-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--sp-3)}
-    .prov-card{border:2px solid var(--border);border-radius:var(--r-md);padding:var(--sp-4);cursor:pointer;background:var(--surface);transition:all .18s;display:flex;align-items:center;gap:var(--sp-3)}
-    .prov-card:hover{border-color:var(--accent-light);background:var(--accent-xsoft)}
-    .prov-card.selected{border-color:var(--accent);background:var(--accent-xsoft)}
-    .prov-ava{width:44px;height:44px;border-radius:50%;flex-shrink:0;overflow:hidden;background:var(--accent-soft);color:var(--accent-dark);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:var(--fs-md);font-family:var(--font-head)}
-    .prov-ava img{width:100%;height:100%;object-fit:cover}
-    .search-row{display:flex;gap:var(--sp-3);margin-bottom:var(--sp-4)}
-    .search-row input{flex:1;padding:9px var(--sp-4);border:1.5px solid var(--border);border-radius:var(--r-sm);font-size:var(--fs-sm);outline:none;font-family:var(--font-body);transition:border-color .18s}
-    .search-row input:focus{border-color:var(--primary)}
-    .chip-row{display:flex;gap:var(--sp-2);flex-wrap:wrap;margin-bottom:var(--sp-4)}
-    .chip{padding:5px 14px;border-radius:var(--r-full);font-size:var(--fs-xs);font-weight:600;border:1.5px solid var(--border);background:var(--surface);color:var(--ink-soft);cursor:pointer;transition:all .18s}
-    .chip:hover{border-color:var(--accent);color:var(--accent-dark)}
-    .chip.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+  .prov-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--sp-3)}
+  .prov-card{border:2px solid var(--border);border-radius:var(--r-md);padding:var(--sp-4);cursor:pointer;background:var(--surface);transition:all .18s;display:flex;align-items:center;gap:var(--sp-3)}
+  .prov-card:hover{border-color:var(--accent-light);background:var(--accent-xsoft)}
+  .prov-card.selected{border-color:var(--accent);background:var(--accent-xsoft)}
+  .prov-ava{width:44px;height:44px;border-radius:50%;flex-shrink:0;overflow:hidden;background:var(--accent-soft);color:var(--accent-dark);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:var(--fs-md);font-family:var(--font-head)}
+  .prov-ava img{width:100%;height:100%;object-fit:cover}
+  .search-row{display:flex;gap:var(--sp-3);margin-bottom:var(--sp-4)}
+  .search-row input{flex:1;padding:9px var(--sp-4);border:1.5px solid var(--border);border-radius:var(--r-sm);font-size:var(--fs-sm);outline:none;font-family:var(--font-body);transition:border-color .18s}
+  .search-row input:focus{border-color:var(--primary)}
+  .chip-row{display:flex;gap:var(--sp-2);flex-wrap:wrap;margin-bottom:var(--sp-4)}
+  .chip{padding:5px 14px;border-radius:var(--r-full);font-size:var(--fs-xs);font-weight:600;border:1.5px solid var(--border);background:var(--surface);color:var(--ink-soft);cursor:pointer;transition:all .18s}
+  .chip:hover{border-color:var(--accent);color:var(--accent-dark)}
+  .chip.active{background:var(--primary);color:#fff;border-color:var(--primary)}
 
-    .svc-card{display:flex;align-items:center;justify-content:space-between;padding:var(--sp-3) var(--sp-4);border:2px solid var(--border);border-radius:var(--r-sm);background:var(--surface);cursor:pointer;transition:all .18s}
-    .svc-card:hover{border-color:var(--accent-light)}
-    .svc-card.selected{border-color:var(--accent);background:var(--accent-xsoft)}
+  .svc-card{display:flex;align-items:center;justify-content:space-between;padding:var(--sp-3) var(--sp-4);border:2px solid var(--border);border-radius:var(--r-sm);background:var(--surface);cursor:pointer;transition:all .18s}
+  .svc-card:hover{border-color:var(--accent-light)}
+  .svc-card.selected{border-color:var(--accent);background:var(--accent-xsoft)}
 
-    .cal{border:1px solid var(--border);border-radius:var(--r-md);overflow:hidden;max-width:320px}
-    .cal-head{display:flex;align-items:center;justify-content:space-between;padding:var(--sp-3) var(--sp-4);background:var(--surface-soft);border-bottom:1px solid var(--border);font-weight:600;font-size:var(--fs-sm)}
-    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;padding:var(--sp-3)}
-    .cal-dh{font-size:var(--fs-xs);color:var(--ink-soft);text-align:center;padding:var(--sp-2) 0;font-weight:600}
-    .cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:var(--fs-sm);cursor:pointer;background:none;border:none;font-family:var(--font-body);transition:background .15s}
-    .cal-day:hover:not(:disabled){background:var(--surface-soft)}
-    .cal-day:disabled{color:var(--border-strong);cursor:not-allowed}
-    .cal-day.today{border:2px solid var(--accent)}
-    .cal-day.sel{background:var(--accent);color:#fff;font-weight:700}
+  .cal{border:1px solid var(--border);border-radius:var(--r-md);overflow:hidden;max-width:320px}
+  .cal-head{display:flex;align-items:center;justify-content:space-between;padding:var(--sp-3) var(--sp-4);background:var(--surface-soft);border-bottom:1px solid var(--border);font-weight:600;font-size:var(--fs-sm)}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;padding:var(--sp-3)}
+  .cal-dh{font-size:var(--fs-xs);color:var(--ink-soft);text-align:center;padding:var(--sp-2) 0;font-weight:600}
+  .cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:var(--fs-sm);cursor:pointer;background:none;border:none;font-family:var(--font-body);transition:background .15s}
+  .cal-day:hover:not(:disabled){background:var(--surface-soft)}
+  .cal-day:disabled{color:var(--border-strong);cursor:not-allowed}
+  .cal-day.today{border:2px solid var(--accent)}
+  .cal-day.sel{background:var(--accent);color:#fff;font-weight:700}
 
-    .slot-lbl{font-size:var(--fs-xs);font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);margin:var(--sp-4) 0 var(--sp-2)}
-    .slot-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-2)}
-    .slot{padding:8px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--surface);font-size:var(--fs-sm);font-weight:600;cursor:pointer;text-align:center;font-family:var(--font-body);transition:all .18s}
-    .slot:hover{border-color:var(--accent-light);background:var(--accent-xsoft)}
-    .slot.selected{background:var(--accent);color:#fff;border-color:var(--accent)}
-    .slot:disabled{opacity:.4;cursor:not-allowed}
+  .slot-lbl{font-size:var(--fs-xs);font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);margin:var(--sp-4) 0 var(--sp-2)}
+  .slot-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-2)}
+  .slot{padding:8px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--surface);font-size:var(--fs-sm);font-weight:600;cursor:pointer;text-align:center;font-family:var(--font-body);transition:all .18s}
+  .slot:hover{border-color:var(--accent-light);background:var(--accent-xsoft)}
+  .slot.selected{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .slot:disabled{opacity:.4;cursor:not-allowed}
+  .slot.conflict{background:var(--surface-soft);color:var(--ink-soft);border-color:var(--border);text-decoration:line-through}
 
-    /* Payment */
-    .stripe-wrap{border:1.5px solid var(--border);border-radius:var(--r-md);padding:var(--sp-4);transition:border-color .18s}
-    .stripe-wrap:focus-within{border-color:var(--primary);box-shadow:0 0 0 3px rgba(15,43,43,.06)}
-    #stripe-card-errors{color:var(--danger);font-size:var(--fs-xs);margin-top:var(--sp-2);display:flex;align-items:center;gap:6px}
-    #stripe-card-errors:empty{display:none}
-    .stripe-logos{display:flex;gap:var(--sp-3);align-items:center;margin-bottom:var(--sp-4)}
-    .stripe-secure{display:flex;align-items:center;gap:8px;font-size:var(--fs-xs);color:var(--ink-soft);margin:var(--sp-4) 0}
-    .stripe-secure i{color:var(--success)}
-    .saved-card-box{
-      display:flex;align-items:center;gap:var(--sp-4);
-      padding:var(--sp-4);
-      background:var(--surface-soft);
-      border:1.5px solid var(--border);
-      border-radius:var(--r-md);
-      margin-bottom:var(--sp-4);
-    }
-    .no-card-box{
-      text-align:center;padding:var(--sp-6) var(--sp-4);
-      background:var(--warning-soft);
-      border:1px solid rgba(154,107,16,.2);
-      border-radius:var(--r-md);
-      margin-bottom:var(--sp-4);
-    }
-    .pay-order-box{display:flex;justify-content:space-between;align-items:center;background:var(--accent-xsoft);border:1px solid var(--accent-soft);border-radius:var(--r-md);padding:var(--sp-4);margin-bottom:var(--sp-5)}
+  /* Payment */
+  .stripe-wrap{border:1.5px solid var(--border);border-radius:var(--r-md);padding:var(--sp-4);transition:border-color .18s}
+  .stripe-wrap:focus-within{border-color:var(--primary);box-shadow:0 0 0 3px rgba(15,43,43,.06)}
+  #stripe-card-errors{color:var(--danger);font-size:var(--fs-xs);margin-top:var(--sp-2);display:flex;align-items:center;gap:6px}
+  #stripe-card-errors:empty{display:none}
+  .stripe-logos{display:flex;gap:var(--sp-3);align-items:center;margin-bottom:var(--sp-4)}
+  .stripe-secure{display:flex;align-items:center;gap:8px;font-size:var(--fs-xs);color:var(--ink-soft);margin:var(--sp-4) 0}
+  .stripe-secure i{color:var(--success)}
+  .saved-card-box{
+    display:flex;align-items:center;gap:var(--sp-4);
+    padding:var(--sp-4);
+    background:var(--surface-soft);
+    border:1.5px solid var(--border);
+    border-radius:var(--r-md);
+    margin-bottom:var(--sp-4);
+  }
+  .no-card-box{
+    text-align:center;padding:var(--sp-6) var(--sp-4);
+    background:var(--warning-soft);
+    border:1px solid rgba(154,107,16,.2);
+    border-radius:var(--r-md);
+    margin-bottom:var(--sp-4);
+  }
+  .pay-order-box{display:flex;justify-content:space-between;align-items:center;background:var(--accent-xsoft);border:1px solid var(--accent-soft);border-radius:var(--r-md);padding:var(--sp-4);margin-bottom:var(--sp-5)}
 
-    .processing{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:var(--sp-10) 0;text-align:center}
-    .processing-spin{width:64px;height:64px;border-radius:50%;border:4px solid var(--border);border-top-color:var(--accent);animation:spin .8s linear infinite;margin-bottom:var(--sp-4)}
-    @keyframes spin{to{transform:rotate(360deg)}}
+  .processing{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:var(--sp-10) 0;text-align:center}
+  .processing-spin{width:64px;height:64px;border-radius:50%;border:4px solid var(--border);border-top-color:var(--accent);animation:spin .8s linear infinite;margin-bottom:var(--sp-4)}
+  @keyframes spin{to{transform:rotate(360deg)}}
 
-    .success-wrap{text-align:center;padding:var(--sp-10) 0}
-    .success-icon{width:88px;height:88px;border-radius:50%;background:var(--success-soft);display:flex;align-items:center;justify-content:center;margin:0 auto var(--sp-5);box-shadow:0 0 0 12px rgba(45,106,79,.08)}
+  .success-wrap{text-align:center;padding:var(--sp-10) 0}
+  .success-icon{width:88px;height:88px;border-radius:50%;background:var(--success-soft);display:flex;align-items:center;justify-content:center;margin:0 auto var(--sp-5);box-shadow:0 0 0 12px rgba(45,106,79,.08)}
 
-    .prog-bar{display:flex;gap:4px}
-    .prog-seg{flex:1;height:4px;border-radius:4px;background:var(--border);transition:background .22s}
-    .prog-seg.on{background:var(--accent)}
+  .prog-bar{display:flex;gap:4px}
+  .prog-seg{flex:1;height:4px;border-radius:4px;background:var(--border);transition:background .22s}
+  .prog-seg.on{background:var(--accent)}
 
-    @media(max-width:900px){.book-layout{grid-template-columns:1fr}.book-aside{position:static}}
-    @media(max-width:600px){.prov-grid{grid-template-columns:1fr}.slot-grid{grid-template-columns:repeat(3,1fr)}}
+  @media(max-width:900px){.book-layout{grid-template-columns:1fr}.book-aside{position:static}}
+  @media(max-width:600px){.prov-grid{grid-template-columns:1fr}.slot-grid{grid-template-columns:repeat(3,1fr)}}
   </style>
-  </head>
-  <body>
-    <div id="navbar"></div>
+</head>
+<body>
+  <div id="navbar"></div>
 
-    <section class="section-sm">
-      <div class="container">
+  <section class="section-sm">
+    <div class="container">
 
-        <div
-          style="display:flex;align-items:center;gap:8px;font-size:var(--fs-sm);color:var(--ink-soft);margin-bottom:var(--sp-4)">
-          <a href="home.html" style="color:var(--ink-soft)">Ana səhifə</a>
-          <i class="fa-solid fa-chevron-right" style="font-size:.6rem"></i>
-          <span>Rezervasiya</span>
+      <div
+        style="display:flex;align-items:center;gap:8px;font-size:var(--fs-sm);color:var(--ink-soft);margin-bottom:var(--sp-4)">
+        <a href="home.html" style="color:var(--ink-soft)">Ana səhifə</a>
+        <i class="fa-solid fa-chevron-right" style="font-size:.6rem"></i>
+        <span>Rezervasiya</span>
+      </div>
+
+      <h1
+        style="font-size:var(--fs-2xl);margin-bottom:var(--sp-2)">Rezervasiya
+        et</h1>
+      <p style="color:var(--ink-soft);margin-bottom:var(--sp-6)">Mütəxəssis,
+        xidmət və vaxt seçərək görüş təyin edin</p>
+
+      <!-- Wizard — step 4 dinamik göstərilir -->
+      <div class="wiz">
+        <div class="wiz-step active" id="wi1">
+          <div class="wiz-circle" id="wc1">1</div>
+          <div class="wiz-label"><span>Addım 1</span><b>Mütəxəssis</b></div>
         </div>
-
-        <h1
-          style="font-size:var(--fs-2xl);margin-bottom:var(--sp-2)">Rezervasiya
-          et</h1>
-        <p style="color:var(--ink-soft);margin-bottom:var(--sp-6)">Mütəxəssis,
-          xidmət və vaxt seçərək görüş təyin edin</p>
-
-        <!-- Wizard — step 4 dinamik göstərilir -->
-        <div class="wiz">
-          <div class="wiz-step active" id="wi1">
-            <div class="wiz-circle" id="wc1">1</div>
-            <div class="wiz-label"><span>Addım 1</span><b>Mütəxəssis</b></div>
-          </div>
-          <div class="wiz-line" id="wl1"></div>
-          <div class="wiz-step" id="wi2">
-            <div class="wiz-circle" id="wc2">2</div>
-            <div class="wiz-label"><span>Addım 2</span><b>Xidmət &
-                Vaxt</b></div>
-          </div>
-          <div class="wiz-line" id="wl2"></div>
-          <div class="wiz-step" id="wi3">
-            <div class="wiz-circle" id="wc3">3</div>
-            <div class="wiz-label"><span>Addım 3</span><b>Təsdiq</b></div>
-          </div>
-          <!-- Step 4 yalnız ödənişli xidmətdə görünür -->
-          <div class="wiz-line hidden" id="wl3"></div>
-          <div class="wiz-step hidden" id="wi4">
-            <div class="wiz-circle" id="wc4">4</div>
-            <div class="wiz-label"><span>Addım 4</span><b>Ödəniş</b></div>
-          </div>
+        <div class="wiz-line" id="wl1"></div>
+        <div class="wiz-step" id="wi2">
+          <div class="wiz-circle" id="wc2">2</div>
+          <div class="wiz-label"><span>Addım 2</span><b>Xidmət &
+              Vaxt</b></div>
         </div>
+        <div class="wiz-line" id="wl2"></div>
+        <div class="wiz-step" id="wi3">
+          <div class="wiz-circle" id="wc3">3</div>
+          <div class="wiz-label"><span>Addım 3</span><b>Təsdiq</b></div>
+        </div>
+        <!-- Step 4 yalnız ödənişli xidmətdə görünür -->
+        <div class="wiz-line hidden" id="wl3"></div>
+        <div class="wiz-step hidden" id="wi4">
+          <div class="wiz-circle" id="wc4">4</div>
+          <div class="wiz-label"><span>Addım 4</span><b>Ödəniş</b></div>
+        </div>
+      </div>
 
-        <div class="book-layout">
+      <div class="book-layout">
 
-          <div>
+        <div>
 
-            <!-- STEP 1 -->
-            <div id="step1">
-              <div class="scard">
-                <div class="scard-head">
-                  <div class="scard-icon"><i
-                      class="fa-solid fa-user-doctor"></i></div>
-                  <div><h2>Mütəxəssis seçin</h2><p>Rezervasiya etmək istədiyiniz
-                      mütəxəssisi tapın</p></div>
-                </div>
-                <div class="search-row">
-                  <input type="text" id="provSearch"
-                    placeholder="Ad və ya kateqoriya axtar..."
-                    oninput="filterProvs()">
-                </div>
-                <div class="chip-row" id="catChips">
-                  <button class="chip active" data-cat
-                    onclick="setCat(this,'')">Hamısı</button>
-                </div>
-                <div class="prov-grid" id="provGrid">
-                  <div class="spinner-wrap" style="grid-column:1/-1"><div
-                      class="spinner"></div></div>
-                </div>
+          <!-- STEP 1 -->
+          <div id="step1">
+            <div class="scard">
+              <div class="scard-head">
+                <div class="scard-icon"><i
+                    class="fa-solid fa-user-doctor"></i></div>
+                <div><h2>Mütəxəssis seçin</h2><p>Rezervasiya etmək istədiyiniz
+                    mütəxəssisi tapın</p></div>
               </div>
-              <div style="display:flex;justify-content:flex-end">
-                <button class="btn btn-primary" id="s1btn" disabled
-                  onclick="goStep2()">
-                  Davam et <i class="fa-solid fa-arrow-right"></i>
-                </button>
+              <div class="search-row">
+                <input type="text" id="provSearch"
+                  placeholder="Ad və ya kateqoriya axtar..."
+                  oninput="filterProvs()">
               </div>
-            </div>
-
-            <!-- STEP 2 -->
-            <div id="step2" class="hidden">
-              <div class="scard">
-                <div class="scard-head">
-                  <div class="scard-icon"><i
-                      class="fa-solid fa-briefcase-medical"></i></div>
-                  <div><h2>Xidmət seçin</h2><p id="s2provName"
-                      style="color:var(--accent-dark);font-weight:600"></p></div>
-                </div>
-                <div id="svcList"
-                  style="display:flex;flex-direction:column;gap:var(--sp-2)">
-                  <div class="spinner-wrap"><div class="spinner"></div></div>
-                </div>
+              <div class="chip-row" id="catChips">
+                <button class="chip active" data-cat
+                  onclick="setCat(this,'')">Hamısı</button>
               </div>
-              <div class="scard hidden" id="calCard">
-                <div class="scard-head">
-                  <div class="scard-icon"><i
-                      class="fa-solid fa-calendar-days"></i></div>
-                  <div><h2>Tarix seçin</h2><p>Uyğun tarixi seçin</p></div>
-                </div>
-                <div class="cal" id="calEl"></div>
-              </div>
-              <div class="scard hidden" id="slotCard">
-                <div class="scard-head">
-                  <div class="scard-icon"><i
-                      class="fa-solid fa-clock"></i></div>
-                  <div><h2>Saat seçin</h2><p>Boş vaxtlardan birini
-                      seçin</p></div>
-                </div>
-                <div id="slotEl"></div>
-              </div>
-              <div
-                style="display:flex;justify-content:space-between;margin-top:var(--sp-2)">
-                <button class="btn btn-ghost" onclick="setStep(1)"><i
-                    class="fa-solid fa-arrow-left"></i> Geri</button>
-                <button class="btn btn-primary" id="s2btn" disabled
-                  onclick="goStep3()">
-                  Davam et <i class="fa-solid fa-arrow-right"></i>
-                </button>
+              <div class="prov-grid" id="provGrid">
+                <div class="spinner-wrap" style="grid-column:1/-1"><div
+                    class="spinner"></div></div>
               </div>
             </div>
-
-            <!-- STEP 3 -->
-            <div id="step3" class="hidden">
-              <div class="scard">
-                <div class="scard-head">
-                  <div class="scard-icon"><i
-                      class="fa-solid fa-circle-check"></i></div>
-                  <div><h2>Rezervasiyanı yoxlayın</h2><p
-                      id="s3subtitle">Məlumatları yoxlayın</p></div>
-                </div>
-                <div id="confirmGrid"
-                  style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4);margin-bottom:var(--sp-5)"></div>
-                <div class="field">
-                  <label><i class="fa-solid fa-comment"
-                      style="color:var(--accent);margin-right:6px"></i>Qeyd
-                    (istəyə görə)</label>
-                  <textarea id="bookNotes"
-                    placeholder="Mütəxəssisə qeyd bildirin..."
-                    rows="2"></textarea>
-                </div>
-              </div>
-              <div style="display:flex;justify-content:space-between">
-                <button class="btn btn-ghost" onclick="setStep(2)"><i
-                    class="fa-solid fa-arrow-left"></i> Geri</button>
-                <button class="btn btn-primary btn-lg" id="s3nextBtn">
-                  <i class="fa-solid fa-credit-card"></i> Ödənişə keç
-                </button>
-              </div>
+            <div style="display:flex;justify-content:flex-end">
+              <button class="btn btn-primary" id="s1btn" disabled
+                onclick="goStep2()">
+                Davam et <i class="fa-solid fa-arrow-right"></i>
+              </button>
             </div>
-
-            <!-- STEP 4: Payment -->
-            <div id="step4" class="hidden">
-              <div class="scard">
-                <div class="scard-head">
-                  <div class="scard-icon"><i class="fa-solid fa-lock"></i></div>
-                  <div><h2>Təhlükəsiz ödəniş</h2><p>Stripe ilə şifrələnmiş
-                      ödəniş</p></div>
-                </div>
-
-                <!-- Processing -->
-                <div id="payProcessing" class="hidden">
-                  <div class="processing">
-                    <div class="processing-spin"></div>
-                    <h3 style="font-size:var(--fs-lg);margin-bottom:8px">Ödəniş
-                      emal edilir...</h3>
-                    <p
-                      style="font-size:var(--fs-sm);color:var(--ink-soft)">Zəhmət
-                      olmasa gözləyin</p>
-                  </div>
-                </div>
-
-                <!-- Payment content -->
-                <div id="payContent">
-                  <div class="alert alert-error hidden" id="payAlert"></div>
-
-                  <!-- Order summary -->
-                  <div class="pay-order-box">
-                    <div>
-                      <strong style="display:block;font-size:var(--fs-sm)"
-                        id="payOrderSvc">—</strong>
-                      <span style="font-size:var(--fs-xs);color:var(--ink-soft)"
-                        id="payOrderProv">—</span>
-                    </div>
-                    <strong
-                      style="font-size:var(--fs-lg);color:var(--accent-dark);font-family:var(--font-head)"
-                      id="payOrderPrice">—</strong>
-                  </div>
-
-                  <!-- NO CARD saved -->
-                  <div id="payNoCard" class="hidden">
-                    <div class="no-card-box">
-                      <i class="fa-solid fa-credit-card"
-                        style="font-size:2rem;color:var(--warning);display:block;margin-bottom:12px"></i>
-                      <h3
-                        style="font-size:var(--fs-md);margin-bottom:8px;color:var(--ink)">Ödəniş
-                        kartı yoxdur</h3>
-                      <p
-                        style="font-size:var(--fs-sm);color:var(--ink-soft);margin-bottom:var(--sp-4)">
-                        Ödəniş etmək üçün əvvəlcə profilinizə kart əlavə edin.
-                      </p>
-                      <a href="dashboard.html?addCard=1"
-                        class="btn btn-primary">
-                        <i class="fa-solid fa-plus"></i> Profilə keç — kart
-                        əlavə et
-                      </a>
-                    </div>
-                  </div>
-
-                  <!-- SAVED card -->
-                  <div id="paySavedCard" class="hidden">
-                    <div class="saved-card-box">
-                      <span id="savedCardIcon" style="font-size:2.2rem"></span>
-                      <div style="flex:1">
-                        <strong style="display:block;font-size:var(--fs-sm)"
-                          id="savedCardNum">—</strong>
-                        <span
-                          style="font-size:var(--fs-xs);color:var(--ink-soft)"
-                          id="savedCardMeta">—</span>
-                      </div>
-                      <a href="dashboard.html?addCard=1"
-                        style="font-size:var(--fs-xs);color:var(--accent-dark);font-weight:600;text-decoration:underline">
-                        Dəyiş
-                      </a>
-                    </div>
-
-                    <div class="stripe-logos">
-                      <i class="fa-brands fa-cc-visa"
-                        style="color:#1434CB;font-size:2rem"></i>
-                      <i class="fa-brands fa-cc-mastercard"
-                        style="color:#EB001B;font-size:2rem"></i>
-                      <i class="fa-brands fa-cc-amex"
-                        style="color:#006FCF;font-size:2rem"></i>
-                    </div>
-
-                    <div class="stripe-secure">
-                      <i class="fa-brands fa-stripe"
-                        style="color:#6772E5;font-size:1.1rem"></i>
-                      <span>Stripe ilə şifrələnmiş</span>
-                      <i class="fa-solid fa-shield-check"
-                        style="margin-left:8px"></i>
-                      <span>256-bit SSL</span>
-                    </div>
-                  </div>
-
-                  <!-- NEW card (Stripe element) — yalnız saved card yoxdursa -->
-                  <div id="payNewCard" class="hidden">
-                    <div class="stripe-logos">
-                      <i class="fa-brands fa-cc-visa"
-                        style="color:#1434CB;font-size:2rem"></i>
-                      <i class="fa-brands fa-cc-mastercard"
-                        style="color:#EB001B;font-size:2rem"></i>
-                      <i class="fa-brands fa-cc-amex"
-                        style="color:#006FCF;font-size:2rem"></i>
-                    </div>
-                    <div class="field">
-                      <label><i class="fa-solid fa-credit-card"
-                          style="color:var(--accent);margin-right:6px"></i>Kart
-                        məlumatları</label>
-                      <div class="stripe-wrap">
-                        <div id="stripe-card-element"></div>
-                      </div>
-                      <div id="stripe-card-errors"></div>
-                    </div>
-                    <div class="stripe-secure">
-                      <i class="fa-brands fa-stripe"
-                        style="color:#6772E5;font-size:1.1rem"></i>
-                      <span>Stripe ilə emal edilir</span>
-                      <i class="fa-solid fa-shield-check"
-                        style="margin-left:8px"></i>
-                      <span>256-bit SSL</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div style="display:flex;justify-content:space-between">
-                <button class="btn btn-ghost" id="payBackBtn"
-                  onclick="setStep(3)">
-                  <i class="fa-solid fa-arrow-left"></i> Geri
-                </button>
-                <button class="btn btn-primary btn-lg" id="payBtn"
-                  onclick="doPayment()" class="hidden">
-                  <i class="fa-solid fa-lock"></i> Ödə — <span
-                    id="payBtnAmt">—</span>
-                </button>
-              </div>
-            </div>
-
-            <!-- SUCCESS -->
-            <div id="stepSuccess" class="hidden">
-              <div class="scard">
-                <div class="success-wrap">
-                  <div class="success-icon">
-                    <i class="fa-solid fa-calendar-check"
-                      style="color:var(--success);font-size:2.2rem"></i>
-                  </div>
-                  <h2 style="font-size:var(--fs-xl);margin-bottom:var(--sp-3)"
-                    id="successTitle">Rezervasiya tamamlandı!</h2>
-                  <p
-                    style="color:var(--ink-soft);margin-bottom:var(--sp-6);max-width:420px;margin-left:auto;margin-right:auto"
-                    id="successMsg"></p>
-                  <div
-                    style="display:flex;gap:var(--sp-3);justify-content:center;flex-wrap:wrap">
-                    <a href="appointments.html" class="btn btn-primary">
-                      <i class="fa-solid fa-calendar-check"></i> Görüşlərimə bax
-                    </a>
-                    <a href="home.html" class="btn btn-outline">
-                      <i class="fa-solid fa-house"></i> Ana səhifə
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-
           </div>
 
-          <!-- Summary -->
-          <div class="book-aside">
-            <h3
-              style="font-size:var(--fs-md);margin-bottom:var(--sp-4);display:flex;align-items:center;gap:8px">
-              <i class="fa-solid fa-receipt" style="color:var(--accent)"></i>
-              Xülasə
-            </h3>
-            <div class="sum-row"><span class="sum-lbl">Mütəxəssis</span><span
-                id="sumProv"
-                style="font-size:var(--fs-sm);color:var(--ink-soft);font-style:italic;text-align:right">Seçilməyib</span></div>
-            <div class="sum-row"><span class="sum-lbl">Xidmət</span><span
-                id="sumSvc"
-                style="font-size:var(--fs-sm);color:var(--ink-soft);font-style:italic;text-align:right">Seçilməyib</span></div>
-            <div class="sum-row"><span class="sum-lbl">Tarix</span><span
-                id="sumDate"
-                style="font-size:var(--fs-sm);color:var(--ink-soft);font-style:italic;text-align:right">Seçilməyib</span></div>
-            <div class="sum-row"><span class="sum-lbl">Saat</span><span
-                id="sumSlot"
-                style="font-size:var(--fs-sm);color:var(--ink-soft);font-style:italic;text-align:right">Seçilməyib</span></div>
-            <div class="sum-row"><span class="sum-lbl">Müddət</span><span
-                id="sumDur"
-                style="font-size:var(--fs-sm);color:var(--ink-soft);text-align:right">—</span></div>
-            <div class="sum-total">
-              <span style="font-weight:600">Ümumi</span>
-              <span id="sumPrice"
-                style="font-family:var(--font-head);font-size:var(--fs-lg);color:var(--accent-dark)">—</span>
+          <!-- STEP 2 -->
+          <div id="step2" class="hidden">
+            <div class="scard">
+              <div class="scard-head">
+                <div class="scard-icon"><i
+                    class="fa-solid fa-briefcase-medical"></i></div>
+                <div><h2>Xidmət seçin</h2><p id="s2provName"
+                    style="color:var(--accent-dark);font-weight:600"></p></div>
+              </div>
+              <div id="svcList"
+                style="display:flex;flex-direction:column;gap:var(--sp-2)">
+                <div class="spinner-wrap"><div class="spinner"></div></div>
+              </div>
+            </div>
+            <div class="scard hidden" id="calCard">
+              <div class="scard-head">
+                <div class="scard-icon"><i
+                    class="fa-solid fa-calendar-days"></i></div>
+                <div><h2>Tarix seçin</h2><p>Uyğun tarixi seçin</p></div>
+              </div>
+              <div class="cal" id="calEl"></div>
+            </div>
+            <div class="scard hidden" id="slotCard">
+              <div class="scard-head">
+                <div class="scard-icon"><i
+                    class="fa-solid fa-clock"></i></div>
+                <div><h2>Saat seçin</h2><p>Boş vaxtlardan birini
+                    seçin</p></div>
+              </div>
+              <div id="slotEl"></div>
             </div>
             <div
-              style="margin-top:var(--sp-4);padding:var(--sp-4);background:var(--accent-xsoft);border:1px solid var(--accent-soft);border-radius:var(--r-md)">
+              style="display:flex;justify-content:space-between;margin-top:var(--sp-2)">
+              <button class="btn btn-ghost" onclick="setStep(1)"><i
+                  class="fa-solid fa-arrow-left"></i> Geri</button>
+              <button class="btn btn-primary" id="s2btn" disabled
+                onclick="goStep3()">
+                Davam et <i class="fa-solid fa-arrow-right"></i>
+              </button>
             </div>
-            <div style="margin-top:var(--sp-4)">
-              <div class="prog-bar">
-                <div class="prog-seg on" id="pg1"></div>
-                <div class="prog-seg" id="pg2"></div>
-                <div class="prog-seg" id="pg3"></div>
-                <div class="prog-seg hidden" id="pg4"></div>
+          </div>
+
+          <!-- STEP 3 -->
+          <div id="step3" class="hidden">
+            <div class="scard">
+              <div class="scard-head">
+                <div class="scard-icon"><i
+                    class="fa-solid fa-circle-check"></i></div>
+                <div><h2>Rezervasiyanı yoxlayın</h2><p
+                    id="s3subtitle">Məlumatları yoxlayın</p></div>
               </div>
-              <p
-                style="font-size:var(--fs-xs);color:var(--ink-soft);margin-top:6px"
-                id="pgLabel">Addım 1 / 3</p>
+              <div id="confirmGrid"
+                style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4);margin-bottom:var(--sp-5)"></div>
+              <div class="field">
+                <label><i class="fa-solid fa-comment"
+                    style="color:var(--accent);margin-right:6px"></i>Qeyd
+                  (istəyə görə)</label>
+                <textarea id="bookNotes"
+                  placeholder="Mütəxəssisə qeyd bildirin..."
+                  rows="2"></textarea>
+              </div>
             </div>
-            <div style="margin-top:var(--sp-5);text-align:center;opacity:.4">
-              <i class="fa-brands fa-stripe"
-                style="font-size:2rem;color:var(--ink)"></i>
+            <div style="display:flex;justify-content:space-between">
+              <button class="btn btn-ghost" onclick="setStep(2)"><i
+                  class="fa-solid fa-arrow-left"></i> Geri</button>
+              <button class="btn btn-primary btn-lg" id="s3nextBtn">
+                <i class="fa-solid fa-credit-card"></i> Ödənişə keç
+              </button>
+            </div>
+          </div>
+
+          <!-- STEP 4: Payment -->
+          <div id="step4" class="hidden">
+            <div class="scard">
+              <div class="scard-head">
+                <div class="scard-icon"><i class="fa-solid fa-lock"></i></div>
+                <div><h2>Təhlükəsiz ödəniş</h2><p>Stripe ilə şifrələnmiş
+                    ödəniş</p></div>
+              </div>
+
+              <!-- Processing -->
+              <div id="payProcessing" class="hidden">
+                <div class="processing">
+                  <div class="processing-spin"></div>
+                  <h3 style="font-size:var(--fs-lg);margin-bottom:8px">Ödəniş
+                    emal edilir...</h3>
+                  <p
+                    style="font-size:var(--fs-sm);color:var(--ink-soft)">Zəhmət
+                    olmasa gözləyin</p>
+                </div>
+              </div>
+
+              <!-- Payment content -->
+              <div id="payContent">
+                <div class="alert alert-error hidden" id="payAlert"></div>
+
+                <!-- Order summary -->
+                <div class="pay-order-box">
+                  <div>
+                    <strong style="display:block;font-size:var(--fs-sm)"
+                      id="payOrderSvc">—</strong>
+                    <span style="font-size:var(--fs-xs);color:var(--ink-soft)"
+                      id="payOrderProv">—</span>
+                  </div>
+                  <strong
+                    style="font-size:var(--fs-lg);color:var(--accent-dark);font-family:var(--font-head)"
+                    id="payOrderPrice">—</strong>
+                </div>
+
+                <!-- NO CARD saved -->
+                <div id="payNoCard" class="hidden">
+                  <div class="no-card-box">
+                    <i class="fa-solid fa-credit-card"
+                      style="font-size:2rem;color:var(--warning);display:block;margin-bottom:12px"></i>
+                    <h3
+                      style="font-size:var(--fs-md);margin-bottom:8px;color:var(--ink)">Ödəniş
+                      kartı yoxdur</h3>
+                    <p
+                      style="font-size:var(--fs-sm);color:var(--ink-soft);margin-bottom:var(--sp-4)">
+                      Ödəniş etmək üçün əvvəlcə profilinizə kart əlavə edin.
+                    </p>
+                    <a href="dashboard.html?addCard=1"
+                      class="btn btn-primary">
+                      <i class="fa-solid fa-plus"></i> Profilə keç — kart
+                      əlavə et
+                    </a>
+                  </div>
+                </div>
+
+                <!-- SAVED card -->
+                <div id="paySavedCard" class="hidden">
+                  <div class="saved-card-box">
+                    <span id="savedCardIcon" style="font-size:2.2rem"></span>
+                    <div style="flex:1">
+                      <strong style="display:block;font-size:var(--fs-sm)"
+                        id="savedCardNum">—</strong>
+                      <span
+                        style="font-size:var(--fs-xs);color:var(--ink-soft)"
+                        id="savedCardMeta">—</span>
+                    </div>
+                    <a href="dashboard.html?addCard=1"
+                      style="font-size:var(--fs-xs);color:var(--accent-dark);font-weight:600;text-decoration:underline">
+                      Dəyiş
+                    </a>
+                  </div>
+
+                  <div class="stripe-logos">
+                    <i class="fa-brands fa-cc-visa"
+                      style="color:#1434CB;font-size:2rem"></i>
+                    <i class="fa-brands fa-cc-mastercard"
+                      style="color:#EB001B;font-size:2rem"></i>
+                    <i class="fa-brands fa-cc-amex"
+                      style="color:#006FCF;font-size:2rem"></i>
+                  </div>
+
+                  <div class="stripe-secure">
+                    <i class="fa-brands fa-stripe"
+                      style="color:#6772E5;font-size:1.1rem"></i>
+                    <span>Stripe ilə şifrələnmiş</span>
+                    <i class="fa-solid fa-shield-check"
+                      style="margin-left:8px"></i>
+                    <span>256-bit SSL</span>
+                  </div>
+                </div>
+
+                <!-- NEW card (Stripe element) — yalnız saved card yoxdursa -->
+                <div id="payNewCard" class="hidden">
+                  <div class="stripe-logos">
+                    <i class="fa-brands fa-cc-visa"
+                      style="color:#1434CB;font-size:2rem"></i>
+                    <i class="fa-brands fa-cc-mastercard"
+                      style="color:#EB001B;font-size:2rem"></i>
+                    <i class="fa-brands fa-cc-amex"
+                      style="color:#006FCF;font-size:2rem"></i>
+                  </div>
+                  <div class="field">
+                    <label><i class="fa-solid fa-credit-card"
+                        style="color:var(--accent);margin-right:6px"></i>Kart
+                      məlumatları</label>
+                    <div class="stripe-wrap">
+                      <div id="stripe-card-element"></div>
+                    </div>
+                    <div id="stripe-card-errors"></div>
+                  </div>
+                  <div class="stripe-secure">
+                    <i class="fa-brands fa-stripe"
+                      style="color:#6772E5;font-size:1.1rem"></i>
+                    <span>Stripe ilə emal edilir</span>
+                    <i class="fa-solid fa-shield-check"
+                      style="margin-left:8px"></i>
+                    <span>256-bit SSL</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style="display:flex;justify-content:space-between">
+              <button class="btn btn-ghost" id="payBackBtn"
+                onclick="setStep(3)">
+                <i class="fa-solid fa-arrow-left"></i> Geri
+              </button>
+              <button class="btn btn-primary btn-lg" id="payBtn"
+                onclick="doPayment()" class="hidden">
+                <i class="fa-solid fa-lock"></i> Ödə — <span
+                  id="payBtnAmt">—</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- SUCCESS -->
+          <div id="stepSuccess" class="hidden">
+            <div class="scard">
+              <div class="success-wrap">
+                <div class="success-icon">
+                  <i class="fa-solid fa-calendar-check"
+                    style="color:var(--success);font-size:2.2rem"></i>
+                </div>
+                <h2 style="font-size:var(--fs-xl);margin-bottom:var(--sp-3)"
+                  id="successTitle">Rezervasiya tamamlandı!</h2>
+                <p
+                  style="color:var(--ink-soft);margin-bottom:var(--sp-6);max-width:420px;margin-left:auto;margin-right:auto"
+                  id="successMsg"></p>
+                <div
+                  style="display:flex;gap:var(--sp-3);justify-content:center;flex-wrap:wrap">
+                  <a href="appointments.html" class="btn btn-primary">
+                    <i class="fa-solid fa-calendar-check"></i> Görüşlərimə bax
+                  </a>
+                  <a href="home.html" class="btn btn-outline">
+                    <i class="fa-solid fa-house"></i> Ana səhifə
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
 
         </div>
+
+        <!-- Summary -->
+        <div class="book-aside">
+          <h3
+            style="font-size:var(--fs-md);margin-bottom:var(--sp-4);display:flex;align-items:center;gap:8px">
+            <i class="fa-solid fa-receipt" style="color:var(--accent)"></i>
+            Xülasə
+          </h3>
+          <div class="sum-row"><span class="sum-lbl">Mütəxəssis</span><span
+              id="sumProv"
+              style="font-size:var(--fs-sm);color:var(--ink-soft);font-style:italic;text-align:right">Seçilməyib</span></div>
+          <div class="sum-row"><span class="sum-lbl">Xidmət</span><span
+              id="sumSvc"
+              style="font-size:var(--fs-sm);color:var(--ink-soft);font-style:italic;text-align:right">Seçilməyib</span></div>
+          <div class="sum-row"><span class="sum-lbl">Tarix</span><span
+              id="sumDate"
+              style="font-size:var(--fs-sm);color:var(--ink-soft);font-style:italic;text-align:right">Seçilməyib</span></div>
+          <div class="sum-row"><span class="sum-lbl">Saat</span><span
+              id="sumSlot"
+              style="font-size:var(--fs-sm);color:var(--ink-soft);font-style:italic;text-align:right">Seçilməyib</span></div>
+          <div class="sum-row"><span class="sum-lbl">Müddət</span><span
+              id="sumDur"
+              style="font-size:var(--fs-sm);color:var(--ink-soft);text-align:right">—</span></div>
+          <div class="sum-total">
+            <span style="font-weight:600">Ümumi</span>
+            <span id="sumPrice"
+              style="font-family:var(--font-head);font-size:var(--fs-lg);color:var(--accent-dark)">—</span>
+          </div>
+          <div
+            style="margin-top:var(--sp-4);padding:var(--sp-4);background:var(--accent-xsoft);border:1px solid var(--accent-soft);border-radius:var(--r-md)">
+          </div>
+          <div style="margin-top:var(--sp-4)">
+            <div class="prog-bar">
+              <div class="prog-seg on" id="pg1"></div>
+              <div class="prog-seg" id="pg2"></div>
+              <div class="prog-seg" id="pg3"></div>
+              <div class="prog-seg hidden" id="pg4"></div>
+            </div>
+            <p
+              style="font-size:var(--fs-xs);color:var(--ink-soft);margin-top:6px"
+              id="pgLabel">Addım 1 / 3</p>
+          </div>
+          <div style="margin-top:var(--sp-5);text-align:center;opacity:.4">
+            <i class="fa-brands fa-stripe"
+              style="font-size:2rem;color:var(--ink)"></i>
+          </div>
+        </div>
+
       </div>
-    </section>
+    </div>
+  </section>
 
-    <div id="footer"></div>
+  <div id="footer"></div>
 
-    <script src="../js/client-api.js"></script>
-    <script src="../js/layout.js"></script>
-    <script>
-  requireAuth();
+  <script src="../js/client-api.js"></script>
+  <script src="../js/layout.js"></script>
+  <script>
+requireAuth();
 
-  /* ── Stripe ── */
-  const STRIPE_PK  = 'pk_test_51TrwYHPyObHpPv8AhvofvlzmSgVgyh504Ia7njklDZnS5CeXgOfqOHi6pmxrMvZokf8CjW0JpQdKKBdJr7uANMSs00Ir3V3oO4';
-  const stripe     = Stripe(STRIPE_PK);
-  const stripeElms = stripe.elements({
-    fonts:[{cssSrc:'https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap'}]
+/* ══════════════════════════════════════════════════════════
+   MY UPCOMING APPOINTMENTS — hər dəfə TƏZƏ yüklənir (cache yoxdur)
+   ══════════════════════════════════════════════════════════ */
+let myUpcomingAppts = [];
+
+async function loadMyAppointments() {
+  try {
+    const { access } = Token.get();
+    if (!access) {
+      console.warn('[appts] access token yoxdur, sorğu göndərilmir');
+      myUpcomingAppts = [];
+      return;
+    }
+    const res = await fetch(
+      'http://localhost:5291/api/appointments/my?filter=upcoming',
+      { headers: { 'Authorization': 'Bearer ' + access } }
+    );
+    console.log('[appts] status:', res.status);
+    if (!res.ok) { myUpcomingAppts = []; return; }
+    const text = await res.text();
+    if (!text) { myUpcomingAppts = []; return; }
+    const data = JSON.parse(text);
+
+    /* Backend fərqli şəkillərdə qaytara bilər — hamısını dəstəklə */
+    let list = [];
+    if (Array.isArray(data)) list = data;
+    else if (Array.isArray(data.data)) list = data.data;
+    else if (Array.isArray(data.items)) list = data.items;
+
+    myUpcomingAppts = list;
+    console.log('[appts] loaded:', myUpcomingAppts.length, myUpcomingAppts);
+  } catch(e) {
+    console.warn('[appts] yüklənmədi:', e);
+    myUpcomingAppts = [];
+  }
+}
+
+/* Səhifə açılan kimi ilkin yükləmə (kölgə üçün) */
+loadMyAppointments();
+
+/* ── Vaxt sahələrini müxtəlif adlandırma formatlarından oxu ── */
+function apField(a, ...names) {
+  for (const n of names) {
+    if (a[n] !== undefined && a[n] !== null) return a[n];
+  }
+  return null;
+}
+
+function toLocalMinutes(dateTimeStr) {
+  const clean = String(dateTimeStr).replace('Z','');
+  const [datePart, timePart] = clean.split('T');
+  const [y,m,d]  = datePart.split('-').map(Number);
+  const [hh,mm]  = (timePart||'00:00').split(':').map(Number);
+  return new Date(y, m-1, d, hh, mm, 0).getTime();
+}
+
+function hasConflict(dateObj, timeStr, durMin) {
+  const dateStr      = dateObj.toLocaleDateString('en-CA');
+  const slotStartMs  = toLocalMinutes(`${dateStr}T${timeStr.slice(0,5)}`);
+  const slotEndMs    = slotStartMs + (durMin || 30) * 60000;
+
+  return myUpcomingAppts.find(a => {
+    const status = apField(a,'status','Status');
+    if (status === 'Cancelled') return false;
+
+    const startRaw = apField(a,'startDateTime','StartDateTime');
+    const endRaw   = apField(a,'endDateTime','EndDateTime');
+    if (!startRaw) return false;
+
+    const aStartMs = toLocalMinutes(startRaw);
+    const aEndMs   = endRaw ? toLocalMinutes(endRaw) : aStartMs + 30*60000;
+
+    return slotStartMs < aEndMs && slotEndMs > aStartMs;
   });
-  let cardElement = null;
+}
 
-  function mountStripeCard() {
-    if (cardElement) return;
-    cardElement = stripeElms.create('card', {
-      style:{
-        base:{fontFamily:"'Inter',sans-serif",fontSize:'15px',color:'#1a1208','::placeholder':{color:'#b8a898'},iconColor:'#c9912f'},
-        invalid:{color:'#b5271d',iconColor:'#b5271d'}
-      },
-      hidePostalCode:true,
-    });
-    cardElement.mount('#stripe-card-element');
-    cardElement.on('change', e => {
-      const el = document.getElementById('stripe-card-errors');
-      el.textContent = e.error ? e.error.message : '';
-    });
+function conflictLabel(conflict) {
+  const svc   = apField(conflict,'serviceName','ServiceName') || 'başqa görüş';
+  const start = apField(conflict,'startDateTime','StartDateTime');
+  const end   = apField(conflict,'endDateTime','EndDateTime');
+  return { svc, start, end };
+}
+
+/* ── Slot xəbərdarlığını göstər ── */
+function showSlotWarning(conflict) {
+  const old = document.getElementById('slotConflictWarn');
+  if (old) old.remove();
+  const slotSec = document.getElementById('slotCard');
+  if (!slotSec) return;
+  const { svc, start, end } = conflictLabel(conflict);
+  const warn = document.createElement('div');
+  warn.id = 'slotConflictWarn';
+  warn.className = 'alert alert-warning';
+  warn.style.cssText = 'display:flex;margin-top:var(--sp-3)';
+  warn.innerHTML = `
+    <i class="fa-solid fa-triangle-exclamation"></i>
+    <span>Bu vaxtda artıq <strong>${svc}</strong> görüşünüz var
+    ${start?`(${formatTime(start)} – ${end?formatTime(end):''})`:''}.
+    Başqa saat seçin.</span>`;
+  slotSec.querySelector('.scard-head').after(warn);
+}
+
+function clearAllWarnings() {
+  const w1 = document.getElementById('slotConflictWarn');
+  if (w1) w1.remove();
+  const w2 = document.querySelector('#step3 .alert');
+  if (w2) w2.remove();
+}
+
+/* ── Stripe ── */
+const STRIPE_PK  = 'pk_test_51TrwYHPyObHpPv8AhvofvlzmSgVgyh504Ia7njklDZnS5CeXgOfqOHi6pmxrMvZokf8CjW0JpQdKKBdJr7uANMSs00Ir3V3oO4';
+const stripe     = Stripe(STRIPE_PK);
+const stripeElms = stripe.elements({
+  fonts:[{cssSrc:'https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap'}]
+});
+let cardElement = null;
+
+function mountStripeCard() {
+  if (cardElement) return;
+  cardElement = stripeElms.create('card', {
+    style:{
+      base:{fontFamily:"'Inter',sans-serif",fontSize:'15px',color:'#1a1208','::placeholder':{color:'#b8a898'},iconColor:'#c9912f'},
+      invalid:{color:'#b5271d',iconColor:'#b5271d'}
+    },
+    hidePostalCode:true,
+  });
+  cardElement.mount('#stripe-card-element');
+  cardElement.on('change', e => {
+    const el = document.getElementById('stripe-card-errors');
+    el.textContent = e.error ? e.error.message : '';
+  });
+}
+
+const urlP   = new URLSearchParams(location.search);
+const urlPid = urlP.get('providerId');
+const urlSid = urlP.get('serviceId');
+
+const S = {
+  provId:null, provName:null,
+  svcId:null,  svcName:null, svcPrice:null, svcDur:null,
+  date:null,   slot:null,
+};
+
+/* ── Ödənişli mi? ── */
+const isPaid = () => S.svcPrice > 0;
+
+let allProvs  = [];
+let activeCat = '';
+let calY = new Date().getFullYear();
+let calM = new Date().getMonth();
+const MONTHS = ['Yanvar','Fevral','Mart','Aprel','May','İyun','İyul','Avqust','Sentyabr','Oktyabr','Noyabr','Dekabr'];
+const DAYS   = ['B.e','Ç.a','Ç','C.a','C','Ş','B'];
+
+/* ════ STEP 1 ════ */
+(async () => {
+  const data = await cApi.getProviders({ pageSize:200 }).catch(() => []);
+  allProvs = Array.isArray(data) ? data : (data?.items||[]);
+
+  const cats = [...new Set(allProvs.map(p => p.category).filter(Boolean))];
+  const cw   = document.getElementById('catChips');
+  cats.forEach(cat => {
+    const b = document.createElement('button');
+    b.className='chip'; b.dataset.cat=cat; b.textContent=cat;
+    b.onclick = () => setCat(b, cat);
+    cw.appendChild(b);
+  });
+  renderProvs(allProvs);
+
+  if (urlPid) {
+    const f = allProvs.find(p => p.id === urlPid);
+    if (f) { pickProv(f.id, f.businessName, f.category, f.imageUrl||''); await goStep2(); }
   }
+})();
 
-  const urlP   = new URLSearchParams(location.search);
-  const urlPid = urlP.get('providerId');
-  const urlSid = urlP.get('serviceId');
+function setCat(btn, cat) {
+  document.querySelectorAll('.chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  activeCat = cat;
+  filterProvs();
+}
 
-  const S = {
-    provId:null, provName:null,
-    svcId:null,  svcName:null, svcPrice:null, svcDur:null,
-    date:null,   slot:null,
-  };
+function filterProvs() {
+  const q2 = document.getElementById('provSearch').value.toLowerCase();
+  let list = allProvs;
+  if (activeCat) list = list.filter(p => p.category === activeCat);
+  if (q2) list = list.filter(p => p.businessName.toLowerCase().includes(q2) || (p.category||'').toLowerCase().includes(q2));
+  renderProvs(list);
+}
 
-  /* ── Ödənişli mi? ── */
-  const isPaid = () => S.svcPrice > 0;
-
-  let allProvs  = [];
-  let activeCat = '';
-  let calY = new Date().getFullYear();
-  let calM = new Date().getMonth();
-  const MONTHS = ['Yanvar','Fevral','Mart','Aprel','May','İyun','İyul','Avqust','Sentyabr','Oktyabr','Noyabr','Dekabr'];
-  const DAYS   = ['B.e','Ç.a','Ç','C.a','C','Ş','B'];
-
-  /* ════ STEP 1 ════ */
-  (async () => {
-    const data = await cApi.getProviders({ pageSize:200 }).catch(() => []);
-    allProvs = Array.isArray(data) ? data : (data?.items||[]);
-
-    const cats = [...new Set(allProvs.map(p => p.category).filter(Boolean))];
-    const cw   = document.getElementById('catChips');
-    cats.forEach(cat => {
-      const b = document.createElement('button');
-      b.className='chip'; b.dataset.cat=cat; b.textContent=cat;
-      b.onclick = () => setCat(b, cat);
-      cw.appendChild(b);
-    });
-    renderProvs(allProvs);
-
-    if (urlPid) {
-      const f = allProvs.find(p => p.id === urlPid);
-      if (f) { pickProv(f.id, f.businessName, f.category, f.imageUrl||''); await goStep2(); }
-    }
-  })();
-
-  function setCat(btn, cat) {
-    document.querySelectorAll('.chip').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    activeCat = cat;
-    filterProvs();
+function renderProvs(list) {
+  const g = document.getElementById('provGrid');
+  if (!list.length) {
+    g.innerHTML = `<div class="empty" style="grid-column:1/-1"><i class="fa-solid fa-magnifying-glass"></i><h3>Nəticə tapılmadı</h3></div>`;
+    return;
   }
-
-  function filterProvs() {
-    const q2 = document.getElementById('provSearch').value.toLowerCase();
-    let list = allProvs;
-    if (activeCat) list = list.filter(p => p.category === activeCat);
-    if (q2) list = list.filter(p => p.businessName.toLowerCase().includes(q2) || (p.category||'').toLowerCase().includes(q2));
-    renderProvs(list);
-  }
-
-  function renderProvs(list) {
-    const g = document.getElementById('provGrid');
-    if (!list.length) {
-      g.innerHTML = `<div class="empty" style="grid-column:1/-1"><i class="fa-solid fa-magnifying-glass"></i><h3>Nəticə tapılmadı</h3></div>`;
-      return;
-    }
-    g.innerHTML = list.map(p => `
-      <div class="prov-card ${S.provId===p.id?'selected':''}" id="pc-${p.id}"
-        onclick="pickProv('${p.id}','${esc(p.businessName)}','${p.category||''}','${p.imageUrl||''}')">
-        <div class="prov-ava">${p.imageUrl?`<img src="${p.imageUrl}" alt="${p.businessName}">`:p.businessName[0]}</div>
-        <div style="flex:1;min-width:0">
-          <strong style="display:block;font-size:var(--fs-sm);margin-bottom:2px">${p.businessName}</strong>
-          <span style="font-size:var(--fs-xs);color:var(--ink-soft)"><i class="fa-solid fa-tag" style="color:var(--accent);margin-right:3px"></i>${p.category||''}</span>
-          <div style="font-size:var(--fs-xs);color:var(--accent-dark);font-weight:600;margin-top:2px">
-            ★ ${(p.averageRating||0).toFixed(1)} <span style="color:var(--ink-soft);font-weight:400">(${p.reviewCount||0})</span>
-          </div>
+  g.innerHTML = list.map(p => `
+    <div class="prov-card ${S.provId===p.id?'selected':''}" id="pc-${p.id}"
+      onclick="pickProv('${p.id}','${esc(p.businessName)}','${p.category||''}','${p.imageUrl||''}')">
+      <div class="prov-ava">${p.imageUrl?`<img src="${p.imageUrl}" alt="${p.businessName}">`:p.businessName[0]}</div>
+      <div style="flex:1;min-width:0">
+        <strong style="display:block;font-size:var(--fs-sm);margin-bottom:2px">${p.businessName}</strong>
+        <span style="font-size:var(--fs-xs);color:var(--ink-soft)"><i class="fa-solid fa-tag" style="color:var(--accent);margin-right:3px"></i>${p.category||''}</span>
+        <div style="font-size:var(--fs-xs);color:var(--accent-dark);font-weight:600;margin-top:2px">
+          ★ ${(p.averageRating||0).toFixed(1)} <span style="color:var(--ink-soft);font-weight:400">(${p.reviewCount||0})</span>
         </div>
-      </div>`).join('');
-  }
-
-  function pickProv(id, name, cat, img) {
-    S.provId=id; S.provName=name;
-    S.svcId=S.svcName=S.svcPrice=S.svcDur=null; S.date=S.slot=null;
-    document.getElementById('s1btn').disabled = false;
-    updateSum();
-    document.querySelectorAll('[id^="pc-"]').forEach(c => {
-      c.classList.toggle('selected', c.id==='pc-'+id);
-    });
-  }
-
-  /* ════ STEP 2 ════ */
-  async function goStep2() {
-    if (!S.provId) return;
-    setStep(2);
-    document.getElementById('s2provName').textContent = S.provName+' · xidmətlər';
-    document.getElementById('calCard').classList.add('hidden');
-    document.getElementById('slotCard').classList.add('hidden');
-    document.getElementById('s2btn').disabled = true;
-
-    const sl = document.getElementById('svcList');
-    sl.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div></div>';
-    const svcs  = await cApi.getByProvider(S.provId).catch(()=>[]);
-    const active = Array.isArray(svcs) ? svcs.filter(s=>s.isActive) : [];
-
-    if (!active.length) {
-      sl.innerHTML=`<div class="empty" style="padding:var(--sp-6) 0"><i class="fa-solid fa-briefcase-medical"></i><h3>Aktiv xidmət yoxdur</h3><p>Başqa mütəxəssis seçin</p></div>`;
-      return;
-    }
-
-    sl.innerHTML = active.map(s => `
-      <div class="svc-card ${S.svcId===s.id?'selected':''}" id="sv-${s.id}"
-        onclick="pickSvc('${s.id}','${esc(s.name)}',${s.price},${s.durationMinutes})">
-        <div>
-          <strong style="display:block;font-size:var(--fs-sm);margin-bottom:2px">${s.name}</strong>
-          <span style="font-size:var(--fs-xs);color:var(--ink-soft)">
-            <i class="fa-regular fa-clock" style="color:var(--accent);margin-right:3px"></i>${s.durationMinutes} dəqiqə
-          </span>
-        </div>
-        ${s.price > 0
-          ? `<strong style="color:var(--accent-dark)">${formatPrice(s.price)}</strong>`
-          : `<span class="badge badge-success"><i class="fa-solid fa-gift"></i> Pulsuz</span>`}
-      </div>`).join('');
-
-    if (urlSid) {
-      const f = active.find(s=>s.id===urlSid);
-      if (f) pickSvc(f.id,f.name,f.price,f.durationMinutes);
-    }
-  }
-
-  function pickSvc(id, name, price, dur) {
-    S.svcId=id; S.svcName=name; S.svcPrice=price; S.svcDur=dur;
-    S.date=S.slot=null;
-    document.getElementById('s2btn').disabled=true;
-    updateSum();
-    updateWizardVisibility();
-    document.querySelectorAll('[id^="sv-"]').forEach(c=>c.classList.toggle('selected',c.id==='sv-'+id));
-    document.getElementById('calCard').classList.remove('hidden');
-    document.getElementById('slotCard').classList.add('hidden');
-    renderCal();
-    document.getElementById('calCard').scrollIntoView({behavior:'smooth',block:'start'});
-  }
-
-  /* Wizard step 4-ü göstər/gizlət */
-  function updateWizardVisibility() {
-    const paid = isPaid();
-    document.getElementById('wi4').classList.toggle('hidden', !paid);
-    document.getElementById('wl3').classList.toggle('hidden', !paid);
-    document.getElementById('pg4').classList.toggle('hidden', !paid);
-  }
-
-  function renderCal() {
-    const today=new Date(); today.setHours(0,0,0,0);
-    const max=new Date(today); max.setDate(today.getDate()+60);
-    const first=new Date(calY,calM,1);
-    const off=(first.getDay()+6)%7;
-    const dim=new Date(calY,calM+1,0).getDate();
-    document.getElementById('calEl').innerHTML=`
-      <div class="cal-head">
-        <button class="btn-icon" style="width:28px;height:28px" onclick="chM(-1)">‹</button>
-        <span>${MONTHS[calM]} ${calY}</span>
-        <button class="btn-icon" style="width:28px;height:28px" onclick="chM(1)">›</button>
       </div>
-      <div class="cal-grid">
-        ${DAYS.map(d=>`<div class="cal-dh">${d}</div>`).join('')}
-        ${'<div></div>'.repeat(off)}
-        ${Array.from({length:dim},(_,i)=>{
-          const d=i+1,dt=new Date(calY,calM,d);
-          const dis=dt<today||dt>max;
-          const sel=S.date&&dt.toDateString()===S.date.toDateString();
-          const tod=dt.toDateString()===today.toDateString();
-          return `<button class="cal-day${sel?' sel':''}${tod?' today':''}" ${dis?'disabled':''} onclick="pickDay(${d})">${d}</button>`;
-        }).join('')}
-      </div>`;
+    </div>`).join('');
+}
+
+function pickProv(id, name, cat, img) {
+  S.provId=id; S.provName=name;
+  S.svcId=S.svcName=S.svcPrice=S.svcDur=null; S.date=S.slot=null;
+  document.getElementById('s1btn').disabled = false;
+  updateSum();
+  document.querySelectorAll('[id^="pc-"]').forEach(c => {
+    c.classList.toggle('selected', c.id==='pc-'+id);
+  });
+}
+
+/* ════ STEP 2 ════ */
+async function goStep2() {
+  if (!S.provId) return;
+  setStep(2);
+  document.getElementById('s2provName').textContent = S.provName+' · xidmətlər';
+  document.getElementById('calCard').classList.add('hidden');
+  document.getElementById('slotCard').classList.add('hidden');
+  document.getElementById('s2btn').disabled = true;
+
+  const sl = document.getElementById('svcList');
+  sl.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div></div>';
+  const svcs  = await cApi.getByProvider(S.provId).catch(()=>[]);
+  const active = Array.isArray(svcs) ? svcs.filter(s=>s.isActive) : [];
+
+  if (!active.length) {
+    sl.innerHTML=`<div class="empty" style="padding:var(--sp-6) 0"><i class="fa-solid fa-briefcase-medical"></i><h3>Aktiv xidmət yoxdur</h3><p>Başqa mütəxəssis seçin</p></div>`;
+    return;
   }
 
-  function chM(d){calM+=d;if(calM<0){calM=11;calY--;}if(calM>11){calM=0;calY++;}renderCal();}
-
-  async function pickDay(d) {
-    S.date=new Date(calY,calM,d); S.slot=null;
-    document.getElementById('s2btn').disabled=true;
-    updateSum(); renderCal();
-    const sc=document.getElementById('slotCard');
-    sc.classList.remove('hidden');
-    document.getElementById('slotEl').innerHTML='<div class="spinner-wrap"><div class="spinner"></div></div>';
-    sc.scrollIntoView({behavior:'smooth',block:'start'});
-    const iso=S.date.toLocaleDateString('en-CA');
-    const slots=await cApi.getSlots(S.provId,S.svcId,iso).catch(()=>[]);
-    renderSlots(Array.isArray(slots)?slots:[]);
-  }
-
-  function renderSlots(slots) {
-    const el=document.getElementById('slotEl');
-    if(!slots.length){
-      el.innerHTML=`<div style="text-align:center;padding:var(--sp-5) 0">
-        <i class="fa-regular fa-calendar-xmark" style="font-size:2rem;color:var(--border-strong);display:block;margin-bottom:12px"></i>
-        <p style="font-size:var(--fs-sm);color:var(--ink-soft)">Bu tarixdə boş vaxt yoxdur. Başqa tarix seçin.</p>
-      </div>`;
-      return;
-    }
-    const grps={};
-    slots.forEach(s=>{const h=parseInt(s.startTime);const g=h<12?'Səhər':h<17?'Günorta':'Axşam';(grps[g]=grps[g]||[]).push(s);});
-    el.innerHTML=Object.entries(grps).map(([g,items])=>`
-      <div class="slot-lbl">${g}</div>
-      <div class="slot-grid">${items.map(s=>`
-        <button class="slot" data-s="${s.startTime}" data-e="${s.endTime||''}" onclick="pickSlot(this)">${trimTime(s.startTime)}</button>`).join('')}
-      </div>`).join('');
-  }
-
-  function pickSlot(el){
-    document.querySelectorAll('.slot').forEach(b=>b.classList.remove('selected'));
-    el.classList.add('selected');
-    S.slot={startTime:el.dataset.s,endTime:el.dataset.e};
-    updateSum();
-    document.getElementById('s2btn').disabled=false;
-  }
-
-  /* ════ STEP 3 ════ */
-  function goStep3(){
-    if(!S.provId||!S.svcId||!S.date||!S.slot) return;
-    setStep(3);
-
-    document.getElementById('confirmGrid').innerHTML=[
-      ['fa-building',         'Mütəxəssis', S.provName],
-      ['fa-briefcase-medical','Xidmət',     S.svcName||'—'],
-      ['fa-calendar',         'Tarix',      formatDate(S.date,{day:'numeric',month:'long',year:'numeric',weekday:'long'})],
-      ['fa-clock',            'Saat',       trimTime(S.slot.startTime)],
-      ['fa-hourglass-half',   'Müddət',     (S.svcDur||'—')+' dəqiqə'],
-      ['fa-tag',              'Qiymət',     S.svcPrice > 0 ? formatPrice(S.svcPrice) : 'Pulsuz'],
-    ].map(([ic,l,v])=>`
+  sl.innerHTML = active.map(s => `
+    <div class="svc-card ${S.svcId===s.id?'selected':''}" id="sv-${s.id}"
+      onclick="pickSvc('${s.id}','${esc(s.name)}',${s.price},${s.durationMinutes})">
       <div>
-        <span style="font-size:var(--fs-xs);color:var(--ink-soft);display:flex;align-items:center;gap:5px;margin-bottom:4px">
-          <i class="fa-solid ${ic}" style="color:var(--accent)"></i>${l}
+        <strong style="display:block;font-size:var(--fs-sm);margin-bottom:2px">${s.name}</strong>
+        <span style="font-size:var(--fs-xs);color:var(--ink-soft)">
+          <i class="fa-regular fa-clock" style="color:var(--accent);margin-right:3px"></i>${s.durationMinutes} dəqiqə
         </span>
-        <strong style="font-size:var(--fs-sm)">${v}</strong>
-      </div>`).join('');
+      </div>
+      ${s.price > 0
+        ? `<strong style="color:var(--accent-dark)">${formatPrice(s.price)}</strong>`
+        : `<span class="badge badge-success"><i class="fa-solid fa-gift"></i> Pulsuz</span>`}
+    </div>`).join('');
 
-    /* ── Ödənişli / Pulsuz button ── */
-    const btn = document.getElementById('s3nextBtn');
-    if (isPaid()) {
-      btn.innerHTML = '<i class="fa-solid fa-credit-card"></i> Ödənişə keç';
-      btn.onclick   = goPayment;
-      document.getElementById('s3subtitle').textContent = 'Məlumatlar düzgündürsə ödənişə keçin';
-    } else {
-      btn.innerHTML = '<i class="fa-solid fa-calendar-check"></i> Rezervasiyanı təsdiqlə';
-      btn.onclick   = doFreeBook;
-      document.getElementById('s3subtitle').textContent = 'Bu xidmət pulsuzdur. Birbaşa rezervasiya edin';
-    }
+  if (urlSid) {
+    const f = active.find(s=>s.id===urlSid);
+    if (f) pickSvc(f.id,f.name,f.price,f.durationMinutes);
+  }
+}
+
+function pickSvc(id, name, price, dur) {
+  S.svcId=id; S.svcName=name; S.svcPrice=price; S.svcDur=dur;
+  S.date=S.slot=null;
+  document.getElementById('s2btn').disabled=true;
+  updateSum();
+  updateWizardVisibility();
+  document.querySelectorAll('[id^="sv-"]').forEach(c=>c.classList.toggle('selected',c.id==='sv-'+id));
+  document.getElementById('calCard').classList.remove('hidden');
+  document.getElementById('slotCard').classList.add('hidden');
+  renderCal();
+  document.getElementById('calCard').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* Wizard step 4-ü göstər/gizlət */
+function updateWizardVisibility() {
+  const paid = isPaid();
+  document.getElementById('wi4').classList.toggle('hidden', !paid);
+  document.getElementById('wl3').classList.toggle('hidden', !paid);
+  document.getElementById('pg4').classList.toggle('hidden', !paid);
+}
+
+function renderCal() {
+  const today=new Date(); today.setHours(0,0,0,0);
+  const max=new Date(today); max.setDate(today.getDate()+60);
+  const first=new Date(calY,calM,1);
+  const off=(first.getDay()+6)%7;
+  const dim=new Date(calY,calM+1,0).getDate();
+  document.getElementById('calEl').innerHTML=`
+    <div class="cal-head">
+      <button class="btn-icon" style="width:28px;height:28px" onclick="chM(-1)">‹</button>
+      <span>${MONTHS[calM]} ${calY}</span>
+      <button class="btn-icon" style="width:28px;height:28px" onclick="chM(1)">›</button>
+    </div>
+    <div class="cal-grid">
+      ${DAYS.map(d=>`<div class="cal-dh">${d}</div>`).join('')}
+      ${'<div></div>'.repeat(off)}
+      ${Array.from({length:dim},(_,i)=>{
+        const d=i+1,dt=new Date(calY,calM,d);
+        const dis=dt<today||dt>max;
+        const sel=S.date&&dt.toDateString()===S.date.toDateString();
+        const tod=dt.toDateString()===today.toDateString();
+        return `<button class="cal-day${sel?' sel':''}${tod?' today':''}" ${dis?'disabled':''} onclick="pickDay(${d})">${d}</button>`;
+      }).join('')}
+    </div>`;
+}
+
+function chM(d){calM+=d;if(calM<0){calM=11;calY--;}if(calM>11){calM=0;calY++;}renderCal();}
+
+async function pickDay(d) {
+  S.date=new Date(calY,calM,d); S.slot=null;
+  document.getElementById('s2btn').disabled=true;
+  updateSum(); renderCal();
+  clearAllWarnings();
+  const sc=document.getElementById('slotCard');
+  sc.classList.remove('hidden');
+  document.getElementById('slotEl').innerHTML='<div class="spinner-wrap"><div class="spinner"></div></div>';
+  sc.scrollIntoView({behavior:'smooth',block:'start'});
+
+  /* Hər tarix seçimində appointments-i TƏZƏ yüklə */
+  await loadMyAppointments();
+
+  const iso=S.date.toLocaleDateString('en-CA');
+  const slots=await cApi.getSlots(S.provId,S.svcId,iso).catch(()=>[]);
+  renderSlots(Array.isArray(slots)?slots:[]);
+}
+
+function renderSlots(slots) {
+  const el=document.getElementById('slotEl');
+  if(!slots.length){
+    el.innerHTML=`<div style="text-align:center;padding:var(--sp-5) 0">
+      <i class="fa-regular fa-calendar-xmark" style="font-size:2rem;color:var(--border-strong);display:block;margin-bottom:12px"></i>
+      <p style="font-size:var(--fs-sm);color:var(--ink-soft)">Bu tarixdə boş vaxt yoxdur. Başqa tarix seçin.</p>
+    </div>`;
+    return;
+  }
+  const grps={};
+  slots.forEach(s=>{const h=parseInt(s.startTime);const g=h<12?'Səhər':h<17?'Günorta':'Axşam';(grps[g]=grps[g]||[]).push(s);});
+  el.innerHTML=Object.entries(grps).map(([g,items])=>`
+    <div class="slot-lbl">${g}</div>
+    <div class="slot-grid">${items.map(s=>{
+      const conflict = hasConflict(S.date, s.startTime, S.svcDur);
+      return `<button class="slot${conflict?' conflict':''}" data-s="${s.startTime}" data-e="${s.endTime||''}"
+        onclick="pickSlot(this)">${trimTime(s.startTime)}</button>`;
+    }).join('')}
+    </div>`).join('');
+}
+
+async function pickSlot(el) {
+  document.querySelectorAll('.slot').forEach(b => b.classList.remove('selected'));
+  clearAllWarnings();
+
+  /* Hər klikdə TƏZƏ yoxla — cache-ə güvənmə */
+  await loadMyAppointments();
+
+  const conflict = hasConflict(S.date, el.dataset.s, S.svcDur);
+  console.log('[pickSlot] time:', el.dataset.s, 'conflict:', conflict);
+
+  if (conflict) {
+    el.classList.add('conflict');
+    showSlotWarning(conflict);
+    S.slot = null;
+    document.getElementById('s2btn').disabled = true;
+    return;
   }
 
-  /* ════ STEP 4 — Payment ════ */
-  function goPayment() {
-    setStep(4);
+  el.classList.add('selected');
+  S.slot = { startTime: el.dataset.s, endTime: el.dataset.e };
+  updateSum();
+  document.getElementById('s2btn').disabled = false;
+}
 
-    const priceStr = formatPrice(S.svcPrice);
-    document.getElementById('payOrderSvc').textContent   = S.svcName||'—';
-    document.getElementById('payOrderProv').textContent  = S.provName||'—';
-    document.getElementById('payOrderPrice').textContent = priceStr;
-    document.getElementById('payBtnAmt').textContent     = priceStr;
+/* ════ STEP 3 ════ */
+async function goStep3(){
+  if(!S.provId||!S.svcId||!S.date||!S.slot) return;
 
+  /* son bir dəfə də TƏZƏ yoxla */
+  await loadMyAppointments();
+  const conflict = hasConflict(S.date, S.slot.startTime, S.svcDur);
+
+  if (conflict) {
+    setStep(2);
+    showSlotWarning(conflict);
+    S.slot = null;
+    document.querySelectorAll('.slot').forEach(b => b.classList.remove('selected'));
+    document.getElementById('s2btn').disabled = true;
+    return;
+  }
+
+  clearAllWarnings();
+  setStep(3);
+
+  document.getElementById('confirmGrid').innerHTML=[
+    ['fa-building',         'Mütəxəssis', S.provName],
+    ['fa-briefcase-medical','Xidmət',     S.svcName||'—'],
+    ['fa-calendar',         'Tarix',      formatDate(S.date,{day:'numeric',month:'long',year:'numeric',weekday:'long'})],
+    ['fa-clock',            'Saat',       trimTime(S.slot.startTime)],
+    ['fa-hourglass-half',   'Müddət',     (S.svcDur||'—')+' dəqiqə'],
+    ['fa-tag',              'Qiymət',     S.svcPrice > 0 ? formatPrice(S.svcPrice) : 'Pulsuz'],
+  ].map(([ic,l,v])=>`
+    <div>
+      <span style="font-size:var(--fs-xs);color:var(--ink-soft);display:flex;align-items:center;gap:5px;margin-bottom:4px">
+        <i class="fa-solid ${ic}" style="color:var(--accent)"></i>${l}
+      </span>
+      <strong style="font-size:var(--fs-sm)">${v}</strong>
+    </div>`).join('');
+
+  /* ── Ödənişli / Pulsuz button ── */
+  const btn = document.getElementById('s3nextBtn');
+  if (isPaid()) {
+    btn.innerHTML = '<i class="fa-solid fa-credit-card"></i> Ödənişə keç';
+    btn.onclick   = goPayment;
+    document.getElementById('s3subtitle').textContent = 'Məlumatlar düzgündürsə ödənişə keçin';
+  } else {
+    btn.innerHTML = '<i class="fa-solid fa-calendar-check"></i> Rezervasiyanı təsdiqlə';
+    btn.onclick   = doFreeBook;
+    document.getElementById('s3subtitle').textContent = 'Bu xidmət pulsuzdur. Birbaşa rezervasiya edin';
+  }
+}
+
+/* ════ STEP 4 — Payment ════ */
+function goPayment() {
+  setStep(4);
+
+  const priceStr = formatPrice(S.svcPrice);
+  document.getElementById('payOrderSvc').textContent   = S.svcName||'—';
+  document.getElementById('payOrderProv').textContent  = S.provName||'—';
+  document.getElementById('payOrderPrice').textContent = priceStr;
+  document.getElementById('payBtnAmt').textContent     = priceStr;
+
+  const saved = JSON.parse(localStorage.getItem('stripeCard')||'null');
+
+  if (!saved) {
+    document.getElementById('payNoCard').classList.remove('hidden');
+    document.getElementById('paySavedCard').classList.add('hidden');
+    document.getElementById('payNewCard').classList.add('hidden');
+    document.getElementById('payBtn').classList.add('hidden');
+  } else {
+    document.getElementById('payNoCard').classList.add('hidden');
+    document.getElementById('paySavedCard').classList.remove('hidden');
+    document.getElementById('payNewCard').classList.add('hidden');
+    document.getElementById('payBtn').classList.remove('hidden');
+
+    const last4  = saved.last4;
+    const iconEl = document.getElementById('savedCardIcon');
+    if      (saved.brand==='visa')       iconEl.innerHTML = '<i class="fa-brands fa-cc-visa" style="color:#1434CB;font-size:2.2rem"></i>';
+    else if (saved.brand==='mastercard') iconEl.innerHTML = '<i class="fa-brands fa-cc-mastercard" style="color:#EB001B;font-size:2.2rem"></i>';
+    else if (saved.brand==='amex')       iconEl.innerHTML = '<i class="fa-brands fa-cc-amex" style="color:#006FCF;font-size:2.2rem"></i>';
+    else                                 iconEl.innerHTML = '<i class="fa-solid fa-credit-card" style="color:var(--ink-soft);font-size:2.2rem"></i>';
+
+    document.getElementById('savedCardNum').textContent  = `•••• •••• •••• ${last4}`;
+    document.getElementById('savedCardMeta').textContent = `${saved.brand} · ${saved.expMonth}/${String(saved.expYear).slice(-2)}`;
+  }
+}
+
+/* ── Backend-in "artıq görüşünüz var" xətasını AZ dilinə çevir ── */
+function translateBookError(msg) {
+  if (/already have an appointment/i.test(msg||'')) {
+    return 'Bu vaxtda artıq görüşünüz var. Zəhmət olmasa başqa saat seçin.';
+  }
+  return msg || 'Əməliyyat uğursuz oldu';
+}
+
+function isConflictError(msg) {
+  return /already have an appointment/i.test(msg||'');
+}
+
+/* ════ Pulsuz booking ════ */
+async function doFreeBook() {
+  const btn = document.getElementById('s3nextBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Göndərilir...';
+
+  try {
+    const dateStr = S.date.toLocaleDateString('en-CA');
+    const timeStr = S.slot.startTime.slice(0,5);
+
+    const res = await cApi.book({
+      providerId:    S.provId,
+      serviceId:     S.svcId,
+      startDateTime: `${dateStr}T${timeStr}:00`,
+      notes:         document.getElementById('bookNotes')?.value?.trim() || undefined,
+    });
+
+    setStep('success');
+    document.getElementById('successTitle').textContent = 'Rezervasiya təsdiqləndi!';
+    document.getElementById('successMsg').textContent   =
+      `${res.serviceName||S.svcName} · ${res.providerBusinessName||S.provName} — ${formatDate(res.startDateTime||dateStr)}, ${timeStr}`;
+
+  } catch(err) {
+    if (isConflictError(err.message)) {
+      /* Konflikt — istifadəçini saat seçim ekranına qaytar və orada göstər */
+      await loadMyAppointments();
+      setStep(2);
+      const conflict = hasConflict(S.date, S.slot?.startTime||'', S.svcDur) || {};
+      showSlotWarning(conflict);
+      S.slot = null;
+      document.querySelectorAll('.slot').forEach(b => b.classList.remove('selected'));
+      document.getElementById('s2btn').disabled = true;
+    } else {
+      let errEl = document.querySelector('#step3 .alert');
+      if (!errEl) {
+        errEl = document.createElement('div');
+        errEl.className = 'alert alert-error';
+        document.querySelector('#step3 .scard').prepend(errEl);
+      }
+      errEl.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i><span>${translateBookError(err.message)}</span>`;
+      errEl.style.display = 'flex';
+    }
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-calendar-check"></i> Rezervasiyanı təsdiqlə';
+  }
+}
+
+/* ════ Ödənişli booking ════ */
+async function doPayment() {
+  const payBtn  = document.getElementById('payBtn');
+  const backBtn = document.getElementById('payBackBtn');
+  const alertEl = document.getElementById('payAlert');
+  alertEl.classList.add('hidden');
+
+  payBtn.disabled  = true;
+  backBtn.disabled = true;
+  document.getElementById('payContent').classList.add('hidden');
+  document.getElementById('payProcessing').classList.remove('hidden');
+
+  try {
+    const { access } = Token.get();
     const saved = JSON.parse(localStorage.getItem('stripeCard')||'null');
 
-    if (!saved) {
-      /* Kart yoxdur */
-      document.getElementById('payNoCard').classList.remove('hidden');
-      document.getElementById('paySavedCard').classList.add('hidden');
-      document.getElementById('payNewCard').classList.add('hidden');
-      document.getElementById('payBtn').classList.add('hidden');
+    /* 1. PaymentIntent al */
+    const iRes  = await fetch('http://localhost:5291/api/Payment/create-intent', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','Authorization':'Bearer '+access},
+      body: JSON.stringify({ amount: S.svcPrice, description: `${S.svcName} — ${S.provName}` }),
+    });
+    const iText = await iRes.text();
+    if (!iText) throw new Error('Backend boş cavab qaytardı');
+    const iData = JSON.parse(iText);
+    if (!iData.success) throw new Error(iData.errors?.[0] || 'PaymentIntent xətası');
+    const { clientSecret } = iData.data;
+
+    /* 2. Ödənişi təsdiqlə */
+    let stripeResult;
+    if (saved?.pmId) {
+      stripeResult = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: saved.pmId
+      });
     } else {
-      /* Saxlanılmış kart var */
-      document.getElementById('payNoCard').classList.add('hidden');
-      document.getElementById('paySavedCard').classList.remove('hidden');
-      document.getElementById('payNewCard').classList.add('hidden');
-      document.getElementById('payBtn').classList.remove('hidden');
-
-      /* Kart ikonunu göstər */
-      const last4  = saved.last4;
-      const iconEl = document.getElementById('savedCardIcon');
-      if      (saved.brand==='visa')       iconEl.innerHTML = '<i class="fa-brands fa-cc-visa" style="color:#1434CB;font-size:2.2rem"></i>';
-      else if (saved.brand==='mastercard') iconEl.innerHTML = '<i class="fa-brands fa-cc-mastercard" style="color:#EB001B;font-size:2.2rem"></i>';
-      else if (saved.brand==='amex')       iconEl.innerHTML = '<i class="fa-brands fa-cc-amex" style="color:#006FCF;font-size:2.2rem"></i>';
-      else                                 iconEl.innerHTML = '<i class="fa-solid fa-credit-card" style="color:var(--ink-soft);font-size:2.2rem"></i>';
-
-      document.getElementById('savedCardNum').textContent  = `•••• •••• •••• ${last4}`;
-      document.getElementById('savedCardMeta').textContent = `${saved.brand} · ${saved.expMonth}/${String(saved.expYear).slice(-2)}`;
+      stripeResult = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: { card: cardElement }
+      });
     }
-  }
 
-  /* ════ Pulsuz booking ════ */
-  async function doFreeBook() {
-    const btn = document.getElementById('s3nextBtn');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Göndərilir...';
+    if (stripeResult.error) throw new Error(stripeResult.error.message);
+    if (stripeResult.paymentIntent?.status !== 'succeeded')
+      throw new Error('Ödəniş tamamlanmadı. Yenidən cəhd edin.');
 
-    try {
-      const dateStr = S.date.toLocaleDateString('en-CA');
-      const timeStr = S.slot.startTime.slice(0,5);
+    /* 3. Booking yarat */
+    const dateStr = S.date.toLocaleDateString('en-CA');
+    const timeStr = S.slot.startTime.slice(0,5);
 
-      const res = await cApi.book({
-        providerId:    S.provId,
-        serviceId:     S.svcId,
-        startDateTime: `${dateStr}T${timeStr}:00`,
-        notes:         document.getElementById('bookNotes')?.value?.trim() || undefined,
-      });
+    const res = await cApi.book({
+      providerId:    S.provId,
+      serviceId:     S.svcId,
+      startDateTime: `${dateStr}T${timeStr}:00`,
+      notes:         document.getElementById('bookNotes')?.value?.trim() || undefined,
+    });
 
-      setStep('success');
-      document.getElementById('successTitle').textContent = 'Rezervasiya təsdiqləndi!';
-      document.getElementById('successMsg').textContent   =
-        `${res.serviceName||S.svcName} · ${res.providerBusinessName||S.provName} — ${formatDate(res.startDateTime||dateStr)}, ${timeStr}`;
+    setStep('success');
+    document.getElementById('successTitle').textContent = 'Rezervasiya və ödəniş tamamlandı!';
+    document.getElementById('successMsg').textContent   =
+      `${res.serviceName||S.svcName} · ${res.providerBusinessName||S.provName} — ${formatDate(res.startDateTime||dateStr)}, ${timeStr}`;
 
-    } catch(err) {
-      showAlert('#bookingAlert', err.message || 'Rezervasiya uğursuz oldu');
-    } finally {
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fa-solid fa-calendar-check"></i> Rezervasiyanı təsdiqlə';
-    }
-  }
-
-  /* ════ Ödənişli booking ════ */
-  async function doPayment() {
-    const payBtn  = document.getElementById('payBtn');
-    const backBtn = document.getElementById('payBackBtn');
-    const alertEl = document.getElementById('payAlert');
-    alertEl.classList.add('hidden');
-
-    payBtn.disabled  = true;
-    backBtn.disabled = true;
-    document.getElementById('payContent').classList.add('hidden');
-    document.getElementById('payProcessing').classList.remove('hidden');
-
-    try {
-      const { access } = Token.get();
-      const saved = JSON.parse(localStorage.getItem('stripeCard')||'null');
-
-      /* 1. PaymentIntent al */
-      const iRes  = await fetch('http://localhost:5291/api/Payment/create-intent', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json','Authorization':'Bearer '+access},
-        body: JSON.stringify({ amount: S.svcPrice, description: `${S.svcName} — ${S.provName}` }),
-      });
-      const iText = await iRes.text();
-      if (!iText) throw new Error('Backend boş cavab qaytardı');
-      const iData = JSON.parse(iText);
-      if (!iData.success) throw new Error(iData.errors?.[0] || 'PaymentIntent xətası');
-      const { clientSecret } = iData.data;
-
-      /* 2. Ödənişi təsdiqlə */
-      let stripeResult;
-      if (saved?.pmId) {
-        /* Saxlanılmış kart ilə */
-        stripeResult = await stripe.confirmCardPayment(clientSecret, {
-          payment_method: saved.pmId
-        });
-      } else {
-        /* Yeni kart ilə (Stripe element) */
-        stripeResult = await stripe.confirmCardPayment(clientSecret, {
-          payment_method: { card: cardElement }
-        });
-      }
-
-      if (stripeResult.error) throw new Error(stripeResult.error.message);
-      if (stripeResult.paymentIntent?.status !== 'succeeded')
-        throw new Error('Ödəniş tamamlanmadı. Yenidən cəhd edin.');
-
-      /* 3. Booking yarat */
-      const dateStr = S.date.toLocaleDateString('en-CA');
-      const timeStr = S.slot.startTime.slice(0,5);
-
-      const res = await cApi.book({
-        providerId:    S.provId,
-        serviceId:     S.svcId,
-        startDateTime: `${dateStr}T${timeStr}:00`,
-        notes:         document.getElementById('bookNotes')?.value?.trim() || undefined,
-      });
-
-      setStep('success');
-      document.getElementById('successTitle').textContent = 'Rezervasiya və ödəniş tamamlandı!';
-      document.getElementById('successMsg').textContent   =
-        `${res.serviceName||S.svcName} · ${res.providerBusinessName||S.provName} — ${formatDate(res.startDateTime||dateStr)}, ${timeStr}`;
-
-    } catch(err) {
+  } catch(err) {
+    if (isConflictError(err.message)) {
+      await loadMyAppointments();
+      setStep(2);
+      const conflict = hasConflict(S.date, S.slot?.startTime||'', S.svcDur) || {};
+      showSlotWarning(conflict);
+      S.slot = null;
+      document.querySelectorAll('.slot').forEach(b => b.classList.remove('selected'));
+      document.getElementById('s2btn').disabled = true;
       document.getElementById('payProcessing').classList.add('hidden');
       document.getElementById('payContent').classList.remove('hidden');
-      payBtn.disabled  = false;
-      backBtn.disabled = false;
-      alertEl.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i><span>${err.message||'Ödəniş uğursuz oldu'}</span>`;
+    } else {
+      document.getElementById('payProcessing').classList.add('hidden');
+      document.getElementById('payContent').classList.remove('hidden');
+      alertEl.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i><span>${translateBookError(err.message)}</span>`;
       alertEl.className = 'alert alert-error';
     }
+    payBtn.disabled  = false;
+    backBtn.disabled = false;
+  }
+}
+
+/* ════ setStep ════ */
+function setStep(n) {
+  document.getElementById('step1').classList.toggle('hidden', n !== 1);
+  document.getElementById('step2').classList.toggle('hidden', n !== 2);
+  document.getElementById('step3').classList.toggle('hidden', n !== 3);
+  document.getElementById('step4').classList.toggle('hidden', n !== 4);
+  document.getElementById('stepSuccess').classList.toggle('hidden', n !== 'success');
+
+  const paid  = isPaid();
+  const total = paid ? 4 : 3;
+
+  for (let i=1; i<=4; i++) {
+    const wi = document.getElementById(`wi${i}`);
+    const wc = document.getElementById(`wc${i}`);
+    const wl = document.getElementById(`wl${i}`);
+    if (!wi) continue;
+
+    const stepNum = (n === 'success') ? total+1 : n;
+    wi.classList.toggle('active', i === stepNum);
+    wi.classList.toggle('done',   i < stepNum);
+    if (wl) wl.classList.toggle('done', i < stepNum);
+    if (i < stepNum) wc.innerHTML = '<i class="fa-solid fa-check" style="font-size:.7rem"></i>';
+    else wc.textContent = String(i);
   }
 
-  /* ════ setStep ════ */
-  function setStep(n) {
-    document.getElementById('step1').classList.toggle('hidden', n !== 1);
-    document.getElementById('step2').classList.toggle('hidden', n !== 2);
-    document.getElementById('step3').classList.toggle('hidden', n !== 3);
-    document.getElementById('step4').classList.toggle('hidden', n !== 4);
-    document.getElementById('stepSuccess').classList.toggle('hidden', n !== 'success');
-
-    const paid  = isPaid();
-    const total = paid ? 4 : 3;
-
-    /* Wizard circles */
-    for (let i=1; i<=4; i++) {
-      const wi = document.getElementById(`wi${i}`);
-      const wc = document.getElementById(`wc${i}`);
-      const wl = document.getElementById(`wl${i}`);
-      if (!wi) continue;
-
-      const stepNum = (n === 'success') ? total+1 : n;
-      wi.classList.toggle('active', i === stepNum);
-      wi.classList.toggle('done',   i < stepNum);
-      if (wl) wl.classList.toggle('done', i < stepNum);
-      if (i < stepNum) wc.innerHTML = '<i class="fa-solid fa-check" style="font-size:.7rem"></i>';
-      else wc.textContent = String(i);
-    }
-
-    /* Progress bars */
-    for (let i=1; i<=4; i++) {
-      const pg = document.getElementById(`pg${i}`);
-      if (!pg) continue;
-      const stepNum = (n === 'success') ? total+1 : n;
-      pg.classList.toggle('on', i <= stepNum);
-    }
-
-    /* Label */
-    const lbl = document.getElementById('pgLabel');
-    if (lbl) {
-      if (n === 'success') lbl.textContent = 'Tamamlandı ✓';
-      else lbl.textContent = `Addım ${n} / ${total}`;
-    }
-
-    window.scrollTo({top:0,behavior:'smooth'});
+  for (let i=1; i<=4; i++) {
+    const pg = document.getElementById(`pg${i}`);
+    if (!pg) continue;
+    const stepNum = (n === 'success') ? total+1 : n;
+    pg.classList.toggle('on', i <= stepNum);
   }
 
-  /* ════ Summary ════ */
-  function updateSum() {
-    const sv = (id, val, bold=false) => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      if (val !== null && val !== undefined) {
-        el.textContent = val;
-        el.style.cssText = (bold?'font-size:var(--fs-sm);font-weight:600;color:var(--ink)':'font-size:var(--fs-sm);color:var(--ink)')+';text-align:right';
-      } else {
-        el.textContent = 'Seçilməyib';
-        el.style.cssText = 'font-size:var(--fs-sm);color:var(--ink-soft);font-style:italic;text-align:right';
-      }
-    };
-    sv('sumProv', S.provName, true);
-    sv('sumSvc',  S.svcName,  true);
-    sv('sumDate', S.date ? formatDate(S.date,{day:'numeric',month:'short',weekday:'short'}) : null);
-    sv('sumSlot', S.slot ? trimTime(S.slot.startTime) : null, true);
-    const dur = document.getElementById('sumDur');
-    if (dur) dur.textContent = S.svcDur ? S.svcDur+' dəq' : '—';
-    const prc = document.getElementById('sumPrice');
-    if (prc) {
-      if (S.svcPrice === null || S.svcPrice === undefined) prc.textContent = '—';
-      else if (S.svcPrice === 0) prc.innerHTML = '<span style="color:var(--success);font-weight:700">Pulsuz</span>';
-      else prc.textContent = formatPrice(S.svcPrice);
-    }
+  const lbl = document.getElementById('pgLabel');
+  if (lbl) {
+    if (n === 'success') lbl.textContent = 'Tamamlandı ✓';
+    else lbl.textContent = `Addım ${n} / ${total}`;
   }
 
-  function esc(s) { return String(s).replace(/'/g,"&#39;").replace(/"/g,'&quot;'); }
-</script>
-  </body>
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ════ Summary ════ */
+function updateSum() {
+  const sv = (id, val, bold=false) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (val !== null && val !== undefined) {
+      el.textContent = val;
+      el.style.cssText = (bold?'font-size:var(--fs-sm);font-weight:600;color:var(--ink)':'font-size:var(--fs-sm);color:var(--ink)')+';text-align:right';
+    } else {
+      el.textContent = 'Seçilməyib';
+      el.style.cssText = 'font-size:var(--fs-sm);color:var(--ink-soft);font-style:italic;text-align:right';
+    }
+  };
+  sv('sumProv', S.provName, true);
+  sv('sumSvc',  S.svcName,  true);
+  sv('sumDate', S.date ? formatDate(S.date,{day:'numeric',month:'short',weekday:'short'}) : null);
+  sv('sumSlot', S.slot ? trimTime(S.slot.startTime) : null, true);
+  const dur = document.getElementById('sumDur');
+  if (dur) dur.textContent = S.svcDur ? S.svcDur+' dəq' : '—';
+  const prc = document.getElementById('sumPrice');
+  if (prc) {
+    if (S.svcPrice === null || S.svcPrice === undefined) prc.textContent = '—';
+    else if (S.svcPrice === 0) prc.innerHTML = '<span style="color:var(--success);font-weight:700">Pulsuz</span>';
+    else prc.textContent = formatPrice(S.svcPrice);
+  }
+}
+
+function esc(s) { return String(s).replace(/'/g,"&#39;").replace(/"/g,'&quot;'); }
+  </script>
+</body>
 </html>
